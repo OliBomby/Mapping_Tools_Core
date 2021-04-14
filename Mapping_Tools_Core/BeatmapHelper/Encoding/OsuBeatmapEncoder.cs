@@ -58,6 +58,7 @@ namespace Mapping_Tools_Core.BeatmapHelper.Encoding {
             foreach (BeatmapHelper.HitObject ho in beatmap.HitObjects) {
                 yield return hitObjectEncoder.Encode(ho);
             }
+            yield return "";
         }
 
         public string Encode(IBeatmap obj) {

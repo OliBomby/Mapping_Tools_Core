@@ -3,6 +3,7 @@ using Mapping_Tools_Core.BeatmapHelper.Decoding;
 using Mapping_Tools_Core.BeatmapHelper.Encoding;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Diagnostics;
 using System.IO;
 
 namespace Mapping_Tools_Core_Tests.BeatmapHelper {
@@ -30,6 +31,9 @@ namespace Mapping_Tools_Core_Tests.BeatmapHelper {
 
         private static void TestUnchanging(string lines, IDecoder<Beatmap> decoder, IEncoder<Beatmap> encoder) {
             var lines2 = encoder.Encode(decoder.DecodeNew(lines));
+
+            Debug.Print(lines);
+            Debug.Print(lines2);
 
             // Split equal asserting to lines so we know where the difference is
             var linesSplit = lines.Split(Environment.NewLine);
