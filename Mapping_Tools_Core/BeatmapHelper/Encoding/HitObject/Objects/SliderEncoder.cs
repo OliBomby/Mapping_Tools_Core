@@ -29,7 +29,7 @@ namespace Mapping_Tools_Core.BeatmapHelper.Encoding.HitObject.Objects {
                 builder.Append(',');
                 builder.AppendJoin('|', obj.EdgeHitsounds.Select(p => GetHitsounds(p).ToInvariant()));
                 builder.Append(',');
-                builder.AppendJoin('|', obj.EdgeHitsounds.Select(p => $"{p.SampleSet.ToInvariant()}:{p.AdditionSet.ToInvariant()}"));
+                builder.AppendJoin('|', obj.EdgeHitsounds.Select(p => $"{p.SampleSet.ToIntInvariant()}:{p.AdditionSet.ToIntInvariant()}"));
             }
             builder.Append(',');
             EncodeExtras(obj, builder);
