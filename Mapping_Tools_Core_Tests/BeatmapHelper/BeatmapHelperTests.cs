@@ -11,7 +11,7 @@ namespace Mapping_Tools_Core_Tests.BeatmapHelper {
     public class BeatmapHelperTests {
         [TestMethod]
         public void UnchangingEmptyMapCodeTest() {
-            var path = "Resources\\EmptyTestMap.osu";
+            var path = Path.Join("Resources", "EmptyTestMap.osu");
             var lines = File.ReadAllText(path);
             var decoder = new OsuBeatmapDecoder();
             var encoder = new OsuBeatmapEncoder();
@@ -21,7 +21,7 @@ namespace Mapping_Tools_Core_Tests.BeatmapHelper {
 
         [TestMethod]
         public void UnchangingComplicatedMapCodeTest() {
-            var path = "Resources\\ComplicatedTestMap.osu";
+            var path = Path.Join("Resources", "ComplicatedTestMap.osu");
             var lines = File.ReadAllText(path);
             var decoder = new OsuBeatmapDecoder();
             var encoder = new OsuBeatmapEncoder();
