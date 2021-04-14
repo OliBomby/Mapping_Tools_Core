@@ -1,9 +1,9 @@
 ﻿using Mapping_Tools_Core.BeatmapHelper;
+using Mapping_Tools_Core.BeatmapHelper.Decoding;
+using Mapping_Tools_Core.BeatmapHelper.Encoding;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Mapping_Tools_Core.BeatmapHelper.Decoding;
 
 namespace Mapping_Tools_Core_Tests.BeatmapHelper {
     [TestClass]
@@ -11,27 +11,27 @@ namespace Mapping_Tools_Core_Tests.BeatmapHelper {
         [TestMethod]
         public void UnchangingEmptyMapCodeTest() {
             var path = "Resources\\EmptyTestMap.osu";
-            var lines = File.ReadAllLines(path).ToList();
-            var parser = new OsuBeatmapDecoder();
+            var lines = File.ReadAllText(path);
+            var decoder = new OsuBeatmapDecoder();
+            var encoder = new OsuBeatmapEncoder();
 
-            TestUnchanging(lines, parser);
+            TestUnchanging(lines, decoder, encoder);
         }
 
         [TestMethod]
         public void UnchangingComplicatedMapCodeTest() {
             var path = "Resources\\ComplicatedTestMap.osu";
-            var lines = File.ReadAllLines(path).ToList();
-            var parser = new OsuBeatmapDecoder();
+            var lines = File.ReadAllText(path);
+            var decoder = new OsuBeatmapDecoder();
+            var encoder = new OsuBeatmapEncoder();
 
-            TestUnchanging(lines, parser);
+            TestUnchanging(lines, decoder, encoder);
         }
 
-        private static void TestUnchanging(IReadOnlyList<string> lines, IParser<Beatmap> parser) {
-            var lines2 = parser.Serialize(parser.ParseNew(lines)).ToList();
+        private static void TestUnchanging(string lines, IDecoder<Beatmap> decoder, IEncoder<Beatmap> encoder) {
+            var lines2 = encoder.Encode(decoder.DecodeNew(lines));
 
-            for (int i = 0; i < lines.Count; i++) {
-                Assert.AreEqual(lines[i], lines2[i]);
-            }
+            Assert.AreEqual(lines, lines2);
         }
     }
 }
