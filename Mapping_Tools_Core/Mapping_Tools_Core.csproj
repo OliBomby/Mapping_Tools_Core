@@ -7,14 +7,21 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PackageTags>osu! mapping tools reader writer map cleaner transformer timing hitsounds copier helper</PackageTags>
     <Authors>OliBomby</Authors>
-    <PackageId>MappingToolsCore</PackageId>
+    <PackageId>MappingTools.Core</PackageId>
     <RepositoryUrl>https://github.com/OliBomby/Mapping_Tools_Core</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <PackageLicenseFile>LICENCE</PackageLicenseFile>
+    <ApplicationIcon>mt_icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="Tools\**" />
     <EmbeddedResource Remove="Tools\**" />
     <None Remove="Tools\**" />
+    <None Include="..\LICENCE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <None Remove="C:\Users\Olivier\.nuget\packages\naudio.vorbis\1.2.0\contentFiles\any\netstandard2.0\LICENSE" />
