@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
 using Mapping_Tools_Core.BeatmapHelper.TimingStuff;
@@ -45,6 +46,14 @@ namespace Mapping_Tools_Core.BeatmapHelper.Contexts {
         /// </summary>
         [NotNull]
         public List<TimingPoint> BodyHitsounds { get; set; }
+
+        /// <summary>
+        /// Creates a new timing context without body hitsounds. Automatically copies the timing points.
+        /// </summary>
+        public TimingContext(double globalSliderVelocity, double sliderVelocity, TimingPoint timingPoint,
+            TimingPoint hitsoundTimingPoint, TimingPoint unInheritedTimingPoint) : this(globalSliderVelocity,
+            sliderVelocity, timingPoint, hitsoundTimingPoint, unInheritedTimingPoint, Array.Empty<TimingPoint>()) {
+        }
 
         /// <summary>
         /// Creates a new timing context. Automatically copies the timing points.

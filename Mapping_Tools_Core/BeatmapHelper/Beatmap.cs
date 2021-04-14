@@ -398,8 +398,11 @@ namespace Mapping_Tools_Core.BeatmapHelper {
                     BeatmapTiming.GetSvAtTime(ho.StartTime),
                     BeatmapTiming.GetTimingPointAtTime(ho.StartTime),
                     BeatmapTiming.GetTimingPointAtTime(ho.StartTime + 5),
-                    BeatmapTiming.GetRedlineAtTime(ho.StartTime),
-                    BeatmapTiming.GetTimingPointsInRange(ho.StartTime, ho.EndTime, false)));
+                    BeatmapTiming.GetRedlineAtTime(ho.StartTime)));
+
+                // This has to be set afterwards because the EndTime is inaccessible before the hitobject has a timing context
+                ho.GetContext<TimingContext>().BodyHitsounds =
+                    BeatmapTiming.GetTimingPointsInRange(ho.StartTime, ho.EndTime, false);
             }
         }
 
