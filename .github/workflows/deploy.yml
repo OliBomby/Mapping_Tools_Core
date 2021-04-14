@@ -55,7 +55,7 @@ jobs:
         uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "v${{steps.publish_nuget.outputs.VERSION}}"
+          automatic_release_tag: ${{join('v', ${{ steps.publish_nuget.outputs.VERSION }} )}}
           prerelease: false
 
 
