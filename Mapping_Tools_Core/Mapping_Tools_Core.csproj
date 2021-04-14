@@ -13,7 +13,6 @@
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <PackageLicenseFile>LICENCE</PackageLicenseFile>
     <ApplicationIcon>mt_icon.ico</ApplicationIcon>
-    <Version>0.0.1</Version>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="Tools\**" />
