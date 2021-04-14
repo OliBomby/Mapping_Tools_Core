@@ -5,6 +5,11 @@
     <OutputType>Library</OutputType>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <PackageTags>osu! mapping tools reader writer map cleaner transformer timing hitsounds copier helper</PackageTags>
+    <Authors>OliBomby</Authors>
+    <PackageId>MappingToolsCore</PackageId>
+    <RepositoryUrl>https://github.com/OliBomby/Mapping_Tools_Core</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="Tools\**" />

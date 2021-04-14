@@ -6,11 +6,11 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("Mapping_Tools_Core")]
-[assembly: AssemblyDescription("Class Library for Mapping Tools for osu!")]
+[assembly: AssemblyDescription("osu! mapping utility library built for Mapping Tools for osu!")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("OliBomby Inc.")]
-[assembly: AssemblyProduct("Mapping_Tools_Core")]
-[assembly: AssemblyCopyright("Copyright OliBomby 2020")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("Mapping Tools Core")]
+[assembly: AssemblyCopyright("Copyright OliBomby 2021")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -32,5 +32,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.8.0.1")]
-[assembly: AssemblyFileVersion("1.8.0.1")]
+[assembly: AssemblyVersion("0.0.0.1")]
+[assembly: AssemblyFileVersion("0.0.0.1")]
