@@ -13,6 +13,7 @@
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <PackageLicenseFile>LICENCE</PackageLicenseFile>
     <ApplicationIcon>mt_icon.ico</ApplicationIcon>
+    <Version>0.0.1</Version>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="Tools\**" />
@@ -22,10 +23,6 @@
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Remove="C:\Users\Olivier\.nuget\packages\naudio.vorbis\1.2.0\contentFiles\any\netstandard2.0\LICENSE" />
-    <None Remove="C:\Users\Olivier\.nuget\packages\naudio.vorbis\1.2.0\contentFiles\any\netstandard2.0\README.md" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
