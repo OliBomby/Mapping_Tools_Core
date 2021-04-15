@@ -53,7 +53,7 @@ jobs:
           
       - name: generate release
         uses: "marvinpinto/action-automatic-releases@latest"
-        if: steps.publish_nuget.conclusion.cache-hit == 'success'
+        if: steps.publish_nuget.conclusion == 'success'
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           automatic_release_tag: 'v${{ steps.publish_nuget.outputs.VERSION }}'
