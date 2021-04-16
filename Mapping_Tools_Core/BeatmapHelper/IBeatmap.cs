@@ -1,74 +1,50 @@
-﻿using System.Collections.Generic;
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 using Mapping_Tools_Core.BeatmapHelper.ComboColours;
-using Mapping_Tools_Core.BeatmapHelper.Events;
 using Mapping_Tools_Core.BeatmapHelper.TimingStuff;
+using System.Collections.Generic;
+using Mapping_Tools_Core.BeatmapHelper.Sections;
 
 namespace Mapping_Tools_Core.BeatmapHelper {
     public interface IBeatmap : IComboColourCollection {
         /// <summary>
-        /// Contains all the values in the [General] section of a .osu file. The key is the variable name and the value is the value.
-        /// This section typically contains:
-        /// AudioFilename,
-        /// AudioLeadIn,
-        /// PreviewTime,
-        /// Countdown,
-        /// SampleSet,
-        /// StackLeniency,
-        /// Mode,
-        /// LetterboxInBreaks,
-        /// StoryFireInFront,
-        /// SkinPreference,
-        /// EpilepsyWarning,
-        /// CountdownOffset,
-        /// SpecialStyle,
-        /// WidescreenStoryboard,
-        /// SamplesMatchPlaybackRate
+        /// The version number of the beatmap.
+        /// <para/>
+        /// Version 4 introduces custom samplesets per timing section.<br/>
+        /// Version 5 changes the map's offset by 24ms due to an internal calculation change.<br/>
+        /// Version 6 changes stacking algorithm and fixes animation speeds for storyboarded sprites.<br/>
+        /// Version 7 fixes multipart bezier slider math error (http://osu.sifterapp.com/projects/4151/issues/145)<br/>
+        /// Version 8 mm additions: constant sliderticks-per-beat; HP drain changes near breaks; Taiko triple drumrolls.<br/>
+        /// Version 9 makes bezier the default slider type, which now handles linear corners better;
+        /// Spinner new combos are no longer forced. (Some restrictions re-imposed by the editor.)<br/>
+        /// Version 10 fixes sliders being 1/50 shorter than they should be for every bezier part.<br/>
+        /// Version 11 Support hold notes.<br/>
+        /// Version 14 Support per-node samplesets on sliders (ctb)<br/>
         /// </summary>
-        [NotNull]
-        Dictionary<string, TValue> General { get; }
+        int BeatmapVersion { get; }
 
         /// <summary>
-        /// Contains all the values in the [Editor] section of a .osu file. The key is the variable name and the value is the value.
-        /// This section typically contains:
-        /// Bookmarks,
-        /// DistanceSpacing,
-        /// BeatDivisor,
-        /// GridSize,
-        /// TimelineZoom
+        /// Contains all the values in the [General] section of a .osu file.
         /// </summary>
         [NotNull]
-        Dictionary<string, TValue> Editor { get; }
+        SectionGeneral General { get; }
 
         /// <summary>
-        /// Contains all the values in the [Metadata] section of a .osu file. The key is the variable name and the value is the value.
-        /// This section typically contains:
-        /// Title,
-        /// TitleUnicode,
-        /// Artist,
-        /// ArtistUnicode,
-        /// Creator,
-        /// Version,
-        /// Source,
-        /// Tags,
-        /// BeatmapID,
-        /// BeatmapSetID
+        /// Contains all the values in the [Editor] section of a .osu file.
         /// </summary>
         [NotNull]
-        Dictionary<string, TValue> Metadata { get; }
+        SectionEditor Editor { get; }
 
         /// <summary>
-        /// Contains all the values in the [Difficulty] section of a .osu file. The key is the variable name and the value is the value.
-        /// This section typically contains:
-        /// HPDrainRate,
-        /// CircleSize,
-        /// OverallDifficulty,
-        /// ApproachRate,
-        /// GlobalSliderMultiplier,
-        /// SliderTickRate
+        /// Contains all the values in the [Metadata] section of a .osu file.
         /// </summary>
         [NotNull]
-        Dictionary<string, TValue> Difficulty { get; }
+        SectionMetadata Metadata { get; }
+
+        /// <summary>
+        /// Contains all the values in the [Difficulty] section of a .osu file.
+        /// </summary>
+        [NotNull]
+        SectionDifficulty Difficulty { get; }
 
         /// <summary>
         /// Contains all the basic combo colours. The order of this list is the same as how they are numbered in the .osu.
