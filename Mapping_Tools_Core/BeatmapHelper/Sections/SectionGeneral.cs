@@ -49,6 +49,5 @@ namespace Mapping_Tools_Core.BeatmapHelper.Sections {
         /// Fallback value for timingpoints which dont have a volume value.
         /// </summary>
         public int SampleVolume { get; set; } = 100;
-
     }
 }
