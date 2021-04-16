@@ -9,6 +9,7 @@ using Mapping_Tools_Core.BeatmapHelper.Contexts;
 using Mapping_Tools_Core.BeatmapHelper.Enums;
 using Mapping_Tools_Core.BeatmapHelper.Events;
 using Mapping_Tools_Core.BeatmapHelper.Objects;
+using Mapping_Tools_Core.BeatmapHelper.Sections;
 using Mapping_Tools_Core.BeatmapHelper.TimelineStuff;
 using Mapping_Tools_Core.BeatmapHelper.TimingStuff;
 using Mapping_Tools_Core.BeatmapHelper.Types;
@@ -20,13 +21,15 @@ namespace Mapping_Tools_Core.BeatmapHelper {
     /// Class containing all the data from a .osu beatmap file. It also supports serialization to .osu format and helper methods to get data in specific ways.
     /// </summary>
     public class Beatmap : IBeatmap, IStoryboard {
-        public Dictionary<string, TValue> General { get; set; }
+        public int BeatmapVersion { get; set; }
 
-        public Dictionary<string, TValue> Editor { get; set; }
+        public SectionGeneral General { get; set; }
 
-        public Dictionary<string, TValue> Metadata { get; set; }
+        public SectionEditor Editor { get; set; }
 
-        public Dictionary<string, TValue> Difficulty { get; set; }
+        public SectionMetadata Metadata { get; set; }
+
+        public SectionDifficulty Difficulty { get; set; }
 
         public List<IComboColour> ComboColoursList { get; set; }
 
@@ -68,17 +71,15 @@ namespace Mapping_Tools_Core.BeatmapHelper {
         /// Initializes a new Beatmap.
         /// </summary>
         public Beatmap() {
-            General = new Dictionary<string, TValue>();
-            Editor = new Dictionary<string, TValue>();
-            Metadata = new Dictionary<string, TValue>();
-            Difficulty = new Dictionary<string, TValue>();
+            General = new SectionGeneral();
+            Editor = new SectionEditor();
+            Metadata = new SectionMetadata();
+            Difficulty = new SectionDifficulty();
             ComboColoursList = new List<IComboColour>();
             SpecialColours = new Dictionary<string, IComboColour>();
             StoryBoard = new Storyboard();
             HitObjects = new List<HitObject>();
             BeatmapTiming = new Timing(1.4);
-
-            FillBasicMetadata();
         }
 
         /// <summary>
@@ -103,42 +104,12 @@ namespace Mapping_Tools_Core.BeatmapHelper {
             }
 
             // Set the global SV here too because thats absolutely necessary
-            Difficulty["SliderMultiplier"] = new TValue(globalSv.ToInvariant());
-            General["Mode"] = new TValue(((int) gameMode).ToInvariant());
+            Difficulty.SliderMultiplier = globalSv;
+            General.Mode = gameMode;
 
             SortHitObjects();
             GiveObjectsTimingContext();
             CalculateHitObjectComboStuff();
-        }
-
-        public void FillBasicMetadata() {
-            General["AudioFilename"] = new TValue(string.Empty);
-            General["AudioLeadIn"] = new TValue("0");
-            General["PreviewTime"] = new TValue("-1");
-            General["Countdown"] = new TValue("0");
-            General["SampleSet"] = new TValue("Soft");
-            General["StackLeniency"] = new TValue("0.2");
-            General["Mode"] = new TValue("0");
-            General["LetterboxInBreaks"] = new TValue("0");
-            General["WidescreenStoryboard"] = new TValue("0");
-
-            Metadata["Title"] = new TValue(string.Empty);
-            Metadata["TitleUnicode"] = new TValue(string.Empty);
-            Metadata["Artist"] = new TValue(string.Empty);
-            Metadata["ArtistUnicode"] = new TValue(string.Empty);
-            Metadata["Creator"] = new TValue(string.Empty);
-            Metadata["Version"] = new TValue(string.Empty);
-            Metadata["Source"] = new TValue(string.Empty);
-            Metadata["Tags"] = new TValue(string.Empty);
-            Metadata["BeatmapID"] = new TValue("0");
-            Metadata["BeatmapSetID"] = new TValue("-1");
-
-            Difficulty["HPDrainRate"] = new TValue("5");
-            Difficulty["CircleSize"] = new TValue("5");
-            Difficulty["OverallDifficulty"] = new TValue("5");
-            Difficulty["ApproachRate"] = new TValue("5");
-            Difficulty["SliderMultiplier"] = new TValue("1.4");
-            Difficulty["SliderTickRate"] = new TValue("1");
         }
 
         /// <summary>
@@ -172,9 +143,9 @@ namespace Mapping_Tools_Core.BeatmapHelper {
                 endIndex = HitObjects.Count - 1;
 
             // Getting some variables for use later
-            double stackOffset = GetStackOffset(Difficulty["CircleSize"].DoubleValue);
-            double stackLeniency = General["StackLeniency"].DoubleValue;
-            double preEmpt = GetApproachTime(Difficulty["ApproachRate"].DoubleValue);
+            double stackOffset = GetStackOffset(Difficulty.CircleSize);
+            double stackLeniency = General.StackLeniency;
+            double preEmpt = GetApproachTime(Difficulty.ApproachRate);
 
             // Round the stack offset so objects only get offset by integer values
             if (rounded) {
@@ -412,11 +383,7 @@ namespace Mapping_Tools_Core.BeatmapHelper {
         /// <param name="approachRate">The approach rate difficulty setting.</param>
         /// <returns>The time in milliseconds between a hit object appearing on screen and getting perfectly hit.</returns>
         public static double GetApproachTime(double approachRate) {
-            if (approachRate < 5) {
-                return 1800 - 120 * approachRate;
-            }
-
-            return 1200 - 150 * (approachRate - 5);
+            return SectionDifficulty.DifficultyRange(approachRate, 1800, 1200, 450);
         }
 
         /// <summary>
@@ -460,12 +427,7 @@ namespace Mapping_Tools_Core.BeatmapHelper {
         /// </summary>
         /// <returns>The list of Bookmarks.</returns>
         public List<double> GetBookmarks() {
-            try {
-                return Editor["Bookmarks"].GetDoubleList();
-            }
-            catch (KeyNotFoundException) {
-                return new List<double>();
-            }
+            return Editor.Bookmarks;
         }
 
         /// <summary>
@@ -474,9 +436,7 @@ namespace Mapping_Tools_Core.BeatmapHelper {
         /// </summary>
         /// <param name="bookmarks"></param>
         public void SetBookmarks(List<double> bookmarks) {
-            if (bookmarks.Count > 0) {
-                Editor["Bookmarks"] = new TValue(string.Join(",", bookmarks.Select(d => Math.Round(d))));
-            }
+            Editor.Bookmarks = bookmarks;
         }
 
         /// <summary>
@@ -509,14 +469,14 @@ namespace Mapping_Tools_Core.BeatmapHelper {
         }
 
         public double GetLeadInTime() {
-            var leadInTime = General["AudioLeadIn"].DoubleValue;
-            var od = Difficulty["OverallDifficulty"].DoubleValue;
+            double leadInTime = General.AudioLeadIn;
+            var od = Difficulty.OverallDifficulty;
             var window50 = Math.Ceiling(200 - 10 * od);
             var eventsWithStartTime = EnumerateAllEvents().OfType<IHasStartTime>().ToArray();
             if (eventsWithStartTime.Length > 0)
                 leadInTime = Math.Max(-eventsWithStartTime.Min(o => o.StartTime), leadInTime);
             if (HitObjects.Count > 0) {
-                var approachTime = GetApproachTime(Difficulty["ApproachRate"].DoubleValue);
+                var approachTime = GetApproachTime(Difficulty.ApproachRate);
                 leadInTime = Math.Max(approachTime - HitObjects[0].StartTime, leadInTime);
             }
             return leadInTime + window50 + 1000;
@@ -591,8 +551,7 @@ namespace Mapping_Tools_Core.BeatmapHelper {
         }
 
         public string GetFileName() {
-            return GetFileName(Metadata["Artist"].Value, Metadata["Title"].Value,
-                Metadata["Creator"].Value, Metadata["Version"].Value);
+            return GetFileName(Metadata.Artist, Metadata.Title, Metadata.Creator, Metadata.Version);
         }
 
         /// <summary>
