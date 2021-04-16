@@ -11,7 +11,7 @@
     <RepositoryUrl>https://github.com/OliBomby/Mapping_Tools_Core</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+    <PackageLicenseFile>LICENCE</PackageLicenseFile>
     <ApplicationIcon>mt_icon.ico</ApplicationIcon>
     <Version>0.0.5</Version>
   </PropertyGroup>
@@ -19,7 +19,7 @@
     <Compile Remove="Tools\**" />
     <EmbeddedResource Remove="Tools\**" />
     <None Remove="Tools\**" />
-    <None Include="..\LICENSE.txt">
+    <None Include="..\LICENCE">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
