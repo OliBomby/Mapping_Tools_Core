@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 
 namespace Mapping_Tools_Core.BeatmapHelper {
@@ -44,6 +45,18 @@ namespace Mapping_Tools_Core.BeatmapHelper {
                     }
                 }
             }
+        }
+
+        public static int ParseInt(string s) {
+            return int.Parse(s, CultureInfo.InvariantCulture);
+        }
+
+        public static float ParseFloat(string s) {
+            return float.Parse(s, CultureInfo.InvariantCulture);
+        }
+
+        public static double ParseDouble(string s) {
+            return double.Parse(s, CultureInfo.InvariantCulture);
         }
     }
 }

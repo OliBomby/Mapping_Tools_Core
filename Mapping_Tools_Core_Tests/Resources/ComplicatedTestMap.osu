@@ -10,6 +10,9 @@ StackLeniency: 0.2
 Mode: 0
 LetterboxInBreaks: 1
 StoryFireInFront: 0
+UseSkinSprites: 1
+AlwaysShowPlayfield: 1
+OverlayPosition: Above
 SkinPreference:- elohere x Seouless
 EpilepsyWarning: 1
 CountdownOffset: 1
@@ -17,6 +20,7 @@ WidescreenStoryboard: 1
 SamplesMatchPlaybackRate: 1
 
 [Editor]
+Bookmarks: 1,2,3,1231907
 DistanceSpacing: 2
 BeatDivisor: 16
 GridSize: 4

@@ -1,8 +1,6 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using System.Text.RegularExpressions;
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 using Mapping_Tools_Core.BeatmapHelper.Events;
+using System.Collections.Generic;
 
 namespace Mapping_Tools_Core.BeatmapHelper {
     public interface IStoryboard {
