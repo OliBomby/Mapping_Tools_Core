@@ -1,9 +1,8 @@
 ﻿using Mapping_Tools_Core.BeatmapHelper;
-using Mapping_Tools_Core.BeatmapHelper.Decoding;
-using Mapping_Tools_Core.BeatmapHelper.Encoding;
+using Mapping_Tools_Core.BeatmapHelper.IO.Decoding;
+using Mapping_Tools_Core.BeatmapHelper.IO.Encoding;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Diagnostics;
 using System.IO;
 
 namespace Mapping_Tools_Core_Tests.BeatmapHelper {

@@ -6,7 +6,7 @@ using Mapping_Tools_Core.BeatmapHelper.HitObjects;
 using Mapping_Tools_Core.BeatmapHelper.IO.Decoding.HitObjects;
 using Mapping_Tools_Core.BeatmapHelper.TimingStuff;
 using Mapping_Tools_Core.Exceptions;
-using static Mapping_Tools_Core.BeatmapHelper.FileFormatHelper;
+using static Mapping_Tools_Core.BeatmapHelper.IO.FileFormatHelper;
 
 namespace Mapping_Tools_Core.BeatmapHelper.IO.Decoding {
     public class OsuBeatmapDecoder : IDecoder<Beatmap> {
@@ -49,7 +49,7 @@ namespace Mapping_Tools_Core.BeatmapHelper.IO.Decoding {
                 if (line.Substring(0, 5) == "Combo") {
                     beatmap.ComboColoursList.Add(new ComboColour(line));
                 } else {
-                    beatmap.SpecialColours[SplitKeyValue(line)[0].Trim()] = new ComboColour(line);
+                    beatmap.SpecialColours[SplitKeyValue(line).Item1] = new ComboColour(line);
                 }
             }
 
@@ -86,15 +86,7 @@ namespace Mapping_Tools_Core.BeatmapHelper.IO.Decoding {
         private static void DecodeSection(Beatmap b, IEnumerable<string> generalLines, SectionDecoderDelegate sectionDecoder) {
             foreach (var line in generalLines) {
                 try {
-                    int index = line.IndexOf(':');
-
-                    if (index < 0) {
-                        continue;
-                    }
-
-                    string left = line.Remove(index).Trim();
-                    string right = line.Remove(0, index + 1).Trim();
-
+                    var (left, right) = SplitKeyValue(line);
                     sectionDecoder.Invoke(b, left, right);
                 }
                 catch (Exception e) {

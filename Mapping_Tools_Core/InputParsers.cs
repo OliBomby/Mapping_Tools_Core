@@ -6,22 +6,20 @@ using System.Text.RegularExpressions;
 namespace Mapping_Tools_Core {
     public class InputParsers {
         public static double ParseDouble(string str) {
-            using (DataTable dt = new DataTable()) {
-                string text = str.Replace(",", ".");
-                var v = dt.Compute(text, "");
-                return Convert.ToDouble(v);
-            }
+            using DataTable dt = new DataTable();
+            string text = str.Replace(",", ".");
+            var v = dt.Compute(text, "");
+            return Convert.ToDouble(v);
         }
 
         public static int ParseInt(string str) {
-            using (DataTable dt = new DataTable()) {
-                string text = str.Replace(",", ".");
-                var v = dt.Compute(text, "");
-                return Convert.ToInt32(v);
-            }
+            using DataTable dt = new DataTable();
+            string text = str.Replace(",", ".");
+            var v = dt.Compute(text, "");
+            return Convert.ToInt32(v);
         }
 
-        public static bool TryParseDouble(string str, out double result, double defaultValue = -1) {
+        public static bool TryParseDouble(string str, out double result, double defaultValue) {
             try {
                 result = ParseDouble(str);
                 return true;
@@ -41,7 +39,7 @@ namespace Mapping_Tools_Core {
             }
         }
 
-        public static bool TryParseInt(string str, out int result, int defaultValue = -1) {
+        public static bool TryParseInt(string str, out int result, int defaultValue) {
             try {
                 result = ParseInt(str);
                 return true;
@@ -82,25 +80,14 @@ namespace Mapping_Tools_Core {
 
                 // Invert the index so 0 is the rightmost time value
                 var pos = split.Length - 1 - i;
-                switch (pos) {
-                    case 0:
-                        time += TimeSpan.FromMilliseconds(intValue);
-                        break;
-                    case 1:
-                        time += TimeSpan.FromSeconds(intValue);
-                        break;
-                    case 2:
-                        time += TimeSpan.FromMinutes(intValue);
-                        break;
-                    case 3:
-                        time += TimeSpan.FromHours(intValue);
-                        break;
-                    case 4:
-                        time += TimeSpan.FromDays(intValue);
-                        break;
-                    default:
-                        throw new ArgumentException(@"Provided timestamp has too many values.");
-                }
+                time += pos switch {
+                    0 => TimeSpan.FromMilliseconds(intValue),
+                    1 => TimeSpan.FromSeconds(intValue),
+                    2 => TimeSpan.FromMinutes(intValue),
+                    3 => TimeSpan.FromHours(intValue),
+                    4 => TimeSpan.FromDays(intValue),
+                    _ => throw new ArgumentException(@"Provided timestamp has too many values.")
+                };
             }
             
             return time;

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Mapping_Tools_Core.BeatmapHelper.Events;
-using static Mapping_Tools_Core.BeatmapHelper.FileFormatHelper;
+using static Mapping_Tools_Core.BeatmapHelper.IO.FileFormatHelper;
 
 namespace Mapping_Tools_Core.BeatmapHelper.IO.Decoding {
     public class OsuStoryboardDecoder : IDecoder<Storyboard> {

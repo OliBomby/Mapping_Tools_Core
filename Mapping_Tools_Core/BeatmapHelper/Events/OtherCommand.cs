@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using Mapping_Tools_Core.BeatmapHelper.IO;
 using Mapping_Tools_Core.BeatmapHelper.Types;
 using Mapping_Tools_Core.Exceptions;
 
@@ -49,7 +50,7 @@ namespace Mapping_Tools_Core.BeatmapHelper.Events {
                 Easing = easingType;
             else throw new BeatmapParsingException("Failed to parse easing of command.", line);
 
-            if (InputParsers.TryParseDouble(values[2], out double startTime))
+            if (FileFormatHelper.TryParseDouble(values[2], out double startTime))
                 StartTime = startTime;
             else throw new BeatmapParsingException("Failed to parse start time of command.", line);
 
@@ -58,7 +59,7 @@ namespace Mapping_Tools_Core.BeatmapHelper.Events {
                 EndTime = StartTime;
             }
             else {
-                if (InputParsers.TryParseDouble(values[3], out double endTime))
+                if (FileFormatHelper.TryParseDouble(values[3], out double endTime))
                     EndTime = endTime;
                 else throw new BeatmapParsingException("Failed to parse end time of command.", line);
             }
@@ -68,7 +69,7 @@ namespace Mapping_Tools_Core.BeatmapHelper.Events {
                 var stringValue = values[i];
                 int index = i - 4;
 
-                if (InputParsers.TryParseDouble(stringValue, out double value))
+                if (FileFormatHelper.TryParseDouble(stringValue, out double value))
                     Params[index] = value;
                 else throw new BeatmapParsingException($"Failed to parse value at position {i} of command.", line);
             }

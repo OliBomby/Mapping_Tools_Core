@@ -9,15 +9,15 @@ namespace Mapping_Tools_Core.BeatmapHelper.IO.Decoding {
         public void Decode(TimingPoint obj, string code) {
             string[] values = code.Split(',');
 
-            if (InputParsers.TryParseDouble(values[0], out double offset))
+            if (FileFormatHelper.TryParseDouble(values[0], out double offset))
                 obj.Offset = offset;
             else throw new BeatmapParsingException("Failed to parse offset of timing point", code);
 
-            if (InputParsers.TryParseDouble(values[1], out double mpb))
+            if (FileFormatHelper.TryParseDouble(values[1], out double mpb))
                 obj.MpB = mpb;
             else throw new BeatmapParsingException("Failed to parse milliseconds per beat of timing point", code);
 
-            if (InputParsers.TryParseInt(values[2], out int meter))
+            if (FileFormatHelper.TryParseInt(values[2], out int meter))
                 obj.Meter = new TempoSignature(meter);
             else throw new BeatmapParsingException("Failed to parse meter of timing point", code);
 
@@ -25,18 +25,18 @@ namespace Mapping_Tools_Core.BeatmapHelper.IO.Decoding {
                 obj.SampleSet = ss;
             else throw new BeatmapParsingException("Failed to parse sampleset of timing point", code);
 
-            if (InputParsers.TryParseInt(values[4], out int ind))
+            if (FileFormatHelper.TryParseInt(values[4], out int ind))
                 obj.SampleIndex = ind;
             else throw new BeatmapParsingException("Failed to parse sample index of timing point", code);
 
-            if (InputParsers.TryParseDouble(values[5], out double vol))
+            if (FileFormatHelper.TryParseDouble(values[5], out double vol))
                 obj.Volume = vol;
             else throw new BeatmapParsingException("Failed to parse volume of timing point", code);
 
             obj.Uninherited = values[6] == "1";
 
             if (values.Length <= 7) return;
-            if (InputParsers.TryParseInt(values[7], out int style)) {
+            if (FileFormatHelper.TryParseInt(values[7], out int style)) {
                 BitArray b = new BitArray(new int[] { style });
                 obj.Kiai = b[0];
                 obj.OmitFirstBarLine = b[3];

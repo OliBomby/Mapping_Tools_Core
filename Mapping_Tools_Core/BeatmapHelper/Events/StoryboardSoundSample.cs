@@ -1,4 +1,5 @@
 ﻿using System;
+using Mapping_Tools_Core.BeatmapHelper.IO;
 using Mapping_Tools_Core.BeatmapHelper.Types;
 using Mapping_Tools_Core.Exceptions;
 
@@ -65,7 +66,7 @@ namespace Mapping_Tools_Core.BeatmapHelper.Events {
                 throw new BeatmapParsingException("This line is not a storyboarded sample.", line);
             }
 
-            if (InputParsers.TryParseDouble(values[1], out double t))
+            if (FileFormatHelper.TryParseDouble(values[1], out double t))
                 StartTime = t;
             else throw new BeatmapParsingException("Failed to parse time of storyboarded sample.", line);
 
@@ -76,7 +77,7 @@ namespace Mapping_Tools_Core.BeatmapHelper.Events {
             FilePath = values[3].Trim('"');
 
             if (values.Length > 4) {
-                if (InputParsers.TryParseDouble(values[4], out double vol))
+                if (FileFormatHelper.TryParseDouble(values[4], out double vol))
                     Volume = vol;
                 else throw new BeatmapParsingException("Failed to parse volume of storyboarded sample.", line);
             }

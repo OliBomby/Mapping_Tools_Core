@@ -12,21 +12,21 @@ namespace Mapping_Tools_Core.BeatmapHelper.IO.Decoding.HitObjects {
             if (values.Length <= 4)
                 throw new BeatmapParsingException("Hit object is missing values.", JoinLine(values));
 
-            if (InputParsers.TryParseDouble(values[0], out var x) && InputParsers.TryParseDouble(values[1], out var y))
+            if (FileFormatHelper.TryParseDouble(values[0], out var x) && FileFormatHelper.TryParseDouble(values[1], out var y))
                 hitObject.Pos = new Vector2(x, y);
             else throw new BeatmapParsingException("Failed to parse coordinate of hit object.", JoinLine(values));
 
-            if (InputParsers.TryParseDouble(values[2], out var t))
+            if (FileFormatHelper.TryParseDouble(values[2], out var t))
                 hitObject.StartTime = t;
             else throw new BeatmapParsingException("Failed to parse time of hit object.", JoinLine(values));
 
-            if (InputParsers.TryParseInt(values[3], out var type)) {
+            if (FileFormatHelper.TryParseInt(values[3], out var type)) {
                 var b = new BitArray(new[] { type });
                 hitObject.NewCombo = b[2];
                 hitObject.ComboSkip = MathHelper.GetIntFromBitArray(new BitArray(new[] { b[4], b[5], b[6] }));
             } else throw new BeatmapParsingException("Failed to parse type of hit object.", string.Join(',', values));
 
-            if (InputParsers.TryParseInt(values[4], out var hitsounds))
+            if (FileFormatHelper.TryParseInt(values[4], out var hitsounds))
                 DecodeHitsounds(hitObject.Hitsounds, hitsounds);
             else throw new BeatmapParsingException("Failed to parse hitsound of hit object.", JoinLine(values));
         }
@@ -44,24 +44,24 @@ namespace Mapping_Tools_Core.BeatmapHelper.IO.Decoding.HitObjects {
             var split = extras.Split(':');
             var i = 0;
             if (hitObject is HoldNote holdNote) {
-                if (InputParsers.TryParseDouble(split[i++], out var et))
+                if (FileFormatHelper.TryParseDouble(split[i++], out var et))
                     holdNote.SetEndTime(et);
                 else throw new BeatmapParsingException("Failed to parse end time of hold note.", extras);
             }
 
-            if (InputParsers.TryParseInt(split[i++], out var ss))
+            if (FileFormatHelper.TryParseInt(split[i++], out var ss))
                 hitObject.Hitsounds.SampleSet = (SampleSet)ss;
             else throw new BeatmapParsingException("Failed to parse sample set of hit object.", extras);
 
-            if (InputParsers.TryParseInt(split[i++], out var ass))
+            if (FileFormatHelper.TryParseInt(split[i++], out var ass))
                 hitObject.Hitsounds.AdditionSet = (SampleSet)ass;
             else throw new BeatmapParsingException("Failed to parse additional sample set of hit object.", extras);
 
-            if (InputParsers.TryParseInt(split[i++], out var ci))
+            if (FileFormatHelper.TryParseInt(split[i++], out var ci))
                 hitObject.Hitsounds.CustomIndex = ci;
             else throw new BeatmapParsingException("Failed to parse custom index of hit object.", extras);
 
-            if (InputParsers.TryParseDouble(split[i++], out var vol))
+            if (FileFormatHelper.TryParseDouble(split[i++], out var vol))
                 hitObject.Hitsounds.Volume = vol;
             else throw new BeatmapParsingException("Failed to parse volume of hit object.", extras);
 
@@ -69,7 +69,7 @@ namespace Mapping_Tools_Core.BeatmapHelper.IO.Decoding.HitObjects {
         }
 
         public static HitObjectType GetHitObjectType(string[] values) {
-            if (!InputParsers.TryParseInt(values[3], out var type))
+            if (!FileFormatHelper.TryParseInt(values[3], out var type))
                 throw new BeatmapParsingException("Failed to parse type of hit object.", JoinLine(values));
 
             var b = new BitArray(new[] { type });

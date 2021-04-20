@@ -28,7 +28,7 @@ namespace Mapping_Tools_Core.BeatmapHelper.IO.Decoding.HitObjects.Objects {
                 var spl = sliderData[i].Split(':');
                 if (spl.Length == 2) // It has to have 2 coordinates inside
                 {
-                    if (InputParsers.TryParseDouble(spl[0], out var ax) && InputParsers.TryParseDouble(spl[1], out var ay))
+                    if (FileFormatHelper.TryParseDouble(spl[0], out var ax) && FileFormatHelper.TryParseDouble(spl[1], out var ay))
                         points.Add(new Vector2(ax, ay));
                     else throw new BeatmapParsingException("Failed to parse coordinate of slider anchor.", code);
                 }
@@ -36,11 +36,11 @@ namespace Mapping_Tools_Core.BeatmapHelper.IO.Decoding.HitObjects.Objects {
 
             obj.CurvePoints = points;
 
-            if (InputParsers.TryParseInt(values[6], out var repeat))
+            if (FileFormatHelper.TryParseInt(values[6], out var repeat))
                 obj.RepeatCount = Math.Max(repeat - 1, 0);
             else throw new BeatmapParsingException("Failed to parse repeat number of slider.", code);
 
-            if (InputParsers.TryParseDouble(values[7], out var pixelLength))
+            if (FileFormatHelper.TryParseDouble(values[7], out var pixelLength))
                 obj.PixelLength = pixelLength;
             else throw new BeatmapParsingException("Failed to parse pixel length of slider.", code);
 
@@ -53,7 +53,7 @@ namespace Mapping_Tools_Core.BeatmapHelper.IO.Decoding.HitObjects.Objects {
             if (values.Length > 8) {
                 var split = values[8].Split('|');
                 for (var i = 0; i < Math.Min(split.Length, obj.SpanCount + 1); i++) {
-                    if (InputParsers.TryParseInt(split[i], out var ehs)) {
+                    if (FileFormatHelper.TryParseInt(split[i], out var ehs)) {
                         HitObjectDecodingHelper.DecodeHitsounds(obj.EdgeHitsounds[i], ehs);
                     }
                 }
@@ -64,10 +64,10 @@ namespace Mapping_Tools_Core.BeatmapHelper.IO.Decoding.HitObjects.Objects {
                 var split = values[9].Split('|');
                 for (var i = 0; i < Math.Min(split.Length, obj.SpanCount + 1); i++) {
                     var sssplit = split[i].Split(':');
-                    if (InputParsers.TryParseInt(sssplit[0], out var ess)) {
+                    if (FileFormatHelper.TryParseInt(sssplit[0], out var ess)) {
                         obj.EdgeHitsounds[i].SampleSet = (SampleSet) ess;
                     }
-                    if (InputParsers.TryParseInt(sssplit[1], out var eas)) {
+                    if (FileFormatHelper.TryParseInt(sssplit[1], out var eas)) {
                         obj.EdgeHitsounds[i].AdditionSet = (SampleSet) eas;
                     }
                 }
