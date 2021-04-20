@@ -4,6 +4,7 @@ using Mapping_Tools_Core.BeatmapHelper.Sections;
 using Mapping_Tools_Core.BeatmapHelper.TimingStuff;
 using System.Collections.Generic;
 using System.Linq;
+using Mapping_Tools_Core.BeatmapHelper.HitObjects;
 
 namespace Mapping_Tools_Core.BeatmapHelper {
 

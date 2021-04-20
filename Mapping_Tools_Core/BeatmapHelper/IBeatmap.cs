@@ -1,7 +1,6 @@
 ﻿using JetBrains.Annotations;
 using Mapping_Tools_Core.BeatmapHelper.ComboColours;
 using Mapping_Tools_Core.BeatmapHelper.Contexts;
-using Mapping_Tools_Core.BeatmapHelper.Objects;
 using Mapping_Tools_Core.BeatmapHelper.Sections;
 using Mapping_Tools_Core.BeatmapHelper.TimelineStuff;
 using Mapping_Tools_Core.BeatmapHelper.TimingStuff;
@@ -13,6 +12,8 @@ using System.IO;
 using System.Linq;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
+using Mapping_Tools_Core.BeatmapHelper.HitObjects;
+using Mapping_Tools_Core.BeatmapHelper.HitObjects.Objects;
 
 namespace Mapping_Tools_Core.BeatmapHelper {
     public interface IBeatmap : IComboColourCollection {
