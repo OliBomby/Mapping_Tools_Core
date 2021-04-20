@@ -4,6 +4,7 @@ using Mapping_Tools_Core.BeatmapHelper.Types;
 using Mapping_Tools_Core.MathUtil;
 using System;
 using System.Collections.Generic;
+using Mapping_Tools_Core.BeatmapHelper.Objects;
 
 namespace Mapping_Tools_Core.BeatmapHelper {
     /// <summary>
@@ -97,6 +98,15 @@ namespace Mapping_Tools_Core.BeatmapHelper {
         /// <param name="mat">The transformation matrix to apply to the position</param>
         public virtual void Transform(Matrix2 mat) {
             Pos = Matrix2.Mult(mat, Pos);
+        }
+
+        /// <summary>
+        /// Determines whether this object has a new combo actual.
+        /// </summary>
+        /// <param name="previousHitObject">The hit object that comes directly before this hit object.</param>
+        /// <returns>Whether this hit object actually has a new combo.</returns>
+        public bool IsActualNewCombo(HitObject previousHitObject) {
+            return NewCombo || this is Spinner || previousHitObject == null || previousHitObject is Spinner;
         }
 
         public override string ToString() {

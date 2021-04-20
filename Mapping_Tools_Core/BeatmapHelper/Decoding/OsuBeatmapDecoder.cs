@@ -37,7 +37,6 @@ namespace Mapping_Tools_Core.BeatmapHelper.Decoding {
             IEnumerable<string> metadataLines = GetCategoryLines(lines, "[Metadata]");
             IEnumerable<string> difficultyLines = GetCategoryLines(lines, "[Difficulty]");
             IEnumerable<string> timingLines = GetCategoryLines(lines, "[TimingPoints]");
-            IEnumerable<string> breakPeriodsLines = GetCategoryLines(lines, "//Break Periods", new[] { "[", "//" });
             IEnumerable<string> colourLines = GetCategoryLines(lines, "[Colours]");
             IEnumerable<string> hitobjectLines = GetCategoryLines(lines, "[HitObjects]");
 
@@ -45,10 +44,6 @@ namespace Mapping_Tools_Core.BeatmapHelper.Decoding {
             DecodeSection(beatmap, editorLines, DecodeEditor);
             DecodeSection(beatmap, metadataLines, DecodeMetadata);
             DecodeSection(beatmap, difficultyLines, DecodeDifficulty);
-
-            foreach (string line in breakPeriodsLines) {
-                beatmap.BreakPeriods.Add(new Break(line));
-            }
 
             foreach (string line in colourLines) {
                 if (line.Substring(0, 5) == "Combo") {
