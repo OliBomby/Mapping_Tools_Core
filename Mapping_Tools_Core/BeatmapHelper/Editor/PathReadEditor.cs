@@ -35,7 +35,7 @@ namespace Mapping_Tools_Core.BeatmapHelper.Editor {
         public virtual T ReadFile() {
             // Get contents of the file
             var lines = File.ReadAllText(Path);
-            return decoder.DecodeNew(lines);
+            return decoder.Decode(lines);
         }
 
         public string GetParentFolder() {

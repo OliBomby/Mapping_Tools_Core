@@ -43,7 +43,7 @@ namespace Mapping_Tools_Core.BeatmapHelper.Decoding {
             } else throw new BeatmapParsingException("Failed to style of timing point", code);
         }
 
-        public TimingPoint DecodeNew(string code) {
+        public TimingPoint Decode(string code) {
             var tp = new TimingPoint();
             Decode(tp, code);
 

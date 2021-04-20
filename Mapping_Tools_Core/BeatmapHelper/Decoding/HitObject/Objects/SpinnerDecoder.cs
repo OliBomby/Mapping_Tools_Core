@@ -24,7 +24,7 @@ namespace Mapping_Tools_Core.BeatmapHelper.Decoding.HitObject.Objects {
                 HitObjectDecodingHelper.DecodeExtras(obj, values[6]);
         }
 
-        public Spinner DecodeNew(string code) {
+        public Spinner Decode(string code) {
             var spinner = new Spinner();
             Decode(spinner, code);
 

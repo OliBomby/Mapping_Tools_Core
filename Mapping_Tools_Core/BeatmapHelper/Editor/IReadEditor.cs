@@ -1,12 +1,12 @@
 ﻿namespace Mapping_Tools_Core.BeatmapHelper.Editor {
     /// <summary>
-    /// Read interface a file./>
+    /// Read interface./>
     /// </summary>
     public interface IReadEditor<out T> : IEditor {
         /// <summary>
-        /// Reads and parses <see cref="IEditor.Path"/>.
+        /// Reads and parses the object.
         /// </summary>
-        /// <returns>The parsed object</returns>
+        /// <returns>The parsed object.</returns>
         T ReadFile();
     }
 }

@@ -31,7 +31,7 @@ namespace Mapping_Tools_Core.BeatmapHelper {
 
         public Timing BeatmapTiming { get; set; }
 
-        public Storyboard StoryBoard { get; }
+        public Storyboard StoryBoard { get; set; }
 
         IStoryboard IBeatmap.StoryBoard => StoryBoard;
 

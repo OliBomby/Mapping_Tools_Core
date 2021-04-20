@@ -19,7 +19,7 @@ namespace Mapping_Tools_Core.BeatmapHelper.Decoding.HitObject.Objects {
             }
         }
 
-        public HoldNote DecodeNew(string code) {
+        public HoldNote Decode(string code) {
             var holdNote = new HoldNote();
             Decode(holdNote, code);
 

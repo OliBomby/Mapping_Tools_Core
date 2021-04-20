@@ -37,7 +37,7 @@ namespace Mapping_Tools_Core.BeatmapHelper.Decoding {
             }
         }
 
-        public Storyboard DecodeNew(string code) {
+        public Storyboard Decode(string code) {
             var storyboard = new Storyboard();
             Decode(storyboard, code);
 

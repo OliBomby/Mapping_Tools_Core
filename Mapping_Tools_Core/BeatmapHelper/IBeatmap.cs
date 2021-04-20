@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 
 namespace Mapping_Tools_Core.BeatmapHelper {
@@ -35,6 +36,7 @@ namespace Mapping_Tools_Core.BeatmapHelper {
         /// Information about the beatmap set this map is part of.
         /// </summary>
         [CanBeNull]
+        [JsonIgnore]
         public BeatmapSetInfo BeatmapSet { get; set; }
 
         /// <summary>

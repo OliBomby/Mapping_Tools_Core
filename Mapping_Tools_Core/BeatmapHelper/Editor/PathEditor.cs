@@ -7,7 +7,7 @@ namespace Mapping_Tools_Core.BeatmapHelper.Editor {
     /// A <see cref="IReadWriteEditor{T}"/> that connects an object to a file
     /// using a <see cref="IEncoder{T}"/> and a <see cref="IDecoder{T}"/>./>
     /// </summary>
-    public class Editor<T> : IReadWriteEditor<T> {
+    public class PathEditor<T> : IReadWriteEditor<T> {
         protected readonly IEncoder<T> encoder;
         protected readonly IDecoder<T> decoder;
 
@@ -21,7 +21,7 @@ namespace Mapping_Tools_Core.BeatmapHelper.Editor {
         /// </summary>
         /// <param name="encoder">The encoder for the file type</param>
         /// <param name="decoder">The decoder for the file type</param>
-        public Editor(IEncoder<T> encoder, IDecoder<T> decoder) {
+        public PathEditor(IEncoder<T> encoder, IDecoder<T> decoder) {
             this.encoder = encoder;
             this.decoder = decoder;
         }
@@ -33,14 +33,14 @@ namespace Mapping_Tools_Core.BeatmapHelper.Editor {
         /// <param name="encoder">The encoder for the file type</param>
         /// <param name="decoder">The decoder for the file type</param>
         /// <param name="path">The path of the physical file</param>
-        public Editor(IEncoder<T> encoder, IDecoder<T> decoder, string path) : this(encoder, decoder) {
+        public PathEditor(IEncoder<T> encoder, IDecoder<T> decoder, string path) : this(encoder, decoder) {
             Path = path;
         }
 
         public virtual T ReadFile() {
             // Get contents of the file
             var lines = File.ReadAllText(Path);
-            return decoder.DecodeNew(lines);
+            return decoder.Decode(lines);
         }
 
         public virtual void WriteFile(T instance) {

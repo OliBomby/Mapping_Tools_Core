@@ -77,7 +77,7 @@ namespace Mapping_Tools_Core.BeatmapHelper.Decoding.HitObject.Objects {
                 HitObjectDecodingHelper.DecodeExtras(obj, values[10]);
         }
 
-        public Slider DecodeNew(string code) {
+        public Slider Decode(string code) {
             var slider = new Slider();
             Decode(slider, code);
 

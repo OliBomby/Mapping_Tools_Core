@@ -54,17 +54,17 @@ namespace Mapping_Tools_Core.BeatmapHelper.Decoding {
             }
 
             foreach (string line in hitobjectLines) {
-                beatmap.HitObjects.Add(hitObjectDecoder.DecodeNew(line));
+                beatmap.HitObjects.Add(hitObjectDecoder.Decode(line));
             }
 
             // Give the lines to the storyboard
-            storyboardDecoder.Decode(beatmap.StoryBoard, code);
+            beatmap.StoryBoard = storyboardDecoder.Decode(code);
 
             // Set the timing object
             beatmap.BeatmapTiming = new Timing(beatmap.Difficulty.SliderMultiplier);
 
             foreach (var timingLine in timingLines) {
-                beatmap.BeatmapTiming.Add(timingPointDecoder.DecodeNew(timingLine));
+                beatmap.BeatmapTiming.Add(timingPointDecoder.Decode(timingLine));
             }
 
             beatmap.SortHitObjects();
@@ -72,7 +72,7 @@ namespace Mapping_Tools_Core.BeatmapHelper.Decoding {
             beatmap.GiveObjectsTimingContext();
         }
 
-        public Beatmap DecodeNew(string code) {
+        public Beatmap Decode(string code) {
             var beatmap = new Beatmap();
             Decode(beatmap, code);
 

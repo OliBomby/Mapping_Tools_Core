@@ -24,33 +24,14 @@ namespace Mapping_Tools_Core.BeatmapHelper.Decoding.HitObject {
             this.holdNoteDecoder = holdNoteDecoder;
         }
 
-        public void Decode(BeatmapHelper.HitObject obj, string code) {
-            switch (obj) {
-                case HitCircle hitCircle:
-                    hitCircleDecoder.Decode(hitCircle, code);
-                    break;
-                case Slider slider:
-                    sliderDecoder.Decode(slider, code);
-                    break;
-                case Spinner spinner:
-                    spinnerDecoder.Decode(spinner, code);
-                    break;
-                case HoldNote holdNote:
-                    holdNoteDecoder.Decode(holdNote, code);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(obj));
-            }
-        }
-
-        public BeatmapHelper.HitObject DecodeNew(string code) {
+        public BeatmapHelper.HitObject Decode(string code) {
             var values = HitObjectDecodingHelper.SplitLine(code);
             var type = HitObjectDecodingHelper.GetHitObjectType(values);
             return type switch {
-                HitObjectType.Circle => hitCircleDecoder.DecodeNew(code),
-                HitObjectType.Slider => sliderDecoder.DecodeNew(code),
-                HitObjectType.Spinner => spinnerDecoder.DecodeNew(code),
-                HitObjectType.HoldNote => holdNoteDecoder.DecodeNew(code),
+                HitObjectType.Circle => hitCircleDecoder.Decode(code),
+                HitObjectType.Slider => sliderDecoder.Decode(code),
+                HitObjectType.Spinner => spinnerDecoder.Decode(code),
+                HitObjectType.HoldNote => holdNoteDecoder.Decode(code),
                 _ => throw new BeatmapParsingException("Unrecognized hit object type.", code)
             };
         }

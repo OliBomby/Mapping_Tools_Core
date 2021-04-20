@@ -17,7 +17,7 @@ namespace Mapping_Tools_Core.BeatmapHelper.Decoding.HitObject.Objects {
                 HitObjectDecodingHelper.DecodeExtras(obj, values[5]);
         }
 
-        public HitCircle DecodeNew(string code) {
+        public HitCircle Decode(string code) {
             var hitCircle = new HitCircle();
             Decode(hitCircle, code);
 
