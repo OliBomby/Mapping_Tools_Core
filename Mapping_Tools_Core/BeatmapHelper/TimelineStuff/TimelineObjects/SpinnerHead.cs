@@ -1,4 +1,5 @@
 ﻿using JetBrains.Annotations;
+using Mapping_Tools_Core.BeatmapHelper.HitObjects;
 
 namespace Mapping_Tools_Core.BeatmapHelper.TimelineStuff.TimelineObjects {
     public class SpinnerHead : TimelineObject {

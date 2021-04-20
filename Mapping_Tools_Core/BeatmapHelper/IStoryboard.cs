@@ -1,6 +1,7 @@
 ﻿using JetBrains.Annotations;
 using Mapping_Tools_Core.BeatmapHelper.Events;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Mapping_Tools_Core.BeatmapHelper {
     public interface IStoryboard {
@@ -8,48 +9,56 @@ namespace Mapping_Tools_Core.BeatmapHelper {
         /// A list of all Events under the [Events] -> (Background and Video events) section.
         /// </summary>
         [NotNull]
-        List<Event> BackgroundAndVideoEvents { get; }
+        List<Event> BackgroundAndVideoEvents { get; set; }
 
         /// <summary>
         /// A list of all Breaks under the [Events] -> (Break Periods) section.
         /// </summary>
         [NotNull]
-        List<Break> BreakPeriods { get; }
+        List<Break> BreakPeriods { get; set; }
 
         /// <summary>
         /// A list of all Events under the [Events] -> (Storyboard Layer 0 (Background)) section.
         /// </summary>
         [NotNull]
-        List<Event> StoryboardLayerBackground { get; }
+        List<Event> StoryboardLayerBackground { get; set; }
 
         /// <summary>
         /// A list of all Events under the [Events] -> (Storyboard Layer 1 (Fail)) section.
         /// </summary>
         [NotNull]
-        List<Event> StoryboardLayerFail { get; }
+        List<Event> StoryboardLayerFail { get; set; }
 
         /// <summary>
         /// A list of all Events under the [Events] -> (Storyboard Layer 2 (Pass)) section.
         /// </summary>
         [NotNull]
-        List<Event> StoryboardLayerPass { get; }
+        List<Event> StoryboardLayerPass { get; set; }
 
         /// <summary>
         /// A list of all Events under the [Events] -> (Storyboard Layer 3 (Foreground)) section.
         /// </summary>
         [NotNull]
-        List<Event> StoryboardLayerForeground { get; }
+        List<Event> StoryboardLayerForeground { get; set; }
 
         /// <summary>
         /// A list of all Events under the [Events] -> (Storyboard Layer 4 (Overlay)) section.
         /// </summary>
         [NotNull]
-        List<Event> StoryboardLayerOverlay { get; }
+        List<Event> StoryboardLayerOverlay { get; set; }
 
         /// <summary>
         /// A list of all storyboarded sound sample events under the [Events] -> (Storyboard Sound Samples) section.
         /// </summary>
         [NotNull]
-        List<StoryboardSoundSample> StoryboardSoundSamples { get; }
+        List<StoryboardSoundSample> StoryboardSoundSamples { get; set; }
+    }
+
+    public static class IStoryboardExtensions {
+        public static IEnumerable<Event> EnumerateAllEvents(this IStoryboard sb) {
+            return sb.BackgroundAndVideoEvents.Concat(sb.BreakPeriods).Concat(sb.StoryboardSoundSamples)
+                .Concat(sb.StoryboardLayerFail).Concat(sb.StoryboardLayerPass).Concat(sb.StoryboardLayerBackground)
+                .Concat(sb.StoryboardLayerForeground).Concat(sb.StoryboardLayerOverlay);
+        }
     }
 }

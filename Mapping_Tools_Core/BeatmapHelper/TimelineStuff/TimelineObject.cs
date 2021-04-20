@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Mapping_Tools_Core.BeatmapHelper.HitObjects;
 
 namespace Mapping_Tools_Core.BeatmapHelper.TimelineStuff {
     /// <summary>

@@ -1,4 +1,5 @@
-﻿using Mapping_Tools_Core.BeatmapHelper.Types;
+﻿using Mapping_Tools_Core.BeatmapHelper.IO;
+using Mapping_Tools_Core.BeatmapHelper.Types;
 using Mapping_Tools_Core.Exceptions;
 using Mapping_Tools_Core.MathUtil;
 
@@ -34,7 +35,7 @@ namespace Mapping_Tools_Core.BeatmapHelper.Events {
             EventType = values[0];
 
             // This start time is usually 0 for backgrounds but lets parse it anyways
-            if (InputParsers.TryParseDouble(values[1], out double startTime))
+            if (FileFormatHelper.TryParseDouble(values[1], out double startTime))
                 StartTime = startTime;
             else throw new BeatmapParsingException("Failed to parse start time of video.", line);
 
@@ -42,11 +43,11 @@ namespace Mapping_Tools_Core.BeatmapHelper.Events {
 
             // Writing offset is optional
             if (values.Length > 3) {
-                if (InputParsers.TryParseInt(values[3], out int xOffset))
+                if (FileFormatHelper.TryParseInt(values[3], out int xOffset))
                     XOffset = xOffset;
                 else throw new BeatmapParsingException("Failed to parse X offset of video.", line);
 
-                if (InputParsers.TryParseInt(values[4], out int yOffset))
+                if (FileFormatHelper.TryParseInt(values[4], out int yOffset))
                     YOffset = yOffset;
                 else throw new BeatmapParsingException("Failed to parse Y offset of video.", line);
             } else {

@@ -38,7 +38,7 @@ namespace Mapping_Tools_Core.Audio.SampleGeneration {
                 return cachedWaveStream != null;
             }
 
-            return File.Exists(Path) && ValidExtensions.Contains(Extension());
+            return File.Exists(Path) && ValidExtensions.Contains(Extension(), StringComparer.OrdinalIgnoreCase);
         }
 
         private static ISampleProvider GetSampleProvider(WaveStream wave) {

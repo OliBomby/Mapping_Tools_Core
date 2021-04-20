@@ -1,4 +1,5 @@
 ﻿
+using Mapping_Tools_Core.BeatmapHelper.IO;
 using Mapping_Tools_Core.BeatmapHelper.Types;
 using Mapping_Tools_Core.Exceptions;
 
@@ -22,11 +23,11 @@ namespace Mapping_Tools_Core.BeatmapHelper.Events {
 
             TriggerName = values[1];
 
-            if (InputParsers.TryParseDouble(values[2], out double startTime))
+            if (FileFormatHelper.TryParseDouble(values[2], out double startTime))
                 StartTime = startTime;
             else throw new BeatmapParsingException("Failed to parse start time of event param.", line);
 
-            if (InputParsers.TryParseDouble(values[3], out double endTime))
+            if (FileFormatHelper.TryParseDouble(values[3], out double endTime))
                 EndTime = endTime;
             else throw new BeatmapParsingException("Failed to parse end time of event param.", line);
         }

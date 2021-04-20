@@ -6,7 +6,7 @@ using Mapping_Tools_Core.BeatmapHelper.Events;
 namespace Mapping_Tools_Core {
     public static class InvariantHelper {
         /// <summary>
-        /// Converts the object to an Invariant string.
+        /// Converts the object to a string with invariant culture.
         /// </summary>
         /// <param name="obj"></param>
         /// <returns></returns>
@@ -32,25 +32,12 @@ namespace Mapping_Tools_Core {
             return Math.Round(obj).ToInvariant();
         }
 
-        /// <summary>
-        /// Converts the string into 
-        /// </summary>
-        /// <param name="obj"></param>
-        /// <returns></returns>
         public static string ToIntInvariant(this SampleSet obj) {
             return ((int)obj).ToInvariant();
         }
 
         public static string ToIntInvariant(this StoryboardLayer obj) {
             return ((int)obj).ToInvariant();
-        }
-
-        public static bool TryParseDouble(string str, out double result) {
-            return double.TryParse(str, NumberStyles.Float, CultureInfo.InvariantCulture, out result);
-        }
-
-        public static bool TryParseInt(string str, out int result) {
-            return int.TryParse(str, NumberStyles.Integer, CultureInfo.InvariantCulture, out result);
         }
     }
 }

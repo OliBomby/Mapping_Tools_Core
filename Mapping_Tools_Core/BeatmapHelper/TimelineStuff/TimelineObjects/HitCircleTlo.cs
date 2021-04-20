@@ -1,6 +1,7 @@
 ﻿using System;
 using JetBrains.Annotations;
-using Mapping_Tools_Core.BeatmapHelper.Objects;
+using Mapping_Tools_Core.BeatmapHelper.HitObjects;
+using Mapping_Tools_Core.BeatmapHelper.HitObjects.Objects;
 
 namespace Mapping_Tools_Core.BeatmapHelper.TimelineStuff.TimelineObjects {
     public class HitCircleTlo : TimelineObject {

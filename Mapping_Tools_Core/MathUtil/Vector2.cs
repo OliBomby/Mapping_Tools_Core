@@ -22,8 +22,8 @@ SOFTWARE.
 
 using System;
 using System.Runtime.InteropServices;
+using System.Text.Json.Serialization;
 using System.Xml.Serialization;
-using Newtonsoft.Json;
 
 namespace Mapping_Tools_Core.MathUtil {
     /// <summary>Represents a 2D vector using two double-precision floating-point numbers.</summary>
@@ -57,6 +57,7 @@ namespace Mapping_Tools_Core.MathUtil {
         /// </summary>
         /// <param name="x">The x coordinate of the net Vector2.</param>
         /// <param name="y">The y coordinate of the net Vector2.</param>
+        [JsonConstructor]
         public Vector2(double x, double y) {
             X = x;
             Y = y;

@@ -1,9 +1,8 @@
 ﻿using Mapping_Tools_Core.BeatmapHelper;
-using Mapping_Tools_Core.BeatmapHelper.Decoding;
-using Mapping_Tools_Core.BeatmapHelper.Encoding;
+using Mapping_Tools_Core.BeatmapHelper.IO.Decoding;
+using Mapping_Tools_Core.BeatmapHelper.IO.Encoding;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Diagnostics;
 using System.IO;
 
 namespace Mapping_Tools_Core_Tests.BeatmapHelper {
@@ -30,7 +29,7 @@ namespace Mapping_Tools_Core_Tests.BeatmapHelper {
         }
 
         private static void TestUnchanging(string lines, IDecoder<Beatmap> decoder, IEncoder<Beatmap> encoder) {
-            var lines2 = encoder.Encode(decoder.DecodeNew(lines));
+            var lines2 = encoder.Encode(decoder.Decode(lines));
 
             //Debug.Print(lines);
             //Debug.Print(lines2);
