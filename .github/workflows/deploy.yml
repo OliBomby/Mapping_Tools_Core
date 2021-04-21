@@ -24,7 +24,7 @@ jobs:
         uses: battila7/get-version-action@v2
           
       - name: Change version property in csproj 
-        run: sed -i 's/<Version>\b[0-9].\b[0-9].\b[0-9]<\/Version>/<Version>${{ steps.get_version.outputs.version-without-v }}<\/Version>/g' Mapping_Tools_Core/Mapping_Tools_Core.csproj
+        run: sed -i 's/<Version>\b[0-9]*.\b[0-9]*.\b[0-9]*<\/Version>/<Version>${{ steps.get_version.outputs.version-without-v }}<\/Version>/g' Mapping_Tools_Core/Mapping_Tools_Core.csproj
           
       - name: generate release
         uses: "marvinpinto/action-automatic-releases@latest"
