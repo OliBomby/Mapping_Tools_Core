@@ -9,7 +9,7 @@ namespace Mapping_Tools_Core.BeatmapHelper {
     /// Contains all the contents of a beatmap set.
     /// </summary>
     public class BeatmapSetInfo {
-        private static readonly string[] soundExtensions = { ".wav", ".mp3", ".aif", ".aiff", ".ogg" };
+        private static readonly string[] soundExtensions = { ".wav", ".ogg", ".mp3" };
 
         /// <summary>
         /// All the files in this beatmap set.
@@ -53,6 +53,57 @@ namespace Mapping_Tools_Core.BeatmapHelper {
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Finds the sound file with a given filename.
+        /// </summary>
+        /// <param name="filename">The filename to search.</param>
+        /// <returns>The sound file with the filename or null if nothing was found.</returns>
+        public IBeatmapSetFileInfo GetSoundFile(string filename) {
+            return GetSoundFile(SoundFiles, filename);
+        }
+
+        /// <summary>
+        /// Finds the sound file with a given filename.
+        /// </summary>
+        /// <param name="samples">The sound files to search.</param>
+        /// <param name="filename">The filename to search.</param>
+        /// <returns>The sound file with the filename or null if nothing was found.</returns>
+        public static IBeatmapSetFileInfo GetSoundFile(IEnumerable<IBeatmapSetFileInfo> samples, string filename) {
+            if (samples == null)
+                return null;
+
+            var extension = Path.GetExtension(filename);
+            var extensionOrder = soundExtensions.ToList();
+
+            IBeatmapSetFileInfo bestMatch = null;
+            int matchLevel = int.MaxValue;
+            foreach (var sample in samples) {
+                // Minimum requirement for matching filename
+                if (Path.ChangeExtension(filename, null) == Path.ChangeExtension(sample.Filename, null)) {
+                    // Get the index of the extension in the extension priority list
+                    var extensionLevel = extensionOrder.IndexOf(Path.GetExtension(sample.Filename));
+                    if (extensionLevel < 0) {
+                        extensionLevel = int.MaxValue;
+                    }
+
+                    if (bestMatch == null) {
+                        bestMatch = sample;
+                        matchLevel = extensionLevel;
+                    } else if (extensionLevel < matchLevel) {
+                        bestMatch = sample;
+                        matchLevel = extensionLevel;
+                    }
+
+                    if (!string.IsNullOrEmpty(extension) && Path.GetExtension(bestMatch.Filename) == extension ||
+                        string.IsNullOrEmpty(extension) && matchLevel == 0) {
+                        break;
+                    }
+                }
+            }
+
+            return bestMatch;
         }
     }
 }

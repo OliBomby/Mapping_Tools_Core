@@ -48,10 +48,7 @@ namespace Mapping_Tools_Core.Audio.DuplicateDetection {
         }
 
         private IBeatmapSetFileInfo GetByFilename(string filename) {
-            var result = Map.Keys.FirstOrDefault(o => o.Filename == filename);
-
-            return result ?? Map.Keys.FirstOrDefault(o => 
-                       Path.ChangeExtension(o.Filename, null) == Path.ChangeExtension(filename, null));
+            return BeatmapSetInfo.GetSoundFile(Map.Keys, filename);
         }
     }
 }

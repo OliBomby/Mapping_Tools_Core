@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
 namespace Mapping_Tools_Core.BeatmapHelper {
@@ -10,6 +11,7 @@ namespace Mapping_Tools_Core.BeatmapHelper {
         /// The filename of with file extension.
         /// This is a relative path from the root directory.
         /// </summary>
+        [NotNull]
         public string Filename { get; }
 
         /// <summary>

@@ -24,6 +24,7 @@
     <Compile Include="Tools\MapCleanerStuff\MapCleaner.cs" />
     <Compile Include="Tools\MapCleanerStuff\MapCleanerArgs.cs" />
     <Compile Include="Tools\MapCleanerStuff\MapCleanerResult.cs" />
+    <Compile Include="Tools\UnusedSampleDetector.cs" />
     <None Include="..\LICENSE.txt">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
