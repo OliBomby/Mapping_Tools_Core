@@ -64,7 +64,7 @@ namespace Mapping_Tools_Core.BeatmapHelper.Contexts {
             GlobalSliderVelocity = globalSliderVelocity;
             SliderVelocity = sliderVelocity;
             TimingPoint = timingPoint.Copy();
-            HitsoundTimingPoint = hitsoundTimingPoint;
+            HitsoundTimingPoint = hitsoundTimingPoint.Copy();
             UninheritedTimingPoint = unInheritedTimingPoint.Copy();
             BodyHitsounds = bodyHitsounds.Select(o => o.Copy()).ToList();
         }

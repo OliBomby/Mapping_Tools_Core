@@ -96,7 +96,7 @@ namespace Mapping_Tools_Core.BeatmapHelper.IO.Encoding {
             yield return (@"SliderTickRate:" + beatmap.Difficulty.SliderTickRate.ToInvariant());
             yield return @"";
 
-            foreach (string s in storyboardEncoder.EncodeEnumerable(beatmap.StoryBoard)) yield return s;
+            foreach (string s in storyboardEncoder.EncodeEnumerable(beatmap.Storyboard)) yield return s;
             yield return @"[TimingPoints]";
             foreach (TimingPoint tp in beatmap.BeatmapTiming.TimingPoints.Where(tp => tp != null)) {
                 yield return timingPointEncoder.Encode(tp);

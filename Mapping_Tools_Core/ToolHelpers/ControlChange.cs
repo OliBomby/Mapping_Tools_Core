@@ -1,12 +1,14 @@
-﻿using System;
+﻿using Mapping_Tools_Core.BeatmapHelper.IO.Encoding;
+using Mapping_Tools_Core.BeatmapHelper.TimingStuff;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using Mapping_Tools_Core.BeatmapHelper;
-using Mapping_Tools_Core.BeatmapHelper.IO.Encoding;
-using Mapping_Tools_Core.BeatmapHelper.TimingStuff;
 
 namespace Mapping_Tools_Core.ToolHelpers {
-    public struct TimingPointsChange {
+    /// <summary>
+    /// Struct for helping making changes to <see cref="Timing"/>.
+    /// </summary>
+    public struct ControlChange {
 
         public TimingPoint MyTP;
         public bool MpB;
@@ -14,19 +16,19 @@ namespace Mapping_Tools_Core.ToolHelpers {
         public bool Sampleset;
         public bool Index;
         public bool Volume;
-        public bool UnInherited;
+        public bool Uninherited;
         public bool Kiai;
         public bool OmitFirstBarLine;
         public double Fuzzyness;
 
-        public TimingPointsChange(TimingPoint tpNew, bool mpb = false, bool meter = false, bool sampleset = false, bool index = false, bool volume = false, bool unInherited = false, bool kiai = false, bool omitFirstBarLine = false, double fuzzyness=2) {
+        public ControlChange(TimingPoint tpNew, bool mpb = false, bool meter = false, bool sampleset = false, bool index = false, bool volume = false, bool uninherited = false, bool kiai = false, bool omitFirstBarLine = false, double fuzzyness=2) {
             MyTP = tpNew;
             MpB = mpb;
             Meter = meter;
             Sampleset = sampleset;
             Index = index;
             Volume = volume;
-            UnInherited = unInherited;
+            Uninherited = uninherited;
             Kiai = kiai;
             OmitFirstBarLine = omitFirstBarLine;
             Fuzzyness = fuzzyness;
@@ -55,7 +57,7 @@ namespace Mapping_Tools_Core.ToolHelpers {
                 prevTimingPoint = onTimingPoints.Last();
             }
 
-            if (UnInherited && !onHasRed) {
+            if (Uninherited && !onHasRed) {
                 // Make new redline
                 if (prevTimingPoint == null) {
                     addingTimingPoint = MyTP.Copy();
@@ -67,7 +69,7 @@ namespace Mapping_Tools_Core.ToolHelpers {
                 }
                 onTimingPoints.Add(addingTimingPoint);
             }
-            if (!UnInherited && (onTimingPoints.Count == 0 || (MpB && !onHasGreen))) {
+            if (!Uninherited && (onTimingPoints.Count == 0 || (MpB && !onHasGreen))) {
                 // Make new greenline (based on prev)
                 if (prevTimingPoint == null) {
                     addingTimingPoint = MyTP.Copy();
@@ -82,16 +84,16 @@ namespace Mapping_Tools_Core.ToolHelpers {
             }
 
             foreach (TimingPoint on in onTimingPoints) {
-                if (MpB && (UnInherited ? on.Uninherited : !on.Uninherited)) { on.MpB = MyTP.MpB; }
-                if (Meter && UnInherited && on.Uninherited) { on.Meter = MyTP.Meter; }
+                if (MpB && (Uninherited ? on.Uninherited : !on.Uninherited)) { on.MpB = MyTP.MpB; }
+                if (Meter && Uninherited && on.Uninherited) { on.Meter = MyTP.Meter; }
                 if (Sampleset) { on.SampleSet = MyTP.SampleSet; }
                 if (Index) { on.SampleIndex = MyTP.SampleIndex; }
                 if (Volume) { on.Volume = MyTP.Volume; }
                 if (Kiai) { on.Kiai = MyTP.Kiai; }
-                if (OmitFirstBarLine && UnInherited && on.Uninherited) { on.OmitFirstBarLine = MyTP.OmitFirstBarLine; }
+                if (OmitFirstBarLine && Uninherited && on.Uninherited) { on.OmitFirstBarLine = MyTP.OmitFirstBarLine; }
             }
 
-            if (addingTimingPoint != null && (prevTimingPoint == null || !addingTimingPoint.SameEffect(prevTimingPoint) || UnInherited)) {
+            if (addingTimingPoint != null && (prevTimingPoint == null || !addingTimingPoint.SameEffect(prevTimingPoint) || Uninherited)) {
                 timing.Add(addingTimingPoint);
             }
 
@@ -108,16 +110,16 @@ namespace Mapping_Tools_Core.ToolHelpers {
             }
         }
 
-        public static void ApplyChanges(Timing timing, IEnumerable<TimingPointsChange> timingPointsChanges, bool allAfter = false) {
+        public static void ApplyChanges(Timing timing, IEnumerable<ControlChange> timingPointsChanges, bool allAfter = false) {
             timingPointsChanges = timingPointsChanges.OrderBy(o => o.MyTP.Offset);
-            foreach (TimingPointsChange c in timingPointsChanges) {
+            foreach (ControlChange c in timingPointsChanges) {
                 c.AddChange(timing, allAfter);
             }
         }
 
         public void Debug() {
             Console.WriteLine(new TimingPointEncoder(true).Encode(MyTP));
-            Console.WriteLine($"{MpB}, {Meter}, {Sampleset}, {Index}, {Volume}, {UnInherited}, {Kiai}, {OmitFirstBarLine}");
+            Console.WriteLine($"{MpB}, {Meter}, {Sampleset}, {Index}, {Volume}, {Uninherited}, {Kiai}, {OmitFirstBarLine}");
         }
     }
 }

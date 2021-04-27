@@ -34,7 +34,7 @@ namespace Mapping_Tools_Core.BeatmapHelper {
 
         public Storyboard StoryBoard { get; set; }
 
-        IStoryboard IBeatmap.StoryBoard => StoryBoard;
+        IStoryboard IBeatmap.Storyboard => StoryBoard;
 
         /// <summary>
         /// List of all the hit objects in this beatmap.

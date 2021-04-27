@@ -113,27 +113,25 @@ namespace Mapping_Tools_Core.BeatmapHelper.HitObjects.Objects {
             endPos = GetSliderPath().PositionAt(1);
         }
 
-        public List<string> GetPlayingBodyFilenames(double sliderTickRate, bool includeDefaults = true) {
+        public IEnumerable<string> GetPlayingBodyFilenames(double sliderTickRate, bool includeDefaults = true) {
             if (!TryGetContext<TimingContext>(out var timing)) {
                 throw new InvalidOperationException("Slider is not initialized with timing context. Can not get the playing body filenames.");
             }
 
-            var samples = new List<string>();
-            
             // Get sliderslide hitsounds for every timingpoint in the slider
             if (includeDefaults || timing.TimingPoint.SampleIndex != 0) {
                 var firstSampleSet = Hitsounds.SampleSet == SampleSet.Auto ? timing.TimingPoint.SampleSet : Hitsounds.SampleSet;
-                samples.Add(GetSliderFilename(firstSampleSet, "slide", timing.TimingPoint.SampleIndex));
+                yield return GetSliderFilename(firstSampleSet, "slide", timing.TimingPoint.SampleIndex);
                 if (Hitsounds.Whistle)
-                    samples.Add(GetSliderFilename(firstSampleSet, "whistle", timing.TimingPoint.SampleIndex));
+                    yield return GetSliderFilename(firstSampleSet, "whistle", timing.TimingPoint.SampleIndex);
             }
 
             foreach (var bodyTp in timing.BodyHitsounds)
                 if (includeDefaults || bodyTp.SampleIndex != 0) {
                     var sampleSet = Hitsounds.SampleSet == SampleSet.Auto ? bodyTp.SampleSet : Hitsounds.SampleSet;
-                    samples.Add(GetSliderFilename(sampleSet, "slide", bodyTp.SampleIndex));
+                    yield return GetSliderFilename(sampleSet, "slide", bodyTp.SampleIndex);
                     if (Hitsounds.Whistle)
-                        samples.Add(GetSliderFilename(sampleSet, "whistle", bodyTp.SampleIndex));
+                        yield return GetSliderFilename(sampleSet, "whistle", bodyTp.SampleIndex);
                 }
 
             // Add tick samples
@@ -143,13 +141,11 @@ namespace Mapping_Tools_Core.BeatmapHelper.HitObjects.Objects {
                 var bodyTp = Timing.GetTimingPointAtTime(t, timing.BodyHitsounds, timing.TimingPoint);
                 if (includeDefaults || bodyTp.SampleIndex != 0) {
                     var sampleSet = Hitsounds.SampleSet == SampleSet.Auto ? bodyTp.SampleSet : Hitsounds.SampleSet;
-                    samples.Add(GetSliderFilename(sampleSet, "tick", bodyTp.SampleIndex));
+                    yield return GetSliderFilename(sampleSet, "tick", bodyTp.SampleIndex);
                 }
 
                 t += timing.UninheritedTimingPoint.MpB / sliderTickRate;
             }
-
-            return samples;
         }
 
         private string GetSliderFilename(SampleSet sampleSet, string sampleName, int index) {

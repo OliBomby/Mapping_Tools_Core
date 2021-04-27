@@ -1,6 +1,8 @@
 ﻿using JetBrains.Annotations;
 using Mapping_Tools_Core.BeatmapHelper.ComboColours;
 using Mapping_Tools_Core.BeatmapHelper.Contexts;
+using Mapping_Tools_Core.BeatmapHelper.HitObjects;
+using Mapping_Tools_Core.BeatmapHelper.HitObjects.Objects;
 using Mapping_Tools_Core.BeatmapHelper.Sections;
 using Mapping_Tools_Core.BeatmapHelper.TimelineStuff;
 using Mapping_Tools_Core.BeatmapHelper.TimingStuff;
@@ -12,8 +14,6 @@ using System.IO;
 using System.Linq;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
-using Mapping_Tools_Core.BeatmapHelper.HitObjects;
-using Mapping_Tools_Core.BeatmapHelper.HitObjects.Objects;
 
 namespace Mapping_Tools_Core.BeatmapHelper {
     public interface IBeatmap : IComboColourCollection {
@@ -92,7 +92,7 @@ namespace Mapping_Tools_Core.BeatmapHelper {
         /// The storyboard of the Beatmap. Stores everything under the [Events] section.
         /// </summary>
         [NotNull]
-        IStoryboard StoryBoard { get; }
+        IStoryboard Storyboard { get; }
 
         /// <summary>
         /// List of all the hit objects in this beatmap.
@@ -417,6 +417,7 @@ namespace Mapping_Tools_Core.BeatmapHelper {
         /// Creates a new <see cref="Timeline"/> for this Beatmap.
         /// Upon creation the timeline is updated with all the current timing and hitsounds of this beatmap,
         /// but later changes wont be automatically synchronized.
+        /// This will also set the the <see cref="TimelineContext"/> of all hit objects which implement <see cref="IHasTimelineObjects"/>.
         /// </summary>
         /// <returns></returns>
         public static Timeline GetTimeline(this IBeatmap beatmap) {
@@ -452,7 +453,7 @@ namespace Mapping_Tools_Core.BeatmapHelper {
             double leadInTime = beatmap.General.AudioLeadIn;
             var od = beatmap.Difficulty.OverallDifficulty;
             var window50 = Math.Ceiling(200 - 10 * od);
-            var eventsWithStartTime = beatmap.StoryBoard.EnumerateAllEvents().OfType<IHasStartTime>().ToArray();
+            var eventsWithStartTime = beatmap.Storyboard.EnumerateAllEvents().OfType<IHasStartTime>().ToArray();
             if (eventsWithStartTime.Length > 0)
                 leadInTime = Math.Max(-eventsWithStartTime.Min(o => o.StartTime), leadInTime);
             if (beatmap.HitObjects.Count > 0) {
@@ -470,7 +471,7 @@ namespace Mapping_Tools_Core.BeatmapHelper {
             var endTime = beatmap.HitObjects.Count > 0
                 ? Math.Max(beatmap.GetHitObjectEndTime() + 200, beatmap.HitObjects.Last().EndTime + 3000)
                 : double.NegativeInfinity;
-            var eventsWithEndTime = beatmap.StoryBoard.EnumerateAllEvents().OfType<IHasDuration>().ToArray();
+            var eventsWithEndTime = beatmap.Storyboard.EnumerateAllEvents().OfType<IHasDuration>().ToArray();
             if (eventsWithEndTime.Length > 0)
                 endTime = Math.Max(endTime, eventsWithEndTime.Max(o => o.EndTime) - 500);
             return endTime;
@@ -531,6 +532,15 @@ namespace Mapping_Tools_Core.BeatmapHelper {
             }
         }
 
+        /// <summary>
+        /// Gets the relative path to this beatmap in the beatmap set.
+        /// Returns null if the beatmap has no beatmap set or the beatmap set doesn't have this beatmap.
+        /// </summary>
+        /// <param name="beatmap">The beatmap to get the path of.</param>
+        /// <returns>The path or null.</returns>
+        public static string GetBeatmapSetRelativePath(this IBeatmap beatmap) {
+            return beatmap.BeatmapSet?.GetRelativePath(beatmap);
+        }
 
         /// <summary>
         /// Grabs the specified file name of beatmap file.

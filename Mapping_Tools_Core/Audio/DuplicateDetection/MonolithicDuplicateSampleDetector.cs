@@ -2,75 +2,94 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Mapping_Tools_Core.BeatmapHelper;
 
 namespace Mapping_Tools_Core.Audio.DuplicateDetection {
     public class MonolithicDuplicateSampleDetector : IDuplicateSampleDetector {
-        public Dictionary<string, string> AnalyzeSamples(string dir, out Exception exception, bool includeSubdirectories) {
+        public IDuplicateSampleMap AnalyzeSamples(IEnumerable<IBeatmapSetFileInfo> samples, out Exception exception) {
             var extList = GetSupportedExtensions();
             exception = null;
 
-            List<string> samplePaths = Directory.GetFiles(dir, "*.*", 
-                    includeSubdirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)
-                .Where(n => extList.Contains(Path.GetExtension(n), StringComparer.OrdinalIgnoreCase)).ToList();
+            List<IBeatmapSetFileInfo> samplesFiltered = samples
+                .Where(n => extList.Contains(Path.GetExtension(n.Filename), StringComparer.OrdinalIgnoreCase)).ToList();
 
-            Dictionary<string, string> dict = new Dictionary<string, string>();
+            Dictionary<IBeatmapSetFileInfo, IBeatmapSetFileInfo> dict = new Dictionary<IBeatmapSetFileInfo, IBeatmapSetFileInfo>();
             bool errorHappened = false;
+
+            const int bufferSize = 2048;
+            byte[] thisBuffer = new byte[bufferSize];
+            byte[] otherBuffer = new byte[bufferSize];
             
             // Compare all samples to find ones with the same data
-            for (int i = 0; i < samplePaths.Count; i++) {
-                long thisLength = new FileInfo(samplePaths[i]).Length;
+            for (int i = 0; i < samplesFiltered.Count; i++) {
+                var sample1 = samplesFiltered[i];
+                long thisLength = samplesFiltered[i].Size;
+
+                // The first duplicate found defaults to itself
+                var duplicate = sample1;
 
                 for (int k = 0; k <= i; k++) {
-                    if (samplePaths[i] != samplePaths[k]) {
-                        long otherLength = new FileInfo(samplePaths[k]).Length;
+                    var sample2 = samplesFiltered[k];
 
-                        if (thisLength != otherLength) {
+                    // Only have to compare against other samples
+                    if (sample1.Equals(sample2)) {
+                        continue;
+                    }
+
+                    // Compare file size
+                    long otherLength = sample2.Size;
+                    if (thisLength != otherLength) {
+                        continue;
+                    }
+
+                    // Try comparing the actual audio content
+                    try {
+                        using var thisWave = Helpers.OpenSample(sample1.Filename, sample1.GetData());
+                        using var otherWave = Helpers.OpenSample(sample2.Filename, sample2.GetData());
+
+                        if (thisWave.Length != otherWave.Length) {
                             continue;
                         }
 
-                        try {
-                            using var thisWave = Helpers.OpenSample(samplePaths[i]);
-                            using var otherWave = Helpers.OpenSample(samplePaths[k]);
-
-                            if (thisWave.Length != otherWave.Length) {
-                                continue;
-                            }
-
-                            byte[] thisBuffer = new byte[thisWave.Length];
-                            thisWave.Read(thisBuffer, 0, (int) thisWave.Length);
-
-                            byte[] otherBuffer = new byte[otherWave.Length];
-                            otherWave.Read(otherBuffer, 0, (int) otherWave.Length);
+                        bool equal = true;
+                        while (thisWave.CanRead) {
+                            thisWave.Read(thisBuffer, 0, bufferSize);
+                            otherWave.Read(otherBuffer, 0, bufferSize);
 
                             if (!thisBuffer.SequenceEqual(otherBuffer)) {
-                                continue;
+                                equal = false;
+                                break;
                             }
-                        } catch (Exception ex) {
-                            // Something went wrong reading the samples. I'll just assume they weren't the same
-                            if (!errorHappened) {
-                                exception = ex;
-                                errorHappened = true;
-                            }
+                        }
 
-                            Console.WriteLine(ex);
+                        if (!equal) {
                             continue;
                         }
                     }
+                    catch (Exception ex) {
+                        // Something went wrong reading the samples. I'll just assume they weren't the same
+                        if (!errorHappened) {
+                            exception = ex;
+                            errorHappened = true;
+                        }
 
-                    string samplePath = samplePaths[i];
-                    string fullPathExtLess =
-                        Path.Combine(Path.GetDirectoryName(samplePath) ?? throw new InvalidOperationException(),
-                            Path.GetFileNameWithoutExtension(samplePath) ?? throw new InvalidOperationException());
-                    dict[fullPathExtLess] = samplePaths[k];
+                        Console.WriteLine(ex);
+                        continue;
+                    }
+
+                    // i and k are make the same sound
+                    duplicate = samplesFiltered[k];
                     break;
                 }
+
+                dict[samplesFiltered[i]] = duplicate;
             }
 
-            return dict;
+            return new DictionaryDuplicateSampleMap(dict);
         }
 
         public string[] GetSupportedExtensions() {
-            return new[] { ".wav", ".ogg", ".mp3" };
+            return new[] { ".wav", ".aif", ".aiff", ".ogg", ".mp3" };
         }
     }
 }
