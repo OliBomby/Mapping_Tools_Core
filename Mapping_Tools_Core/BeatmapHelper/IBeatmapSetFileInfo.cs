@@ -1,9 +1,14 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 namespace Mapping_Tools_Core.BeatmapHelper {
-    public interface IBeatmapSetFileInfo {
+    /// <summary>
+    /// Hashable reference to a file in a beatmap set.
+    /// </summary>
+    public interface IBeatmapSetFileInfo : IEquatable<IBeatmapSetFileInfo> {
         /// <summary>
         /// The filename of with file extension.
+        /// This is a relative path from the root directory.
         /// </summary>
         public string Filename { get; }
 
@@ -16,6 +21,6 @@ namespace Mapping_Tools_Core.BeatmapHelper {
         /// Gets a stream with the contents of the file.
         /// </summary>
         /// <returns>The stream with the contents of the file.</returns>
-        public StreamReader GetData();
+        public Stream GetData();
     }
 }

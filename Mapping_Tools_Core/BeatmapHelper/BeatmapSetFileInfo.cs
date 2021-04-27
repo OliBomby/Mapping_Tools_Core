@@ -16,8 +16,22 @@ namespace Mapping_Tools_Core.BeatmapHelper {
             return Path.Join(rootPath, Filename);
         }
 
-        public StreamReader GetData() {
-            return new StreamReader(File.OpenRead(GetFullPath()));
+        public Stream GetData() {
+            return File.OpenRead(GetFullPath());
+        }
+
+        public bool Equals(IBeatmapSetFileInfo other) {
+            return other != null && Filename == other.Filename;
+        }
+
+        public override bool Equals(object obj) {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            return obj.GetType() == GetType() && Equals((IBeatmapSetFileInfo) obj);
+        }
+
+        public override int GetHashCode() {
+            return Filename != null ? Filename.GetHashCode() : 0;
         }
     }
 }

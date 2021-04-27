@@ -2,35 +2,32 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Mapping_Tools_Core.BeatmapHelper;
 
 namespace Mapping_Tools_Core.Audio.DuplicateDetection {
     /// <summary>
     /// Duplicate detector that doesnt actually detect duplicates.
-    /// It just makes the mapping from extension-less path to full path.
+    /// It just creates a <see cref="IDuplicateSampleMap"/> with all the samples and no duplicates.
     /// </summary>
     public class UselessDuplicateSampleDetector : IDuplicateSampleDetector {
-        public Dictionary<string, string> AnalyzeSamples(string dir, out Exception exception, bool includeSubdirectories) {
+        public IDuplicateSampleMap AnalyzeSamples(IEnumerable<IBeatmapSetFileInfo> samples, out Exception exception) {
             var extList = GetSupportedExtensions();
             exception = null;
 
-            List<string> samplePaths = Directory.GetFiles(dir, "*.*", 
-                    includeSubdirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)
-                .Where(n => extList.Contains(Path.GetExtension(n), StringComparer.OrdinalIgnoreCase)).ToList();
+            List<IBeatmapSetFileInfo> samplesFiltered = samples
+                .Where(n => extList.Contains(Path.GetExtension(n.Filename), StringComparer.OrdinalIgnoreCase)).ToList();
 
-            Dictionary<string, string> dict = new Dictionary<string, string>();
+            Dictionary<IBeatmapSetFileInfo, IBeatmapSetFileInfo> dict = new Dictionary<IBeatmapSetFileInfo, IBeatmapSetFileInfo>();
 
-            foreach (var samplePath in samplePaths) {
-                string fullPathExtLess =
-                    Path.Combine(Path.GetDirectoryName(samplePath) ?? throw new InvalidOperationException(),
-                        Path.GetFileNameWithoutExtension(samplePath));
-                dict[fullPathExtLess] = samplePath;
+            foreach (var sample in samplesFiltered) {
+                dict[sample] = sample;
             }
 
-            return dict;
+            return new DictionaryDuplicateSampleMap(dict);
         }
 
         public string[] GetSupportedExtensions() {
-            return new[] { ".wav", ".ogg", ".mp3" };
+            return new[] { ".wav", ".aif", ".aiff", ".ogg", ".mp3" };
         }
     }
 }

@@ -1,16 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using Mapping_Tools_Core.Audio.SampleGeneration;
-using Mapping_Tools_Core.Audio.SampleGeneration.Decorators;
+﻿using Mapping_Tools_Core.Audio.SampleGeneration;
 using NAudio.Vorbis;
 using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
+using System;
+using System.Collections.Generic;
+using System.IO;
 
 namespace Mapping_Tools_Core.Audio {
     public static class Helpers {
-        public static WaveStream OpenSample(string path) {
-            return Path.GetExtension(path) == ".ogg" ? (WaveStream)new VorbisWaveReader(path) : new MediaFoundationReader(path);
+        public static WaveStream OpenSample(string filename, Stream stream) {
+            return Path.GetExtension(filename) switch {
+                ".wav" => new WaveFileReader(stream),
+                ".aiff" => new AiffFileReader(stream),
+                ".aif" => new AiffFileReader(stream),
+                ".mp3" => new Mp3FileReader(stream),
+                ".ogg" => new VorbisWaveReader(stream),
+                _ => throw new ArgumentException("Unrecognized file extension.", nameof(filename))
+            };
         }
 
         public static ISampleProvider SetChannels(ISampleProvider sampleProvider, int channels) {
@@ -33,18 +39,17 @@ namespace Mapping_Tools_Core.Audio {
         /// <returns>Whether the write was a success</returns>
         public static bool CreateWaveFile(string filename, IWaveProvider sourceProvider) {
             try {
-                using (var writer = new WaveFileWriter(filename, sourceProvider.WaveFormat)) {
-                    var buffer = new byte[sourceProvider.WaveFormat.AverageBytesPerSecond * 4];
-                    while (true) {
-                        int bytesRead = sourceProvider.Read(buffer, 0, buffer.Length);
-                        if (bytesRead == 0) {
-                            // end of source provider
-                            break;
-                        }
-
-                        // Write will throw exception if WAV file becomes too large
-                        writer.Write(buffer, 0, bytesRead);
+                using var writer = new WaveFileWriter(filename, sourceProvider.WaveFormat);
+                var buffer = new byte[sourceProvider.WaveFormat.AverageBytesPerSecond * 4];
+                while (true) {
+                    int bytesRead = sourceProvider.Read(buffer, 0, buffer.Length);
+                    if (bytesRead == 0) {
+                        // end of source provider
+                        break;
                     }
+
+                    // Write will throw exception if WAV file becomes too large
+                    writer.Write(buffer, 0, bytesRead);
                 }
 
                 return true;
