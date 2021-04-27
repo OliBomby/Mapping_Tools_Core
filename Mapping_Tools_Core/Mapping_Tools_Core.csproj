@@ -19,6 +19,11 @@
     <Compile Remove="Tools\**" />
     <EmbeddedResource Remove="Tools\**" />
     <None Remove="Tools\**" />
+    <Compile Include="Tools\MapCleanerStuff\IMapCleanerArgs.cs" />
+    <Compile Include="Tools\MapCleanerStuff\IMapCleanerResult.cs" />
+    <Compile Include="Tools\MapCleanerStuff\MapCleaner.cs" />
+    <Compile Include="Tools\MapCleanerStuff\MapCleanerArgs.cs" />
+    <Compile Include="Tools\MapCleanerStuff\MapCleanerResult.cs" />
     <None Include="..\LICENSE.txt">
       <Pack>True</Pack>
       <PackagePath></PackagePath>

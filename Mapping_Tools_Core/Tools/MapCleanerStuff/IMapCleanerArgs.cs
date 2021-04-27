@@ -12,8 +12,6 @@ namespace Mapping_Tools_Core.Tools.MapCleanerStuff {
 
         bool ResnapBookmarks { get; }
 
-        bool RemoveUnusedSamples { get; }
-
         bool RemoveMuting { get; }
 
         bool RemoveUnclickableHitsounds { get; }

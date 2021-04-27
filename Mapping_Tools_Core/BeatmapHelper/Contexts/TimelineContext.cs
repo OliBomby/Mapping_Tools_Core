@@ -25,11 +25,29 @@ namespace Mapping_Tools_Core.BeatmapHelper.Contexts {
         /// Update the associated timeline object with new time information.
         /// </summary>
         /// <param name="hitObject">The hit object to align the timeline objects with.</param>
-        public void UpdateTimelineObjectTimes<T>(T hitObject) where T : IHasRepeats, IHasStartTime {
-            if (hitObject is IHasRepeats hasRepeats && hitObject is IHasStartTime startTime) {
-                for (int i = 0; i < TimelineObjects.Count; i++) {
-                    double time = Math.Floor(startTime.StartTime + hasRepeats.SpanDuration * i);
-                    TimelineObjects[i].Time = time;
+        public void UpdateTimelineObjectTimes<T>(T hitObject) where T : IHasStartTime {
+            switch (hitObject) {
+                case IHasRepeats hasRepeats: {
+                    for (int i = 0; i < TimelineObjects.Count; i++) {
+                        double time = Math.Floor(hitObject.StartTime + hasRepeats.SpanDuration * i);
+                        TimelineObjects[i].Time = time;
+                    }
+                    break;
+                }
+                case IHasDuration hasDuration: {
+                    for (int i = 0; i < TimelineObjects.Count; i++) {
+                        double time = Math.Floor(hitObject.StartTime + hasDuration.Duration / (TimelineObjects.Count - 1) * i);
+                        TimelineObjects[i].Time = time;
+                    }
+                    break;
+                }
+                default: {
+                    // Offset everything to match the start time
+                    var offset = hitObject.StartTime - TimelineObjects[0].Time;
+                    foreach (var tlo in TimelineObjects) {
+                        tlo.Time += offset;
+                    }
+                    break;
                 }
             }
         }

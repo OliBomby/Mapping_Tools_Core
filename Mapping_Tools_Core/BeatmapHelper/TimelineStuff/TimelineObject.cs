@@ -1,12 +1,12 @@
 ﻿using JetBrains.Annotations;
+using Mapping_Tools_Core.Audio.DuplicateDetection;
 using Mapping_Tools_Core.BeatmapHelper.Contexts;
 using Mapping_Tools_Core.BeatmapHelper.Enums;
+using Mapping_Tools_Core.BeatmapHelper.HitObjects;
 using Mapping_Tools_Core.MathUtil;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using Mapping_Tools_Core.BeatmapHelper.HitObjects;
 
 namespace Mapping_Tools_Core.BeatmapHelper.TimelineStuff {
     /// <summary>
@@ -64,7 +64,9 @@ namespace Mapping_Tools_Core.BeatmapHelper.TimelineStuff {
         /// <summary>
         /// The actual sample volume used by this timeline object. Includes <see cref="TimingContext"/>.
         /// </summary>
-        public double FenoSampleVolume => Math.Abs(Hitsounds.Volume) < Precision.DOUBLE_EPSILON? GetContext<TimingContext>().HitsoundTimingPoint.Volume : Hitsounds.Volume;
+        public double FenoSampleVolume => Math.Abs(Hitsounds.Volume) < Precision.DOUBLE_EPSILON || !CanCustoms
+            ? GetContext<TimingContext>().HitsoundTimingPoint.Volume
+            : Hitsounds.Volume;
 
         /// <summary>
         /// Generates a new <see cref="TimelineObject"/>.
@@ -131,68 +133,63 @@ namespace Mapping_Tools_Core.BeatmapHelper.TimelineStuff {
 
         /// <summary>
         /// Grabs the playing filenames of this timeline object.
+        /// Actual playing samples may differ based on the existence of sample files.
         /// </summary>
-        /// <param name="mode">The osu! <see cref="GameMode"/></param>
-        /// <param name="includeDefaults"></param>
+        /// <param name="mode">The gamemode the timeline object is playing in.</param>
+        /// <param name="includeDefaults">Whether to include fictional filenames that represent skin samples.</param>
         /// <returns></returns>
         public IEnumerable<string> GetPlayingFilenames(GameMode mode = GameMode.Standard, bool includeDefaults = true) {
             if (UsesFilename) {
                 yield return Hitsounds.Filename;
-            } else if (includeDefaults || FenoCustomIndex != 0) {
+            } else if (FenoCustomIndex != 0) {
                 foreach (var (sampleSet, hitsound, index) in GetPlayingHitsounds(mode)) {
                     yield return GetFileName(sampleSet, hitsound, index, mode);
+                }
+            } else if (includeDefaults && FenoCustomIndex == 0) {
+                foreach (var (sampleSet, hitsound, _) in GetPlayingHitsounds(mode)) {
+                    yield return GetFileName(sampleSet, hitsound, -1, mode);
                 }
             }
         }
 
         /// <summary>
-        /// Grabs the playing filenames of this timeline object and uses <see cref="firstSamples"/> to get only the first sample that makes the same sound.
+        /// Grabs the playing filenames of this timeline object and uses <see cref="IDuplicateSampleMap"/> to get only the first sample that makes the same sound.
         /// </summary>
-        /// <param name="mode"></param>
-        /// <param name="mapDir"></param>
-        /// <param name="firstSamples"></param>
-        /// <param name="includeDefaults"></param>
+        /// <param name="mode">The gamemode the timeline object is playing in.</param>
+        /// <param name="mapDir">Path from the beatmap set root to the folder containing the beatmap.</param>
+        /// <param name="sampleMap">The analyzed samples.</param>
+        /// <param name="includeDefaults">Whether to include fictional filenames that represent skin samples.</param>
         /// <returns></returns>
-        public IEnumerable<string> GetFirstPlayingFilenames(GameMode mode, string mapDir, Dictionary<string, string> firstSamples, bool includeDefaults=true) {
+        public IEnumerable<string> GetFirstPlayingFilenames(GameMode mode, string mapDir, IDuplicateSampleMap sampleMap, bool includeDefaults = true) {
+            // If the filename is used, only that sample will play and nothing will play if the file doesn't exist
             if (UsesFilename) {
-                string samplePath = Path.Combine(mapDir, Hitsounds.Filename);
-                string fullPathExtLess = Path.Combine(
-                    Path.GetDirectoryName(samplePath) ?? throw new InvalidOperationException(),
-                    Path.GetFileNameWithoutExtension(samplePath));
-
                 // Get the first occurence of this sound to not get duplicated
-                if (firstSamples.Keys.Contains(fullPathExtLess)) {
-                    yield return Path.GetFileName(firstSamples[fullPathExtLess]);
+                string samplePath = Path.Combine(mapDir, Hitsounds.Filename);
+                var firstSample = sampleMap.GetOriginalSample(samplePath);
+
+                if (firstSample != null) {
+                    yield return firstSample.Filename;
                 }
-            } else if (includeDefaults || FenoCustomIndex != 0) {
+            } else if (FenoCustomIndex != 0) {
                 foreach (var (sampleSet, hitsound, index) in GetPlayingHitsounds(mode)) {
-                    var filename = GetFirstIdenticalFilename(sampleSet, hitsound, index, mode, mapDir, firstSamples, includeDefaults);
-                    if (filename != null)
-                        yield return filename;
+                    string filename = GetFileName(sampleSet, hitsound, index, mode);
+                    string samplePath = Path.Combine(mapDir, filename);
+                    var firstSample = sampleMap.GetOriginalSample(samplePath);
+
+                    if (firstSample != null) {
+                        yield return firstSample.Filename;
+                    } else {
+                        // Sample doesn't exist
+                        if (includeDefaults) {
+                            yield return GetFileName(sampleSet, hitsound, -1, mode);
+                        }
+                    }
+                }
+            } else if (FenoCustomIndex == 0 && includeDefaults) {
+                foreach (var (sampleSet, hitsound, _) in GetPlayingHitsounds(mode)) {
+                    yield return GetFileName(sampleSet, hitsound, -1, mode);
                 }
             }
-        }
-
-        private string GetFirstIdenticalFilename(SampleSet sampleSet, Hitsound hitsound, int index, GameMode mode, string mapDir, Dictionary<string, string> firstSamples, bool includeDefaults) {
-            string filename = GetFileName(sampleSet, hitsound, index, mode);
-            string samplePath = Path.Combine(mapDir, filename);
-            string fullPathExtLess = Path.Combine(
-                Path.GetDirectoryName(samplePath) ?? throw new InvalidOperationException(),
-                Path.GetFileNameWithoutExtension(samplePath));
-
-            // Get the first occurence of this sound to not get duplicated
-            if (firstSamples.Keys.Contains(fullPathExtLess)) {
-                if (!UsesFilename) {
-                    return Path.GetFileName(firstSamples[fullPathExtLess]);
-                }
-            } else {
-                // Sample doesn't exist
-                if (!UsesFilename && includeDefaults) {
-                    return GetFileName(sampleSet, hitsound, 0, mode);
-                }
-            }
-
-            return null;
         }
 
         /// <summary>

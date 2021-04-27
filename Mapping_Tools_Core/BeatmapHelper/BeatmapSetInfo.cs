@@ -9,7 +9,7 @@ namespace Mapping_Tools_Core.BeatmapHelper {
     /// Contains all the contents of a beatmap set.
     /// </summary>
     public class BeatmapSetInfo {
-        private static readonly string[] soundExtensions = { ".wav", ".mp3", ".aiff", ".ogg" };
+        private static readonly string[] soundExtensions = { ".wav", ".mp3", ".aif", ".aiff", ".ogg" };
 
         /// <summary>
         /// All the files in this beatmap set.
@@ -35,5 +35,24 @@ namespace Mapping_Tools_Core.BeatmapHelper {
         [CanBeNull]
         public IEnumerable<IBeatmapSetFileInfo> SoundFiles => Files?.Where(f =>
             soundExtensions.Contains(Path.GetExtension(f.Filename), StringComparer.OrdinalIgnoreCase));
+
+        /// <summary>
+        /// Gets the relative path to a beatmap in the beatmap set.
+        /// </summary>
+        /// <param name="beatmap">The beatmap to get the relative path of.</param>
+        /// <returns>The relative path to the beatmap or null.</returns>
+        [CanBeNull]
+        public string GetRelativePath(IBeatmap beatmap) {
+            if (Beatmaps == null)
+                return null;
+
+            foreach (var (path, beatmap1) in Beatmaps) {
+                if (beatmap1.Equals(beatmap)) {
+                    return path;
+                }
+            }
+
+            return null;
+        }
     }
 }
