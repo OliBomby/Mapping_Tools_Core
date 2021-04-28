@@ -3,7 +3,7 @@
 namespace Mapping_Tools_Core.Exceptions
 {
     [Serializable]
-    class BeatmapParsingException : Exception
+    public class BeatmapParsingException : Exception
     {
         public BeatmapParsingException() {
 
