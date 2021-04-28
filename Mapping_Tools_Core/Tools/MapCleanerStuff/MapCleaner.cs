@@ -10,12 +10,14 @@ using Mapping_Tools_Core.BeatmapHelper.TimingStuff;
 using Mapping_Tools_Core.BeatmapHelper.Types;
 using Mapping_Tools_Core.MathUtil;
 using Mapping_Tools_Core.ToolHelpers;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
 namespace Mapping_Tools_Core.Tools.MapCleanerStuff {
+    /// <summary>
+    /// Mapping Tool for cleaning beatmaps, resnapping hit objects, and restructuring greenlines.
+    /// </summary>
     public class MapCleaner {
         /// <summary>
         /// Delegate for reporting progress updates if Map Cleaner is running async.
@@ -30,7 +32,7 @@ namespace Mapping_Tools_Core.Tools.MapCleanerStuff {
         /// <param name="beatmap">The beatmap that is going to be cleaned.</param>
         /// <param name="args">The arguments for how to clean the beatmap.</param>
         /// <param name="progressUpdater">The BackgroundWorker for updating progress.</param>
-        /// <returns>Number of resnapped objects.</returns>
+        /// <returns>Number of resnapped objects and removed greenlines.</returns>
         public static IMapCleanerResult CleanMap(IBeatmap beatmap, IMapCleanerArgs args, ProgressUpdateDelegate progressUpdater = null) {
             UpdateProgress(progressUpdater, 0);
 
