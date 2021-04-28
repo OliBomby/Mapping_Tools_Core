@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("Mapping_Tools_Core")]
-[assembly: AssemblyDescription("osu! mapping utility library built for Mapping Tools for osu!")]
+[assembly: AssemblyDescription("osu! mapping utility library built for Mapping Tools.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Mapping Tools Core")]

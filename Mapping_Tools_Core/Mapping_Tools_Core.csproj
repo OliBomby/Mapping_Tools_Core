@@ -6,6 +6,7 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PackageTags>osu! mapping tools reader writer map cleaner transformer timing hitsounds copier helper</PackageTags>
+    <Description>osu! mapping utility library built for Mapping Tools.</Description>
     <Authors>OliBomby</Authors>
     <PackageId>MappingTools.Core</PackageId>
     <RepositoryUrl>https://github.com/OliBomby/Mapping_Tools_Core</RepositoryUrl>
