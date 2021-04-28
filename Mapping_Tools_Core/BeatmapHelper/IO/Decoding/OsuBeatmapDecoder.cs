@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Mapping_Tools_Core.BeatmapHelper.ComboColours;
 using Mapping_Tools_Core.BeatmapHelper.Enums;
 using Mapping_Tools_Core.BeatmapHelper.HitObjects;
@@ -23,7 +24,7 @@ namespace Mapping_Tools_Core.BeatmapHelper.IO.Decoding {
         }
 
         public void Decode(Beatmap beatmap, string code) {
-            var lines = code.Split(Environment.NewLine);
+            var lines = code.Split('\n').Select(l => l.Trim('\r')).ToList();
 
             // Get the beatmap version
             string headerInfo = lines[0];

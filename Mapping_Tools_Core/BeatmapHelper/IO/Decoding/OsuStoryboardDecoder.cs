@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Mapping_Tools_Core.BeatmapHelper.Events;
 using static Mapping_Tools_Core.BeatmapHelper.IO.FileFormatHelper;
 
 namespace Mapping_Tools_Core.BeatmapHelper.IO.Decoding {
     public class OsuStoryboardDecoder : IDecoder<Storyboard> {
         public void Decode(Storyboard obj, string code) {
-            var lines = code.Split(Environment.NewLine);
+            var lines = code.Split('\n').Select(l => l.Trim('\r')).ToList();
 
             // Load up all the stuff
             IEnumerable<string> backgroundAndVideoEventsLines = GetCategoryLines(lines, "//Background and Video events", new[] { "[", "//" });
