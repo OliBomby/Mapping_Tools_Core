@@ -1,22 +1,19 @@
 ﻿using Mapping_Tools_Core.Audio.DuplicateDetection;
 using Mapping_Tools_Core.BeatmapHelper;
+using Mapping_Tools_Core.BeatmapHelper.Contexts;
 using Mapping_Tools_Core.BeatmapHelper.Enums;
-using Mapping_Tools_Core.BeatmapHelper.Events;
 using Mapping_Tools_Core.BeatmapHelper.HitObjects;
-using Mapping_Tools_Core.BeatmapHelper.IO.Editor;
+using Mapping_Tools_Core.BeatmapHelper.HitObjects.Objects;
 using Mapping_Tools_Core.BeatmapHelper.TimelineStuff;
+using Mapping_Tools_Core.BeatmapHelper.TimelineStuff.TimelineObjects;
 using Mapping_Tools_Core.BeatmapHelper.TimingStuff;
+using Mapping_Tools_Core.BeatmapHelper.Types;
 using Mapping_Tools_Core.MathUtil;
 using Mapping_Tools_Core.ToolHelpers;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
-using Mapping_Tools_Core.BeatmapHelper.Contexts;
-using Mapping_Tools_Core.BeatmapHelper.HitObjects.Objects;
-using Mapping_Tools_Core.BeatmapHelper.TimelineStuff.TimelineObjects;
-using Mapping_Tools_Core.BeatmapHelper.Types;
 
 namespace Mapping_Tools_Core.Tools.MapCleanerStuff {
     public class MapCleaner {
