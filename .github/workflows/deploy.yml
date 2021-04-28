@@ -4,8 +4,6 @@ on:
   push:
     tags:
       - "v*.*.*"
-    branches:
-      - master
 
 jobs:
   publish:
@@ -25,13 +23,6 @@ jobs:
           
       - name: Change version property in csproj 
         run: sed -i 's/<Version>\b[0-9]*.\b[0-9]*.\b[0-9]*<\/Version>/<Version>${{ steps.get_version.outputs.version-without-v }}<\/Version>/g' Mapping_Tools_Core/Mapping_Tools_Core.csproj
-          
-      - name: generate release
-        uses: "marvinpinto/action-automatic-releases@latest"
-        with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          prerelease: false
-          automatic_release_tag: ${{ steps.get_version.outputs.version }}
           
       # Publish
       - name: publish on version change
@@ -66,6 +57,14 @@ jobs:
           # NUGET_SOURCE: https://api.nuget.org
 
           # Flag to toggle pushing symbols along with nuget package to the server, disabled by default
-          # INCLUDE_SYMBOLS: false
+          INCLUDE_SYMBOLS: true
+          
+      - name: generate release
+        uses: "marvinpinto/action-automatic-releases@latest"
+        if: steps.publish_nuget.conclusion == 'success'
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          prerelease: false
+          automatic_release_tag: ${{ steps.get_version.outputs.version }}
 
 
