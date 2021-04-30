@@ -1,4 +1,5 @@
-﻿using Mapping_Tools_Core.Audio.DuplicateDetection;
+﻿using System;
+using Mapping_Tools_Core.Audio.DuplicateDetection;
 using Mapping_Tools_Core.BeatmapHelper;
 using Mapping_Tools_Core.BeatmapHelper.Contexts;
 using Mapping_Tools_Core.BeatmapHelper.Enums;
@@ -45,11 +46,10 @@ namespace Mapping_Tools_Core.Tools.MapCleanerStuff {
             string containingFolderPath = string.Empty;
             if (beatmap.BeatmapSet != null) {
                 sampleComparer = new MonolithicDuplicateSampleDetector().AnalyzeSamples(beatmap.BeatmapSet.SoundFiles, out _);
-                containingFolderPath = Path.GetDirectoryName(beatmap.GetBeatmapSetRelativePath());
+                containingFolderPath = Path.GetDirectoryName(beatmap.GetBeatmapSetRelativePath()) ?? string.Empty;
             }
 
             int objectsResnapped = 0;
-            int samplesRemoved = 0;
 
             // Collect timeline objects before resnapping, so the timingpoints
             // are still valid and the tlo's get the correct hitsounds and offsets.
@@ -233,6 +233,10 @@ namespace Mapping_Tools_Core.Tools.MapCleanerStuff {
                     bool ind = !tlo.UsesFilename && !doUnmute;  // Index doesnt have to change if custom is overridden by Filename
                     bool vol = !doUnmute;  // Remove volume change muted
 
+                    tp.Offset = tlo.Time;
+                    tp.SampleIndex = tlo.FenoCustomIndex;
+                    tp.Volume = doMute ? 5 : tlo.FenoSampleVolume;
+
                     // Index doesn't have to change if the sample it plays currently is the same as the sample it would play with the previous index
                     if (ind && sampleComparer != null) {
                         // Get the samples which the timeline object originally plays
@@ -264,15 +268,14 @@ namespace Mapping_Tools_Core.Tools.MapCleanerStuff {
                         tlo.SetContext(timingContext);
                     }
 
-                    tp.Offset = tlo.Time;
-                    tp.SampleIndex = tlo.FenoCustomIndex;
-                    tp.Volume = doMute ? 5 : tlo.FenoSampleVolume;
-
                     controlChanges.Add(new ControlChange(tp, volume: vol, index: ind));
                 }
             }
             UpdateProgress(progressUpdater, 85);
             
+            // Save the old number of timing points
+            var oldCount = timing.Count;
+
             // Replace the old timingpoints
             timing.Clear();
             ControlChange.ApplyChanges(timing, controlChanges);
@@ -281,7 +284,7 @@ namespace Mapping_Tools_Core.Tools.MapCleanerStuff {
             // Complete progressbar
             UpdateProgress(progressUpdater, 100);
 
-            return new MapCleanerResult(objectsResnapped, samplesRemoved);
+            return new MapCleanerResult(objectsResnapped, oldCount - timing.Count);
         }
 
         private static void UpdateProgress(ProgressUpdateDelegate progressUpdater, int progress) {

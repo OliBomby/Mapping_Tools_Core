@@ -21,6 +21,9 @@ namespace Mapping_Tools_Core.Audio.DuplicateDetection {
         }
 
         public IBeatmapSetFileInfo GetOriginalSample(IBeatmapSetFileInfo sample) {
+            if (sample == null)
+                return null;
+
             return Map.TryGetValue(sample, out var original) ? original : null;
         }
 
@@ -29,7 +32,7 @@ namespace Mapping_Tools_Core.Audio.DuplicateDetection {
         }
 
         public bool SampleExists(IBeatmapSetFileInfo sample) {
-            return Map.ContainsKey(sample);
+            return sample != null && Map.ContainsKey(sample);
         }
 
         public bool SampleExists(string filename) {

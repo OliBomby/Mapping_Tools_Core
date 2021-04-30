@@ -1,5 +1,6 @@
 ﻿using System;
 using JetBrains.Annotations;
+using Mapping_Tools_Core.BeatmapHelper.Events;
 using Mapping_Tools_Core.BeatmapHelper.HitObjects;
 using Mapping_Tools_Core.BeatmapHelper.HitObjects.Objects;
 
@@ -21,10 +22,11 @@ namespace Mapping_Tools_Core.BeatmapHelper.TimelineStuff.TimelineObjects {
         }
 
         public override void HitoundsToOrigin() {
-            if (Origin is Slider slider) {
-                Hitsounds.CopyTo(slider.GetNodeSamples(NodeIndex));
-            }
-            throw new InvalidOperationException($"Invalid origin. Can not assign slider node hitsounds to a {Origin}.");
+            if (!(Origin is Slider slider))
+                throw new InvalidOperationException(
+                    $"Invalid origin. Can not assign slider node hitsounds to a {Origin?.GetType()}: {Origin}.");
+
+            Hitsounds.CopyTo(slider.GetNodeSamples(NodeIndex));
         }
     }
 }

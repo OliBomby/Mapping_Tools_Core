@@ -56,6 +56,15 @@ namespace Mapping_Tools_Core.BeatmapHelper.TimelineStuff {
         }
 
         /// <summary>
+        /// Finds the timeline objects that is closest to the given time.
+        /// </summary>
+        /// <param name="time">The target time.</param>
+        /// <returns></returns>
+        public TimelineObject GetNearestTlo(double time) {
+            return GetNearestTlo(time, o => true);
+        }
+
+        /// <summary>
         /// Finds the timeline objects that is closest to the given time and matches the predicate.
         /// </summary>
         /// <param name="time">The target time.</param>

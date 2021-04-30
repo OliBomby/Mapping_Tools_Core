@@ -52,9 +52,14 @@ namespace Mapping_Tools_Core.Audio.DuplicateDetection {
                         }
 
                         bool equal = true;
-                        while (thisWave.CanRead) {
-                            thisWave.Read(thisBuffer, 0, bufferSize);
+                        while (true) {
+                            var bytesRead = thisWave.Read(thisBuffer, 0, bufferSize);
                             otherWave.Read(otherBuffer, 0, bufferSize);
+
+                            if (bytesRead == 0) {
+                                // end of source provider
+                                break;
+                            }
 
                             if (!thisBuffer.SequenceEqual(otherBuffer)) {
                                 equal = false;
