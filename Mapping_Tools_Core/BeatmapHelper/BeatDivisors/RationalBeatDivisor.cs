@@ -6,12 +6,12 @@ namespace Mapping_Tools_Core.BeatmapHelper.BeatDivisors {
         /// <summary>
         /// The number above the line in a vulgar fraction showing how many of the parts indicated by the denominator are taken, for example, 2 in 2/3.
         /// </summary>
-        public readonly int Numerator;
+        public int Numerator { get; }
 
         /// <summary>
         /// The number below the line in a vulgar fraction; a divisor.
         /// </summary>
-        public readonly int Denominator;
+        public int Denominator { get; }
 
         public RationalBeatDivisor(int denominator) {
             Numerator = 1;
