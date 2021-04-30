@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Mapping_Tools_Core.BeatmapHelper.ComboColours;
 using Mapping_Tools_Core.BeatmapHelper.Enums;
 using Mapping_Tools_Core.BeatmapHelper.HitObjects;
@@ -48,7 +49,7 @@ namespace Mapping_Tools_Core.BeatmapHelper.IO.Decoding {
             DecodeSection(beatmap, difficultyLines, DecodeDifficulty);
 
             foreach (string line in colourLines) {
-                if (line.Substring(0, 5) == "Combo") {
+                if (Regex.IsMatch(line.Substring(0, 6), @"^Combo[1-8]$")) {
                     beatmap.ComboColoursList.Add(new ComboColour(line));
                 } else {
                     beatmap.SpecialColours[SplitKeyValue(line).Item1] = new ComboColour(line);
