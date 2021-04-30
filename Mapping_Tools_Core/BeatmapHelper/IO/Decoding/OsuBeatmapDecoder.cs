@@ -6,6 +6,7 @@ using Mapping_Tools_Core.BeatmapHelper.Enums;
 using Mapping_Tools_Core.BeatmapHelper.HitObjects;
 using Mapping_Tools_Core.BeatmapHelper.IO.Decoding.HitObjects;
 using Mapping_Tools_Core.BeatmapHelper.TimingStuff;
+using Mapping_Tools_Core.BeatmapHelper.Types;
 using Mapping_Tools_Core.Exceptions;
 using static Mapping_Tools_Core.BeatmapHelper.IO.FileFormatHelper;
 
@@ -63,6 +64,12 @@ namespace Mapping_Tools_Core.BeatmapHelper.IO.Decoding {
 
             // Set the timing object
             beatmap.BeatmapTiming = new Timing(beatmap.Difficulty.SliderMultiplier);
+
+            // Pass the default fallback values from the headers to the timing point decoder
+            if (timingPointDecoder is IConfigurableTimingPointDecoder configurable) {
+                configurable.DefaultSampleSet = beatmap.General.SampleSet;
+                configurable.DefaultVolume = beatmap.General.SampleVolume;
+            }
 
             foreach (var timingLine in timingLines) {
                 beatmap.BeatmapTiming.Add(timingPointDecoder.Decode(timingLine));

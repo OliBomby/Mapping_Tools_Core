@@ -1,7 +1,7 @@
 ﻿using Mapping_Tools_Core.Tools.ComboColourStudio;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Mapping_Tools_Core_Tests.ComboColourStudio {
+namespace Mapping_Tools_Core_Tests.Tools.ComboColourStudio {
     [TestClass]
     public class ColourHaxImporterTests {
         [TestMethod]
