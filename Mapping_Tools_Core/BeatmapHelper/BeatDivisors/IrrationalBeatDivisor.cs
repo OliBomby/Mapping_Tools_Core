@@ -1,7 +1,10 @@
-﻿namespace Mapping_Tools_Core.BeatmapHelper.BeatDivisors {
-    public class IrrationalBeatDivisor : IBeatDivisor {
-        public readonly double Value;
+﻿using System.Text.Json.Serialization;
 
+namespace Mapping_Tools_Core.BeatmapHelper.BeatDivisors {
+    public class IrrationalBeatDivisor : IBeatDivisor {
+        public double Value { get; }
+
+        [JsonConstructor]
         public IrrationalBeatDivisor(double value) {
             Value = value;
         }

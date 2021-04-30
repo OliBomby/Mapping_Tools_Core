@@ -11,10 +11,11 @@ namespace Mapping_Tools_Core.BeatmapHelper.TimelineStuff.TimelineObjects {
         public SpinnerTail(double time, [NotNull] HitSampleInfo hitsounds) : base(time, hitsounds) { }
 
         public override void HitoundsToOrigin() {
-            if (Origin is Spinner) {
-                Hitsounds.CopyTo(Origin.Hitsounds);
-            }
-            throw new InvalidOperationException($"Invalid origin. Can not assign spinner tail hitsounds to a {Origin}.");
+            if (!(Origin is Spinner))
+                throw new InvalidOperationException(
+                    $"Invalid origin. Can not assign spinner tail hitsounds to a {Origin?.GetType()}: {Origin}.");
+
+            Hitsounds.CopyTo(Origin.Hitsounds);
         }
     }
 }

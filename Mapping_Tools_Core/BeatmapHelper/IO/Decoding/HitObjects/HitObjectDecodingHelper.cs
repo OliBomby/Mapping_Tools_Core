@@ -9,7 +9,7 @@ using Mapping_Tools_Core.MathUtil;
 namespace Mapping_Tools_Core.BeatmapHelper.IO.Decoding.HitObjects {
     public static class HitObjectDecodingHelper {
         public static void DecodeSharedProperties(HitObject hitObject, string[] values) {
-            if (values.Length <= 4)
+            if (values.Length < 5)
                 throw new BeatmapParsingException("Hit object is missing values.", JoinLine(values));
 
             if (FileFormatHelper.TryParseDouble(values[0], out var x) && FileFormatHelper.TryParseDouble(values[1], out var y))
@@ -40,6 +40,9 @@ namespace Mapping_Tools_Core.BeatmapHelper.IO.Decoding.HitObjects {
         }
 
         public static void DecodeExtras(HitObject hitObject, string extras) {
+            if (string.IsNullOrWhiteSpace(extras))
+                return;
+
             // Extras has an extra value at the start if it's a hold note
             var split = extras.Split(':');
             var i = 0;
@@ -48,6 +51,9 @@ namespace Mapping_Tools_Core.BeatmapHelper.IO.Decoding.HitObjects {
                     holdNote.SetEndTime(et);
                 else throw new BeatmapParsingException("Failed to parse end time of hold note.", extras);
             }
+
+            if (i >= split.Length)
+                return;
 
             if (FileFormatHelper.TryParseInt(split[i++], out var ss))
                 hitObject.Hitsounds.SampleSet = (SampleSet)ss;
