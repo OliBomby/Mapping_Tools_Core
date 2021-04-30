@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using JetBrains.Annotations;
 using Mapping_Tools_Core.BeatmapHelper.Contexts;
 using Mapping_Tools_Core.BeatmapHelper.HitObjects.Objects;
+using Mapping_Tools_Core.BeatmapHelper.IO.Encoding.HitObjects;
 using Mapping_Tools_Core.BeatmapHelper.Types;
 using Mapping_Tools_Core.MathUtil;
 
@@ -109,8 +110,12 @@ namespace Mapping_Tools_Core.BeatmapHelper.HitObjects {
             return NewCombo || this is Spinner || previousHitObject == null || previousHitObject is Spinner;
         }
 
+        /// <summary>
+        /// Returns a string representation of this hit object.
+        /// </summary>
+        /// <returns>A string representation of this hit object</returns>
         public override string ToString() {
-            throw new NotImplementedException();
+            return new HitObjectEncoder().Encode(this);
         }
 
         /// <summary>

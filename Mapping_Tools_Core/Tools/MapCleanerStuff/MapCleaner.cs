@@ -161,6 +161,7 @@ namespace Mapping_Tools_Core.Tools.MapCleanerStuff {
                 if (ho is Slider) {
                     TimingPoint tp = timingContext.TimingPoint.Copy();
                     tp.Offset = ho.StartTime;
+                    tp.Uninherited = false;
                     tp.SetSliderVelocity(timingContext.SliderVelocity);
                     controlChanges.Add(new ControlChange(tp, mpb: true));
                 }
