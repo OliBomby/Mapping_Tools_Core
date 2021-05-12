@@ -2,18 +2,34 @@
 using System.Collections.Generic;
 using System.Linq;
 using Mapping_Tools_Core.BeatmapHelper;
+using Mapping_Tools_Core.BeatmapHelper.Contexts;
+using Mapping_Tools_Core.BeatmapHelper.HitObjects;
+using Mapping_Tools_Core.BeatmapHelper.HitObjects.Objects;
 using Mapping_Tools_Core.MathUtil;
 
 namespace Mapping_Tools_Core.Tools.ComboColourStudio {
+    /// <summary>
+    /// Class for importing custom combo colouring (colour hax).
+    /// </summary>
     public class ColourHaxImporter {
+        /// <summary>
+        /// The maximum allowed combo length for burst-type colour points.
+        /// </summary>
         public int MaxBurstLength { get; set; } = 1;
 
-        public ComboColourProject ImportColourHax(Beatmap beatmap) {
+        /// <summary>
+        /// Imports custom combo colouring from a beatmap and creates a new <see cref="IComboColourProject"/> which represents all the colour haxing.
+        /// </summary>
+        /// <param name="beatmap"></param>
+        /// <returns></returns>
+        public IComboColourProject ImportColourHax(IBeatmap beatmap) {
             var comboColours = beatmap.ComboColoursList;
             var colourPoints = new List<IColourPoint>();
 
             // Get all the hit objects which can colorhax. AKA new combos and not spinners
-            var colorHaxObjects = beatmap.HitObjects.Where(o => o.ActualNewCombo && !o.IsSpinner).ToArray();
+            var colorHaxObjects = beatmap.HitObjects.Where(o =>
+                    o.HasContext<ComboContext>() && o.GetContext<ComboContext>().ActualNewCombo && !(o is Spinner))
+                .ToArray();
 
             // Get the array with all the lengths of sequences that are going to be checked
             var sequenceLengthChecks = Enumerable.Range(1, comboColours.Count * 2 + 2).ToArray();
@@ -24,7 +40,7 @@ namespace Mapping_Tools_Core.Tools.ComboColourStudio {
             while (sequenceStartIndex < colorHaxObjects.Length) {
                 var firstComboHitObject = colorHaxObjects[sequenceStartIndex];
 
-                var bestSequence = GetBestSequenceAtIndex(
+                int[] bestSequence = GetBestSequenceAtIndex(
                     sequenceStartIndex,
                     3,
                     colorHaxObjects,
@@ -66,7 +82,13 @@ namespace Mapping_Tools_Core.Tools.ComboColourStudio {
             return new ComboColourProject(colourPoints, comboColours, MaxBurstLength);
         }
 
-        private Tuple<int[], int, double> GetBestSequenceAtIndex(int sequenceStartIndex, int depth, IReadOnlyList<HitObject> colorHaxObjects, Beatmap beatmap, int[] sequenceLengthChecks, bool lastBurst, int[] lastNormalSequence) {
+        private Tuple<int[], int, double> GetBestSequenceAtIndex(int sequenceStartIndex,
+            int depth,
+            IReadOnlyList<HitObject> colorHaxObjects,
+            IBeatmap beatmap,
+            int[] sequenceLengthChecks,
+            bool lastBurst,
+            int[] lastNormalSequence) {
             if (sequenceStartIndex >= colorHaxObjects.Count) {
                 return null;
             }
@@ -138,6 +160,12 @@ namespace Mapping_Tools_Core.Tools.ComboColourStudio {
             return new Tuple<int[], int, double>(bestSequence, bestContribution, bestCost);
         }
 
+        /// <summary>
+        /// Checks whether the bigger sequence of integers starts with the other sequence of integers.
+        /// </summary>
+        /// <param name="sequence">The sequence of integers to be contained in the bigger sequence.</param>
+        /// <param name="biggerSequence">The sequence that starts with the other sequence.</param>
+        /// <returns>Whether the bigger sequence of integers starts with the other sequence of integers</returns>
         public static bool IsSubSequence(int[] sequence, int[] biggerSequence) {
             if (biggerSequence == null || sequence.Length > biggerSequence.Length) {
                 return false;
@@ -146,10 +174,10 @@ namespace Mapping_Tools_Core.Tools.ComboColourStudio {
             return !sequence.Where((t, i) => t != biggerSequence[i]).Any();
         }
 
-        private static int GetComboLength(List<HitObject> hitObjects, HitObject firstHitObject) {
+        private static int GetComboLength(IList<HitObject> hitObjects, HitObject firstHitObject) {
             var index = hitObjects.IndexOf(firstHitObject);
             var count = 1;
-            while (++index < hitObjects.Count && !hitObjects[index].ActualNewCombo) {
+            while (++index < hitObjects.Count && !hitObjects[index].GetContext<ComboContext>().ActualNewCombo) {
                 count++;
             }
 
@@ -164,7 +192,7 @@ namespace Mapping_Tools_Core.Tools.ComboColourStudio {
                     return null;
                 }
 
-                colourSequence[i] = hitObjects[startIndex + i].ColourIndex;
+                colourSequence[i] = hitObjects[startIndex + i].GetContext<ComboContext>().ColourIndex;
             }
 
             return colourSequence;
@@ -179,7 +207,7 @@ namespace Mapping_Tools_Core.Tools.ComboColourStudio {
             int sequenceIndex = 0;
             int score = 0;
 
-            while (index < hitObjects.Count && hitObjects[index].ColourIndex == colourSequence[sequenceIndex]) {
+            while (index < hitObjects.Count && hitObjects[index].GetContext<ComboContext>().ColourIndex == colourSequence[sequenceIndex]) {
                 score++;
                 index++;
                 sequenceIndex = MathHelper.Mod(sequenceIndex + 1, colourSequence.Count);

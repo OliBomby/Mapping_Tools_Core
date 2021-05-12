@@ -2,7 +2,10 @@
 using System.Diagnostics.CodeAnalysis;
 
 namespace Mapping_Tools_Core.BeatmapHelper.ComboColours {
-    public interface IComboColourCollection {
+    /// <summary>
+    /// Interface that indicates an object has colour colours.
+    /// </summary>
+    public interface IHasComboColours {
         /// <summary>
         /// Contains all the basic combo colours.
         /// </summary>
