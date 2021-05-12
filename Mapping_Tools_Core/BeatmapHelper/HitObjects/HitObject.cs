@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using JetBrains.Annotations;
 using Mapping_Tools_Core.BeatmapHelper.Contexts;
+using Mapping_Tools_Core.BeatmapHelper.Events;
 using Mapping_Tools_Core.BeatmapHelper.HitObjects.Objects;
 using Mapping_Tools_Core.BeatmapHelper.IO.Encoding.HitObjects;
 using Mapping_Tools_Core.BeatmapHelper.Types;
@@ -102,12 +104,17 @@ namespace Mapping_Tools_Core.BeatmapHelper.HitObjects {
         }
 
         /// <summary>
-        /// Determines whether this object has a new combo actual.
+        /// Determines whether this object actually has a new combo.
         /// </summary>
         /// <param name="previousHitObject">The hit object that comes directly before this hit object.</param>
+        /// <param name="breaks">All the break periods in the beatmap.</param>
         /// <returns>Whether this hit object actually has a new combo.</returns>
-        public bool IsActualNewCombo(HitObject previousHitObject) {
-            return NewCombo || this is Spinner || previousHitObject == null || previousHitObject is Spinner;
+        public bool IsActualNewCombo([CanBeNull] HitObject previousHitObject, IEnumerable<Break> breaks) {
+            return NewCombo ||
+                   this is Spinner ||
+                   previousHitObject == null ||
+                   previousHitObject is Spinner ||
+                   breaks.Any(b => previousHitObject.StartTime <= b.EndTime && Precision.DefinitelySmaller(b.EndTime, StartTime));
         }
 
         /// <summary>

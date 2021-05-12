@@ -16,7 +16,7 @@ using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 
 namespace Mapping_Tools_Core.BeatmapHelper {
-    public interface IBeatmap : IComboColourCollection {
+    public interface IBeatmap : IHasComboColours {
         /// <summary>
         /// The version number of the beatmap.
         /// <para/>
@@ -307,7 +307,7 @@ namespace Mapping_Tools_Core.BeatmapHelper {
                 : beatmap.ComboColoursList.ToArray();
 
             foreach (var hitObject in beatmap.HitObjects) {
-                var actualNewCombo = hitObject.IsActualNewCombo(previousHitObject);
+                var actualNewCombo = hitObject.IsActualNewCombo(previousHitObject, beatmap.Storyboard.BreakPeriods);
 
                 if (actualNewCombo) {
                     var colourIncrement = hitObject.ComboIncrement + hitObject.ComboSkip;
@@ -339,7 +339,7 @@ namespace Mapping_Tools_Core.BeatmapHelper {
                 : beatmap.ComboColoursList.ToArray();
 
             foreach (var hitObject in beatmap.HitObjects) {
-                bool newCombo = hitObject.IsActualNewCombo(previousHitObject);
+                bool newCombo = hitObject.IsActualNewCombo(previousHitObject, beatmap.Storyboard.BreakPeriods);
 
                 if (newCombo) {
                     int colourIncrement = hitObject.ComboIncrement;

@@ -1,12 +1,25 @@
-﻿using System;
+﻿using Mapping_Tools_Core.BeatmapHelper;
+using Mapping_Tools_Core.BeatmapHelper.ComboColours;
+using Mapping_Tools_Core.BeatmapHelper.HitObjects;
+using Mapping_Tools_Core.BeatmapHelper.HitObjects.Objects;
+using Mapping_Tools_Core.MathUtil;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using Mapping_Tools_Core.BeatmapHelper;
-using Mapping_Tools_Core.MathUtil;
+using Mapping_Tools_Core.BeatmapHelper.Contexts;
 
 namespace Mapping_Tools_Core.Tools.ComboColourStudio {
+    /// <summary>
+    /// Class for exporting combo colour information from <see cref="IComboColourProject"/>.
+    /// </summary>
     public class ColourHaxExporter {
-        public static void ExportColourHax(IComboColourProject project, Beatmap beatmap) {
+        /// <summary>
+        /// Exports the combo colour information from the <see cref="IComboColourProject"/> to the <see cref="IBeatmap"/>.
+        /// Combo context in the beatmap's hit objects is necessary for this operation.
+        /// </summary>
+        /// <param name="project">The combo colour project to get combo colour information from.</param>
+        /// <param name="beatmap">The beatmap to export combo colour information to.</param>
+        public static void ExportColourHax(IComboColourProject project, IBeatmap beatmap) {
             var orderedColourPoints = project.ColourPoints.OrderBy(o => o.Time).ToList();
             var comboColours = project.ComboColours.ToList();
 
@@ -19,12 +32,16 @@ namespace Mapping_Tools_Core.Tools.ComboColourStudio {
                 var lastColourPoint = orderedColourPoints[0];
                 int lastColourIndex = 0;
                 var exceptions = new List<IColourPoint>();
-                foreach (var newCombo in beatmap.HitObjects.Where(o => o.ActualNewCombo && !o.IsSpinner)) {
-                    int comboLength = GetComboLength(newCombo, beatmap.HitObjects);
-                    //Console.WriteLine(comboLength);
+                foreach (var ho in beatmap.HitObjects) {
+                    // Check if the hit object has actually a new combo
+                    if (ho is Spinner || !ho.HasContext<ComboContext>() || !ho.GetContext<ComboContext>().ActualNewCombo) {
+                        continue;
+                    }
+
+                    int comboLength = GetComboLength(ho, beatmap.HitObjects);
 
                     // Get the colour point for this new combo
-                    var colourPoint = GetColourPointAtTime(orderedColourPoints, newCombo.StartTime, exceptions, comboLength <= project.MaxBurstLength);
+                    var colourPoint = GetColourPointAtTime(orderedColourPoints, ho.StartTime, exceptions, comboLength <= project.MaxBurstLength);
                     var colourSequence = colourPoint.ColourSequence.ToList();
 
                     // Add the colour point to the exceptions so it doesnt get used again
@@ -47,9 +64,6 @@ namespace Mapping_Tools_Core.Tools.ComboColourStudio {
                         // If the colour point changed try going back to index 0
                         lastColourPointColourIndex == 0 && colourSequence.Count > 1 ? 1 : 0;
 
-                    //Console.WriteLine("colourPointColourIndex: " + colourPointColourIndex);
-                    //Console.WriteLine("colourPointColour: " + colourPoint.ColourSequence[colourPointColourIndex].Name);
-
                     // Find the combo index of the chosen colour in the sequence
                     // Check if the colourSequence count is 0 to prevent an out-of-range exception
                     var colourIndex = colourSequence.Count == 0 ? MathHelper.Mod(lastColourIndex + 1, comboColours.Count) :
@@ -59,19 +73,15 @@ namespace Mapping_Tools_Core.Tools.ComboColourStudio {
                         throw new ArgumentException($"Can not use colour {colourSequence[colourPointColourIndex]} of colour point at offset {colourPoint.Time} because it does not exist in the combo colours.");
                     }
 
-                    //Console.WriteLine("colourIndex: " + colourIndex);
-
                     var comboIncrease = MathHelper.Mod(colourIndex - lastColourIndex, comboColours.Count);
 
                     // Do -1 combo skip since it always does +1 combo colour for each new combo which is not on a spinner
-                    newCombo.ComboSkip = MathHelper.Mod(comboIncrease - 1, comboColours.Count);
+                    ho.ComboSkip = MathHelper.Mod(comboIncrease - 1, comboColours.Count);
 
                     // Set new combo to true for the case this is the first object and new combo is false
-                    if (!newCombo.NewCombo && newCombo.ComboSkip != 0) {
-                        newCombo.NewCombo = true;
+                    if (!ho.NewCombo && ho.ComboSkip != 0) {
+                        ho.NewCombo = true;
                     }
-
-                    //Console.WriteLine("comboSkip: " + newCombo.ComboSkip);
 
                     lastColourPointColourIndex = colourPointColourIndex;
                     lastColourPoint = colourPoint;
@@ -90,7 +100,7 @@ namespace Mapping_Tools_Core.Tools.ComboColourStudio {
 
             while (++index < hitObjects.Count) {
                 var hitObject = hitObjects[index];
-                if (hitObject.NewCombo) {
+                if (hitObject.GetContext<ComboContext>().ActualNewCombo) {
                     return count;
                 }
 

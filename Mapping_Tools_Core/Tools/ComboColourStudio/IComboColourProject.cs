@@ -1,7 +1,9 @@
-﻿using Mapping_Tools_Core.BeatmapHelper;
+﻿using Mapping_Tools_Core.BeatmapHelper.ComboColours;
 
 namespace Mapping_Tools_Core.Tools.ComboColourStudio {
-    public interface IComboColourProject : IComboColourCollection, IColourPointCollection {
-        int MaxBurstLength { get; }
+    /// <summary>
+    /// All the information of custom combo colouring for a beatmap.
+    /// </summary>
+    public interface IComboColourProject : IHasComboColours, IHasColourPoints {
     }
 }

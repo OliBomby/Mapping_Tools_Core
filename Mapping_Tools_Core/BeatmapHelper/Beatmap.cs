@@ -26,7 +26,7 @@ namespace Mapping_Tools_Core.BeatmapHelper {
 
         public List<IComboColour> ComboColoursList { get; set; }
 
-        IReadOnlyList<IComboColour> IComboColourCollection.ComboColours => ComboColoursList;
+        IReadOnlyList<IComboColour> IHasComboColours.ComboColours => ComboColoursList;
 
         public Dictionary<string, IComboColour> SpecialColours { get; set; }
 

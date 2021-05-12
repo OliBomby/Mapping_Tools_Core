@@ -1,5 +1,4 @@
-﻿using System;
-using Mapping_Tools_Core.BeatmapHelper.IO;
+﻿using Mapping_Tools_Core.BeatmapHelper.IO;
 using Mapping_Tools_Core.Exceptions;
 
 namespace Mapping_Tools_Core.BeatmapHelper.ComboColours {
@@ -7,7 +6,7 @@ namespace Mapping_Tools_Core.BeatmapHelper.ComboColours {
     /// The british alternative because main developer wants to keep the spelling.
     /// Its spelled "Colours" in the game.
     /// </summary>
-    public class ComboColour : IComboColour, IEquatable<ComboColour> {
+    public class ComboColour : IComboColour {
         /// <summary>
         /// The red component value of the colour.
         /// </summary>
@@ -75,6 +74,7 @@ namespace Mapping_Tools_Core.BeatmapHelper.ComboColours {
             return $"{comboColour.R.ToInvariant()},{comboColour.G.ToInvariant()},{comboColour.B.ToInvariant()}";
         }
 
+        ///<inheritdoc/>
         public object Clone() {
             return MemberwiseClone();
         }
@@ -96,18 +96,21 @@ namespace Mapping_Tools_Core.BeatmapHelper.ComboColours {
                 new ComboColour(242, 24, 57)};
         }
 
-        public bool Equals(ComboColour other) {
+        ///<inheritdoc/>
+        public bool Equals(IComboColour other) {
             if (other is null) return false;
             if (ReferenceEquals(this, other)) return true;
             return R == other.R && G == other.G && B == other.B;
         }
 
+        ///<inheritdoc/>
         public override bool Equals(object obj) {
             if (obj is null) return false;
             if (ReferenceEquals(this, obj)) return true;
-            return obj.GetType() == GetType() && Equals((ComboColour) obj);
+            return obj.GetType() == GetType() && Equals((IComboColour) obj);
         }
 
+        ///<inheritdoc/>
         public override int GetHashCode() {
             unchecked {
                 var hashCode = R.GetHashCode();

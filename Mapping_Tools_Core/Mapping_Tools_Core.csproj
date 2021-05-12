@@ -21,6 +21,14 @@
     <Compile Remove="Tools\**" />
     <EmbeddedResource Remove="Tools\**" />
     <None Remove="Tools\**" />
+    <Compile Include="Tools\ComboColourStudio\ColourHaxExporter.cs" />
+    <Compile Include="Tools\ComboColourStudio\ColourHaxImporter.cs" />
+    <Compile Include="Tools\ComboColourStudio\ColourPoint.cs" />
+    <Compile Include="Tools\ComboColourStudio\ColourPointMode.cs" />
+    <Compile Include="Tools\ComboColourStudio\ComboColourProject.cs" />
+    <Compile Include="Tools\ComboColourStudio\IColourPoint.cs" />
+    <Compile Include="Tools\ComboColourStudio\IHasColourPoints.cs" />
+    <Compile Include="Tools\ComboColourStudio\IComboColourProject.cs" />
     <Compile Include="Tools\MapCleanerStuff\IMapCleanerArgs.cs" />
     <Compile Include="Tools\MapCleanerStuff\IMapCleanerResult.cs" />
     <Compile Include="Tools\MapCleanerStuff\MapCleaner.cs" />
