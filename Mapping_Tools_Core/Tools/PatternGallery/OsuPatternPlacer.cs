@@ -29,7 +29,7 @@ namespace Mapping_Tools_Core.Tools.PatternGallery {
         /// <summary>
         /// Determines which timing stuff to keep from the pattern.
         /// </summary>
-        public TimingOverwriteMode TimingOverwriteMode = TimingOverwriteMode.OriginalTimingOnly;
+        public TimingOverwriteMode TimingOverwriteMode = TimingOverwriteMode.DestinationTimingOnly;
         public bool IncludeHitsounds = false;
         public bool IncludeKiai = false;
         public bool ScaleToNewCircleSize = false;
@@ -230,7 +230,7 @@ namespace Mapping_Tools_Core.Tools.PatternGallery {
             // Avoid overwriting timing if the pattern has no redlines
             TimingOverwriteMode timingOverwriteMode = patternTiming.Redlines.Count > 0
                 ? TimingOverwriteMode
-                : TimingOverwriteMode.OriginalTimingOnly;
+                : TimingOverwriteMode.DestinationTimingOnly;
 
             // Get the scale for custom scale x CS scale
             double csScale = Beatmap.GetHitObjectRadius(originalCircleSize) /

@@ -34,6 +34,15 @@
     <Compile Include="Tools\MapCleanerStuff\MapCleaner.cs" />
     <Compile Include="Tools\MapCleanerStuff\MapCleanerArgs.cs" />
     <Compile Include="Tools\MapCleanerStuff\MapCleanerResult.cs" />
+    <Compile Include="Tools\PatternGallery\ExportTimeMode.cs" />
+    <Compile Include="Tools\PatternGallery\IOsuPattern.cs" />
+    <Compile Include="Tools\PatternGallery\IOsuPatternFileHandler.cs" />
+    <Compile Include="Tools\PatternGallery\OsuPattern.cs" />
+    <Compile Include="Tools\PatternGallery\OsuPatternFileHandler.cs" />
+    <Compile Include="Tools\PatternGallery\OsuPatternMaker.cs" />
+    <Compile Include="Tools\PatternGallery\OsuPatternPlacer.cs" />
+    <Compile Include="Tools\PatternGallery\PatternOverwriteMode.cs" />
+    <Compile Include="Tools\PatternGallery\TimingOverwriteMode.cs" />
     <Compile Include="Tools\UnusedSampleDetector.cs" />
     <None Include="..\LICENSE.txt">
       <Pack>True</Pack>

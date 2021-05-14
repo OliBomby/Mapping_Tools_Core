@@ -2,10 +2,12 @@
 using Mapping_Tools_Core.BeatmapHelper.Editor;
 using Mapping_Tools_Core.BeatmapHelper.Encoding;
 using Mapping_Tools_Core.MathUtil;
-using Newtonsoft.Json;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Text.Json.Serialization;
+using Mapping_Tools_Core.BeatmapHelper.IO.Editor;
+using Mapping_Tools_Core.BeatmapHelper.IO.Encoding;
 
 namespace Mapping_Tools_Core.Tools.PatternGallery {
     public class OsuPatternFileHandler : IOsuPatternFileHandler {

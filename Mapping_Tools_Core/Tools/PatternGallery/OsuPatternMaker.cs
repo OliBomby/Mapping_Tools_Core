@@ -4,18 +4,31 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Mapping_Tools_Core.BeatmapHelper;
-using Mapping_Tools_Core.BeatmapHelper.Editor;
+using Mapping_Tools_Core.BeatmapHelper.Contexts;
 using Mapping_Tools_Core.BeatmapHelper.Enums;
+using Mapping_Tools_Core.BeatmapHelper.HitObjects;
+using Mapping_Tools_Core.BeatmapHelper.TimingStuff;
 using Mapping_Tools_Core.MathUtil;
 
 namespace Mapping_Tools_Core.Tools.PatternGallery {
+    /// <summary>
+    /// Class for creating patterns.
+    /// </summary>
     public class OsuPatternMaker {
         /// <summary>
         /// Extra time in milliseconds around patterns for including a wider range of objects in the target beatmap.
         /// </summary>
         public double Padding = 5;
 
-        public OsuPattern FromSelectedWithSave(Beatmap beatmap, IOsuPatternFileHandler fileHandler, string name) {
+        /// <summary>
+        /// Creates a pattern of only the selected hit objects in the beatmap and saves it with the file handler.
+        /// This doesn't modify the given beatmap.
+        /// </summary>
+        /// <param name="beatmap">The beatmap to create a pattern from.</param>
+        /// <param name="fileHandler">The file handler to save the pattern beatmap with.</param>
+        /// <param name="name">The name of the pattern.</param>
+        /// <returns>The created pattern.</returns>
+        public IOsuPattern FromSelectedWithSave(IBeatmap beatmap, IOsuPatternFileHandler fileHandler, string name) {
             var osuPattern = FromSelected(beatmap, out var patternBeatmap, name);
 
             fileHandler.SavePatternBeatmap(patternBeatmap, osuPattern.Filename);
@@ -23,9 +36,17 @@ namespace Mapping_Tools_Core.Tools.PatternGallery {
             return osuPattern;
         }
 
-        public OsuPattern FromSelected(Beatmap beatmap, out Beatmap patternBeatmap, string name) {
+        /// <summary>
+        /// Creates a pattern of only the selected hit objects in the beatmap.
+        /// This doesn't modify the given beatmap.
+        /// </summary>
+        /// <param name="beatmap">The beatmap to create a pattern from.</param>
+        /// <param name="patternBeatmap">The created pattern beatmap</param>
+        /// <param name="name">The name of the pattern.</param>
+        /// <returns>The created pattern.</returns>
+        public IOsuPattern FromSelected(IBeatmap beatmap, out IBeatmap patternBeatmap, string name) {
             // Check if it has selected objects
-            if (!beatmap.HitObjects.Any(h => h.IsSelected)) throw new Exception("No selected hit objects found.");
+            if (!beatmap.HitObjects.Any(h => h.IsSelected)) throw new ArgumentException("No selected hit objects found.", nameof(beatmap));
 
             // Copy it so the changes dont affect the given beatmap object
             patternBeatmap = beatmap.DeepClone();
@@ -36,31 +57,43 @@ namespace Mapping_Tools_Core.Tools.PatternGallery {
             return FromBeatmap(patternBeatmap, name);
         }
 
-        public OsuPattern FromFileWithSave(string filePath, OsuPatternFileHandler fileHandler, string name, 
+        /// <summary>
+        /// Filters out stuff from the beatmap and creates a pattern of the beatmap and saves the pattern beatmap.
+        /// This doesn't modify the given beatmap.
+        /// </summary>
+        /// <param name="beatmap">The beatmap to create a pattern from.</param>
+        /// <param name="fileHandler">The file handler to save the pattern beatmap with.</param>
+        /// <param name="name">The name of the pattern.</param>
+        /// <param name="filter">Filter with osu! time code syntax. Ex: "01:12:123(1,2,3) - "</param>
+        /// <param name="filterStartTime">Start time of time filter in milliseconds.</param>
+        /// <param name="filterEndTime">End time of time filter in milliseconds.</param>
+        /// <returns>The created pattern.</returns>
+        public IOsuPattern FromBeatmapFilterWithSave(IBeatmap beatmap, OsuPatternFileHandler fileHandler, string name, 
             string filter = null, double filterStartTime = -1, double filterEndTime = -1) {
 
-            OsuPattern osuPattern;
-            if (!string.IsNullOrEmpty(filter) || filterStartTime != -1 || filterEndTime != -1) {
-                osuPattern = FromFileFilter(filePath, out var patternBeatmap, name, filter, filterStartTime, filterEndTime);
+            var osuPattern = FromBeatmapFilter(beatmap, out var patternBeatmap, name, filter, filterStartTime, filterEndTime);
 
-                // Save the modified pattern beatmap in the collection folder
-                fileHandler.SavePatternBeatmap(patternBeatmap, osuPattern.Filename);
-            }
-            else {
-                osuPattern = FromFile(filePath, name);
-
-                // Save the pattern in the collection folder by copying
-                var newFilePath = fileHandler.GetPatternPath(osuPattern.Filename);
-                File.Copy(filePath, newFilePath, false);
-            }
+            // Save the modified pattern beatmap in the collection folder
+            fileHandler.SavePatternBeatmap(patternBeatmap, osuPattern.Filename);
 
             return osuPattern;
         }
 
-        public OsuPattern FromFileFilter(string filePath, out Beatmap patternBeatmap, string name, 
+        /// <summary>
+        /// Filters out stuff from the beatmap and creates a pattern of the beatmap.
+        /// This doesn't modify the given beatmap.
+        /// </summary>
+        /// <param name="beatmap">The beatmap to create a pattern from.</param>
+        /// <param name="patternBeatmap">The created pattern beatmap.</param>
+        /// <param name="name">The name of the pattern.</param>
+        /// <param name="filter">Filter with osu! time code syntax. Ex: "01:12:123(1,2,3) - "</param>
+        /// <param name="filterStartTime">Start time of time filter in milliseconds.</param>
+        /// <param name="filterEndTime">End time of time filter in milliseconds.</param>
+        /// <returns>The created pattern.</returns>
+        public IOsuPattern FromBeatmapFilter(IBeatmap beatmap, out IBeatmap patternBeatmap, string name, 
             string filter = null, double filterStartTime = -1, double filterEndTime = -1) {
-            // Read some stuff from the pattern
-            patternBeatmap = new BeatmapEditor(filePath).ReadFile();
+            // Copy it so the changes dont affect the given beatmap object
+            patternBeatmap = beatmap.DeepClone();
 
             RemoveStoryboard(patternBeatmap);
 
@@ -79,14 +112,18 @@ namespace Mapping_Tools_Core.Tools.PatternGallery {
             return FromBeatmap(patternBeatmap, name);
         }
 
-        public OsuPattern FromFile(string filePath, string name) {
-            // Read some stuff from the pattern
-            var patternBeatmap = new BeatmapEditor(filePath).ReadFile();
-
-            return FromBeatmap(patternBeatmap, name);
-        }
-
-        public OsuPattern FromObjectsWithSave(List<HitObject> hitObjects, List<TimingPoint> timingPoints, OsuPatternFileHandler fileHandler,
+        /// <summary>
+        /// Creates a pattern from a collection hit objects and timing points and stores it with the file handler.
+        /// </summary>
+        /// <param name="fileHandler">The file handler to store the pattern beatmap with.</param>
+        /// <param name="name">The name of the pattern.</param>
+        /// <param name="hitObjects">The hit objects of the pattern.</param>
+        /// <param name="timingPoints">The timing points of the pattern.</param>
+        /// <param name="firstUnInheritedTimingPoint">The first uninherited timing point of the pattern. (optional)</param>
+        /// <param name="globalSv">The global slider velocity of the pattern.</param>
+        /// <param name="gameMode">The game mode of the pattern.</param>
+        /// <returns>The created pattern.</returns>
+        public IOsuPattern FromObjectsWithSave(List<HitObject> hitObjects, List<TimingPoint> timingPoints, IOsuPatternFileHandler fileHandler,
             string name, TimingPoint firstUnInheritedTimingPoint = null, double globalSv = 1.4, GameMode gameMode = GameMode.Standard) {
 
             var osuPattern = FromObjects(hitObjects, timingPoints, out var patternBeatmap, name,
@@ -97,16 +134,33 @@ namespace Mapping_Tools_Core.Tools.PatternGallery {
             return osuPattern;
         }
 
-        public OsuPattern FromObjects(List<HitObject> hitObjects, List<TimingPoint> timingPoints, out Beatmap patternBeatmap, 
+        /// <summary>
+        /// Creates a pattern and pattern beatmap from a collection hit objects and timing points.
+        /// </summary>
+        /// <param name="patternBeatmap">The created pattern beatmap.</param>
+        /// <param name="name">The name of the pattern.</param>
+        /// <param name="hitObjects">The hit objects of the pattern.</param>
+        /// <param name="timingPoints">The timing points of the pattern.</param>
+        /// <param name="firstUnInheritedTimingPoint">The first uninherited timing point of the pattern. (optional)</param>
+        /// <param name="globalSv">The global slider velocity of the pattern.</param>
+        /// <param name="gameMode">The game mode of the pattern.</param>
+        /// <returns>The created pattern.</returns>
+        public IOsuPattern FromObjects(List<HitObject> hitObjects, List<TimingPoint> timingPoints, out IBeatmap patternBeatmap, 
             string name, TimingPoint firstUnInheritedTimingPoint = null, double globalSv = 1.4, GameMode gameMode = GameMode.Standard) {
             patternBeatmap = new Beatmap(hitObjects, timingPoints, firstUnInheritedTimingPoint, globalSv, gameMode) {
-                    Metadata = {["Version"] = new TValue(name)}
-                };
+                Metadata = {Version = name}
+            };
 
             return FromBeatmap(patternBeatmap, name);
         }
 
-        public OsuPattern FromBeatmap(Beatmap beatmap, string name) {
+        /// <summary>
+        /// Creates a pattern from the entire beatmap.
+        /// </summary>
+        /// <param name="beatmap">The beatmap to create a pattern from.</param>
+        /// <param name="name">The name of the pattern.</param>
+        /// <returns>The created pattern.</returns>
+        public IOsuPattern FromBeatmap(IBeatmap beatmap, string name) {
             // Import a file name and save the pattern
             var now = DateTime.Now;
             var fileName = GenerateUniquePatternFileName(name, now);
@@ -114,14 +168,13 @@ namespace Mapping_Tools_Core.Tools.PatternGallery {
             var startTime = beatmap.GetHitObjectStartTime();
             var endTime = beatmap.GetHitObjectEndTime();
 
-            return new OsuPattern {
+            return new OsuPattern(fileName,
+                beatmap.HitObjects.Count,
+                TimeSpan.FromMilliseconds(endTime - startTime),
+                beatmap.BeatmapTiming.GetBeatLength(startTime, endTime, true)) {
                 Name = name,
                 CreationTime = now,
                 LastUsedTime = now,
-                Filename = fileName,
-                ObjectCount = beatmap.HitObjects.Count,
-                Duration = TimeSpan.FromMilliseconds(endTime - startTime),
-                BeatLength = beatmap.BeatmapTiming.GetBeatLength(startTime, endTime, true)
             };
         }
 
@@ -142,16 +195,16 @@ namespace Mapping_Tools_Core.Tools.PatternGallery {
             return fileName;
         }
 
-        private static void RemoveStoryboard(Beatmap beatmap) {
+        private static void RemoveStoryboard(IBeatmap beatmap) {
             // Remove the storyboarding
-            beatmap.StoryboardLayerFail.Clear();
-            beatmap.StoryboardLayerPass.Clear();
-            beatmap.StoryboardLayerBackground.Clear();
-            beatmap.StoryboardLayerForeground.Clear();
-            beatmap.StoryboardLayerOverlay.Clear();
+            beatmap.Storyboard.StoryboardLayerFail.Clear();
+            beatmap.Storyboard.StoryboardLayerPass.Clear();
+            beatmap.Storyboard.StoryboardLayerBackground.Clear();
+            beatmap.Storyboard.StoryboardLayerForeground.Clear();
+            beatmap.Storyboard.StoryboardLayerOverlay.Clear();
         }
 
-        private void RemoveEverythingThatIsNotTheseHitObjects(Beatmap beatmap, List<HitObject> hitObjects) {
+        private void RemoveEverythingThatIsNotTheseHitObjects(IBeatmap beatmap, List<HitObject> hitObjects) {
             // Keep the selected subset of hit objects
             beatmap.HitObjects = hitObjects;
 
@@ -162,8 +215,16 @@ namespace Mapping_Tools_Core.Tools.PatternGallery {
             beatmap.BeatmapTiming.RemoveAll(tp => !(tp.Offset >= startTime && tp.Offset <= endTime));
 
             // Add some earlier timing points if necessary
-            var firstUnInheritedTimingPoint = beatmap.HitObjects.First().UnInheritedTimingPoint;
-            var firstNormalTimingPoint = beatmap.HitObjects.First().TimingPoint;
+            var first = beatmap.HitObjects.First();
+            TimingPoint firstUnInheritedTimingPoint;
+            TimingPoint firstNormalTimingPoint;
+            if (first.TryGetContext<TimingContext>(out var firstTiming)) {
+                firstUnInheritedTimingPoint = firstTiming.UninheritedTimingPoint;
+                firstNormalTimingPoint = firstTiming.TimingPoint;
+            } else {
+                firstUnInheritedTimingPoint = beatmap.BeatmapTiming.GetRedlineAtTime(first.StartTime);
+                firstNormalTimingPoint = beatmap.BeatmapTiming.GetTimingPointAtTime(first.StartTime);
+            }
 
             if (!beatmap.BeatmapTiming.Contains(firstUnInheritedTimingPoint)) {
                 beatmap.BeatmapTiming.Add(firstUnInheritedTimingPoint);
