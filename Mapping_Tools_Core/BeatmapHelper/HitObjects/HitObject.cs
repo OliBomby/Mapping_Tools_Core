@@ -82,6 +82,15 @@ namespace Mapping_Tools_Core.BeatmapHelper.HitObjects {
         }
 
         /// <summary>
+        /// Gets the end time but you can truncate it to an integer.
+        /// </summary>
+        /// <param name="floor">Whether to truncate it to an integer.</param>
+        /// <returns>The end time.</returns>
+        public virtual double GetEndTime(bool floor = false) {
+            return floor ? Math.Floor(EndTime + Precision.DOUBLE_EPSILON) : EndTime;
+        }
+
+        /// <summary>
         /// </summary>
         /// <param name="deltaTime"></param>
         public virtual void MoveTime(double deltaTime) {

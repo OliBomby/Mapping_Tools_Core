@@ -27,5 +27,27 @@
 
             return mid;
         }
+
+        /// <summary>
+        /// Calculates the time in milliseconds between a hit object appearing on screen and getting perfectly hit for a given approach rate value.
+        /// </summary>
+        /// <param name="approachRate">The approach rate difficulty setting.</param>
+        /// <returns>The time in milliseconds between a hit object appearing on screen and getting perfectly hit.</returns>
+        public static double GetApproachTime(double approachRate) {
+            return SectionDifficulty.DifficultyRange(approachRate, 1800, 1200, 450);
+        }
+
+        /// <summary>
+        /// Calculates the radius of a hit circle from a given Circle Size difficulty.
+        /// </summary>
+        /// <param name="circleSize"></param>
+        /// <returns></returns>
+        public static double GetHitObjectRadius(double circleSize) {
+            return (109 - 9 * circleSize) / 2;
+        }
+
+        public static double GetStackOffset(double circleSize) {
+            return GetHitObjectRadius(circleSize) / 10;
+        }
     }
 }

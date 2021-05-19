@@ -146,9 +146,9 @@ namespace Mapping_Tools_Core.BeatmapHelper {
                 endIndex = beatmap.HitObjects.Count - 1;
 
             // Getting some variables for use later
-            double stackOffset = GetStackOffset(beatmap.Difficulty.CircleSize);
+            double stackOffset = SectionDifficulty.GetStackOffset(beatmap.Difficulty.CircleSize);
             double stackLeniency = beatmap.General.StackLeniency;
-            double preEmpt = GetApproachTime(beatmap.Difficulty.ApproachRate);
+            double preEmpt = SectionDifficulty.GetApproachTime(beatmap.Difficulty.ApproachRate);
 
             // Round the stack offset so objects only get offset by integer values
             if (rounded) {
@@ -380,28 +380,6 @@ namespace Mapping_Tools_Core.BeatmapHelper {
         }
 
         /// <summary>
-        /// Calculates the time in milliseconds between a hit object appearing on screen and getting perfectly hit for a given approach rate value.
-        /// </summary>
-        /// <param name="approachRate">The approach rate difficulty setting.</param>
-        /// <returns>The time in milliseconds between a hit object appearing on screen and getting perfectly hit.</returns>
-        public static double GetApproachTime(double approachRate) {
-            return SectionDifficulty.DifficultyRange(approachRate, 1800, 1200, 450);
-        }
-
-        /// <summary>
-        /// Calculates the radius of a hit circle from a given Circle Size difficulty.
-        /// </summary>
-        /// <param name="circleSize"></param>
-        /// <returns></returns>
-        public static double GetHitObjectRadius(double circleSize) {
-            return (109 - 9 * circleSize) / 2;
-        }
-
-        public static double GetStackOffset(double circleSize) {
-            return GetHitObjectRadius(circleSize) / 10;
-        }
-
-        /// <summary>
         /// Finds all hit objects from this beatmap which are within a specified range.
         /// Just any part of the hit object has to overlap with the time range in order to be included.
         /// </summary>
@@ -457,7 +435,7 @@ namespace Mapping_Tools_Core.BeatmapHelper {
             if (eventsWithStartTime.Length > 0)
                 leadInTime = Math.Max(-eventsWithStartTime.Min(o => o.StartTime), leadInTime);
             if (beatmap.HitObjects.Count > 0) {
-                var approachTime = GetApproachTime(beatmap.Difficulty.ApproachRate);
+                var approachTime = SectionDifficulty.GetApproachTime(beatmap.Difficulty.ApproachRate);
                 leadInTime = Math.Max(approachTime - beatmap.HitObjects[0].StartTime, leadInTime);
             }
             return leadInTime + window50 + 1000;

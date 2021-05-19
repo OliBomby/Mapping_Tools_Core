@@ -27,7 +27,7 @@ namespace Mapping_Tools_Core.BeatmapHelper.HitObjects.Objects {
 
         public int SpanCount => RepeatCount + 1;
 
-        public override double EndTime => GetEndTime();
+        public override double EndTime => StartTime + Duration;
 
         public override double Duration => SpanDuration * SpanCount;
 
@@ -77,11 +77,6 @@ namespace Mapping_Tools_Core.BeatmapHelper.HitObjects.Objects {
 
             var timing = GetContext<TimingContext>();
             return SvHelper.CalculateSliderDuration(PixelLength, timing.UninheritedTimingPoint.MpB, timing.SliderVelocity, timing.GlobalSliderVelocity);
-        }
-
-        public double GetEndTime(bool floor = true) {
-            var endTime = StartTime + Duration;
-            return floor ? Math.Floor(endTime + Precision.DOUBLE_EPSILON) : endTime;
         }
 
         /// <summary>
