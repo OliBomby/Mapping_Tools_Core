@@ -31,6 +31,12 @@ namespace Mapping_Tools_Core.BeatmapHelper.HitObjects.Objects {
             endTime = newEndTime;
         }
 
+        public override void MoveTime(double deltaTime) {
+            endTime += deltaTime;
+
+            base.MoveTime(deltaTime);
+        }
+
         public IEnumerable<TimelineObject> GetTimelineObjects() {
             var context = new TimelineContext();
 
