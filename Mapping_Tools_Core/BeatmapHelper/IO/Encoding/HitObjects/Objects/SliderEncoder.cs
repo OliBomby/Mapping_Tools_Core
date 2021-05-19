@@ -30,9 +30,9 @@ namespace Mapping_Tools_Core.BeatmapHelper.IO.Encoding.HitObjects.Objects {
                 builder.AppendJoin('|', obj.EdgeHitsounds.Select(p => GetHitsounds(p).ToInvariant()));
                 builder.Append(',');
                 builder.AppendJoin('|', obj.EdgeHitsounds.Select(p => $"{p.SampleSet.ToIntInvariant()}:{p.AdditionSet.ToIntInvariant()}"));
+                builder.Append(',');
+                EncodeExtras(obj, builder);
             }
-            builder.Append(',');
-            EncodeExtras(obj, builder);
 
             return builder.ToString();
         }
