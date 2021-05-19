@@ -250,7 +250,7 @@ namespace Mapping_Tools_Core.Tools.PatternGallery {
             var tp = tc.TimingPoint.Copy();
             tp.Offset = ho.StartTime;
             tp.Uninherited = false;
-            tp.MpB = tc.SliderVelocity;
+            tp.SetSliderVelocity(tc.SliderVelocity);
             return new ControlChange(tp, true);
         }
 
@@ -722,7 +722,7 @@ namespace Mapping_Tools_Core.Tools.PatternGallery {
                 if (ho is Slider) {
                     TimingPoint tp = tc.TimingPoint.Copy();
                     tp.Offset = ho.StartTime;
-                    tp.MpB = tc.SliderVelocity;
+                    tp.SetSliderVelocity(tc.SliderVelocity);
                     controlChanges.Add(new ControlChange(tp, mpb: true));
                 }
 
