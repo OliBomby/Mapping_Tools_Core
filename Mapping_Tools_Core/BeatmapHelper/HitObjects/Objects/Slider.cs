@@ -255,8 +255,8 @@ namespace Mapping_Tools_Core.BeatmapHelper.HitObjects.Objects {
         protected override void DeepCloneAdd(HitObject clonedHitObject) {
             var slider = (Slider) clonedHitObject;
 
-            slider.CurvePoints.AddRange(CurvePoints);
-            slider.EdgeHitsounds.AddRange(EdgeHitsounds.Select(o => o.Clone()));
+            slider.CurvePoints = CurvePoints.ToList();
+            slider.EdgeHitsounds = EdgeHitsounds.Select(o => o.Clone()).ToList();
         }
 
         public IEnumerable<TimelineObject> GetTimelineObjects() {
