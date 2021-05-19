@@ -61,7 +61,7 @@ namespace Mapping_Tools_Core.BeatmapHelper.IO.Decoding {
             }
 
             // Give the lines to the storyboard
-            beatmap.StoryBoard = storyboardDecoder.Decode(code);
+            beatmap.Storyboard = storyboardDecoder.Decode(code);
 
             // Set the timing object
             beatmap.BeatmapTiming = new Timing(beatmap.Difficulty.SliderMultiplier);

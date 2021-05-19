@@ -23,12 +23,19 @@ namespace Mapping_Tools_Core.BeatmapHelper.Contexts {
         }
 
         /// <summary>
+        /// Gets the total offset from the original position to the stacked position.
+        /// </summary>
+        public Vector2 StackOffset() {
+            return StackCount * StackVector;
+        }
+
+        /// <summary>
         /// Calculates the stacked position of a position on the hit object.
         /// </summary>
         /// <param name="pos">The position to calculate stacked position of.</param>
         /// <returns>The stacked position.</returns>
         public Vector2 Stacked(Vector2 pos) {
-            return pos + StackCount * StackVector;
+            return pos + StackOffset();
         }
 
         public IContext Copy() {

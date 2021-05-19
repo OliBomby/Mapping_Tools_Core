@@ -32,9 +32,9 @@ namespace Mapping_Tools_Core.BeatmapHelper {
 
         public Timing BeatmapTiming { get; set; }
 
-        public Storyboard StoryBoard { get; set; }
+        public Storyboard Storyboard { get; set; }
 
-        IStoryboard IBeatmap.Storyboard => StoryBoard;
+        IStoryboard IBeatmap.Storyboard => Storyboard;
 
         /// <summary>
         /// List of all the hit objects in this beatmap.
@@ -51,7 +51,7 @@ namespace Mapping_Tools_Core.BeatmapHelper {
             Difficulty = new SectionDifficulty();
             ComboColoursList = new List<IComboColour>();
             SpecialColours = new Dictionary<string, IComboColour>();
-            StoryBoard = new Storyboard();
+            Storyboard = new Storyboard();
             HitObjects = new List<HitObject>();
             BeatmapTiming = new Timing(1.4);
         }

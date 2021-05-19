@@ -28,6 +28,20 @@ namespace Mapping_Tools_Core.MathUtil {
         }
 
         /// <summary>
+        /// Checks if value1 is almost bigger than value2 with some acceptable difference.
+        /// </summary>
+        public static bool AlmostBigger(double value1, double value2, double acceptableDifference = DOUBLE_EPSILON) {
+            return value1 > value2 - acceptableDifference;
+        }
+
+        /// <summary>
+        /// Checks if value1 is almost smaller than value2 with some acceptable difference.
+        /// </summary>
+        public static bool AlmostSmaller(double value1, double value2, double acceptableDifference = DOUBLE_EPSILON) {
+            return value1 - acceptableDifference < value2;
+        }
+
+        /// <summary>
         /// Checks if value1 is equal to value2 with some acceptable difference.
         /// </summary>
         public static bool AlmostEquals(double value1, double value2, double acceptableDifference = DOUBLE_EPSILON) {

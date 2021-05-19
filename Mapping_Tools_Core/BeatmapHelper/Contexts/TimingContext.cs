@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using JetBrains.Annotations;
 using Mapping_Tools_Core.BeatmapHelper.HitObjects;
 using Mapping_Tools_Core.BeatmapHelper.TimingStuff;
@@ -71,6 +72,17 @@ namespace Mapping_Tools_Core.BeatmapHelper.Contexts {
 
         public IContext Copy() {
             return new TimingContext(GlobalSliderVelocity, SliderVelocity, TimingPoint, HitsoundTimingPoint, UninheritedTimingPoint, BodyHitsounds);
+        }
+
+        /// <inheritdoc/>
+        public override string ToString() {
+            return "Global SV: " + GlobalSliderVelocity +
+                   "\nSV: " + SliderVelocity +
+                   "\nTP: " + TimingPoint +
+                   "\nHSTP: " + HitsoundTimingPoint +
+                   "\nUTP: " + UninheritedTimingPoint +
+                   "\nBody HS:\n    " + 
+                   string.Join("\n    ", BodyHitsounds.Select(tp => tp.ToString()));
         }
     }
 }
