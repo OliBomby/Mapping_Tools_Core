@@ -29,6 +29,8 @@
     <Compile Include="Tools\ComboColourStudio\IColourPoint.cs" />
     <Compile Include="Tools\ComboColourStudio\IHasColourPoints.cs" />
     <Compile Include="Tools\ComboColourStudio\IComboColourProject.cs" />
+    <Compile Include="Tools\HitsoundCopierStuff\HasCopiedContext.cs" />
+    <Compile Include="Tools\HitsoundCopierStuff\HitsoundCopier.cs" />
     <Compile Include="Tools\MapCleanerStuff\IMapCleanerArgs.cs" />
     <Compile Include="Tools\MapCleanerStuff\IMapCleanerResult.cs" />
     <Compile Include="Tools\MapCleanerStuff\MapCleaner.cs" />
