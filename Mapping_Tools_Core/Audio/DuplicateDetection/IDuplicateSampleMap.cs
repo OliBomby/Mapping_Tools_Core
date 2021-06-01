@@ -18,7 +18,7 @@ namespace Mapping_Tools_Core.Audio.DuplicateDetection {
         /// Gets the first sample in the equality class of given sample.
         /// </summary>
         /// <param name="filename">The filename of the sample to get the equality class of.</param>
-        /// <returns>The first sample in the equality class.</returns>
+        /// <returns>The first sample in the equality class or null if this file doesn't exist.</returns>
         [CanBeNull]
         IBeatmapSetFileInfo GetOriginalSample(string filename);
 

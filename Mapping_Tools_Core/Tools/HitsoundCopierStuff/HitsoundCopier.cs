@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Mapping_Tools_Core.Audio;
+using Mapping_Tools_Core.Audio.DuplicateDetection;
 using Mapping_Tools_Core.BeatmapHelper;
 using Mapping_Tools_Core.BeatmapHelper.BeatDivisors;
 using Mapping_Tools_Core.BeatmapHelper.Contexts;
@@ -58,6 +59,7 @@ namespace Mapping_Tools_Core.Tools.HitsoundCopierStuff {
 
         /// <summary>
         /// Whether to prevent copying storyboarded samples that are already played in the hitsounds.
+        /// Requires <see cref="IBeatmap.BeatmapSet"/> with all sound samples to be set in the destination beatmap.
         /// </summary>
         public bool IgnoreHitsoundSatisfiedSamples = true;
 
@@ -148,59 +150,68 @@ namespace Mapping_Tools_Core.Tools.HitsoundCopierStuff {
             }
             
             if (CopyStoryboardedSamples) {
-                if (arg.CopyMode == 0) {
-                    beatmapTo.StoryboardSoundSamples.Clear();
-                }
-
-                beatmapTo.GiveObjectsGreenlines();
-                processedTimeline.GiveTimingPoints(beatmapTo.BeatmapTiming);
-
-                var mapDir = editorTo.GetParentFolder();
-                var firstSamples = HitsoundImporter.AnalyzeSamples(mapDir, true);
-
-                var samplesTo = new HashSet<StoryboardSoundSample>(beatmapTo.StoryboardSoundSamples);
-                var mode = (GameMode)beatmapTo.General["Mode"].IntValue;
-
-                foreach (var sampleFrom in beatmapFrom.StoryboardSoundSamples) {
-                    if (arg.IgnoreHitsoundSatisfiedSamples) {
-                        var tloHere = processedTimeline.TimelineObjects.FindAll(o =>
-                            Math.Abs(o.Time - sampleFrom.StartTime) <= arg.TemporalLeniency);
-                        var samplesHere = new HashSet<string>();
-                        foreach (var tlo in tloHere) {
-                            foreach (var filename in tlo.GetPlayingFilenames(mode)) {
-                                var samplePath = Path.Combine(mapDir, filename);
-                                var fullPathExtLess = Path.Combine(Path.GetDirectoryName(samplePath),
-                                    Path.GetFileNameWithoutExtension(samplePath));
-
-                                if (firstSamples.Keys.Contains(fullPathExtLess)) {
-                                    samplePath = firstSamples[fullPathExtLess];
-                                }
-
-                                samplesHere.Add(samplePath);
-                            }
-                        }
-
-                        var sbSamplePath = Path.Combine(mapDir, sampleFrom.FilePath);
-                        var sbFullPathExtLess = Path.Combine(Path.GetDirectoryName(sbSamplePath),
-                            Path.GetFileNameWithoutExtension(sbSamplePath));
-
-                        if (firstSamples.Keys.Contains(sbFullPathExtLess)) {
-                            sbSamplePath = firstSamples[sbFullPathExtLess];
-                        }
-
-                        if (samplesHere.Contains(sbSamplePath))
-                            continue;
-                    }
-
-                    // Add the StoryboardSoundSamples from beatmapFrom to beatmapTo if it doesn't already have the sample
-                    if (!samplesTo.Contains(sampleFrom)) {
-                        beatmapTo.StoryboardSoundSamples.Add(sampleFrom);
-                    }
-                }
-
-                // Sort the storyboarded samples
-                beatmapTo.StoryboardSoundSamples.Sort();
+                CopyStoryboardedSamples(sourceBeatmap, destBeatmap, processedTimeline, true);
             }
+        }
+
+        /// <summary>
+        /// Copies storyboarded samples between beatmaps.
+        /// </summary>
+        /// <param name="sourceBeatmap">The beatmap to copy samples from.</param>
+        /// <param name="destBeatmap">The beatmap to copy samples to.</param>
+        /// <param name="removeOldSamples">Whether to remove the existing storyboarded samples in the destination beatmap.</param>
+        public void CopyStoryboardedSamples(IBeatmap sourceBeatmap, IBeatmap destBeatmap, bool removeOldSamples) {
+            CopyStoryboardedSamples(sourceBeatmap, destBeatmap, destBeatmap.GetTimeline(), removeOldSamples);
+        }
+
+        private void CopyStoryboardedSamples(IBeatmap sourceBeatmap, IBeatmap destBeatmap, Timeline destTimeline, bool removeOldSamples) {
+            if (removeOldSamples) {
+                destBeatmap.Storyboard.StoryboardSoundSamples.Clear();
+            }
+
+            destBeatmap.GiveObjectsTimingContext();
+            destTimeline.GiveTimingContext(destBeatmap.BeatmapTiming);
+
+            IDuplicateSampleMap sampleComparer = null;
+            string containingFolderPath = string.Empty;
+            if (destBeatmap.BeatmapSet != null && IgnoreHitsoundSatisfiedSamples) {
+                sampleComparer = new MonolithicDuplicateSampleDetector().AnalyzeSamples(destBeatmap.BeatmapSet.SoundFiles, out _);
+                containingFolderPath = Path.GetDirectoryName(destBeatmap.GetBeatmapSetRelativePath()) ?? string.Empty;
+            }
+
+            var samplesTo = new HashSet<StoryboardSoundSample>(destBeatmap.Storyboard.StoryboardSoundSamples);
+            var mode = destBeatmap.General.Mode;
+
+            foreach (var sampleFrom in sourceBeatmap.Storyboard.StoryboardSoundSamples) {
+                // Add the StoryboardSoundSamples from beatmapFrom to beatmapTo only if it doesn't already have the sample
+                if (samplesTo.Contains(sampleFrom)) {
+                    continue;
+                }
+
+                // If IgnoreHitoundSatisfiedSamples and the beatmap set is not null
+                if (sampleComparer != null) {
+                    var tloHere = destTimeline.TimelineObjects.FindAll(o =>
+                        Math.Abs(o.Time - sampleFrom.StartTime) <= TemporalLeniency);
+                    var samplesHere = new HashSet<string>();
+                    foreach (var tlo in tloHere) {
+                        foreach (var filename in tlo.GetFirstPlayingFilenames(mode, containingFolderPath, sampleComparer, false)) {
+                            samplesHere.Add(filename);
+                        }
+                    }
+
+                    var sbSamplePath = Path.Combine(containingFolderPath, sampleFrom.FilePath);
+
+                    sbSamplePath = sampleComparer.GetOriginalSample(sbSamplePath) ?? sbSamplePath;
+
+                    if (samplesHere.Contains(sbSamplePath))
+                        continue;
+                }
+
+                destBeatmap.Storyboard.StoryboardSoundSamples.Add(sampleFrom);
+            }
+
+            // Sort the storyboarded samples
+            destBeatmap.Storyboard.StoryboardSoundSamples.Sort();
         }
 
         /// <summary>
