@@ -81,7 +81,6 @@ namespace Mapping_Tools_Core.Tools.HitsoundCopierStuff {
         /// </remarks>
         public int StartIndex = 100;
 
-        
 
         /// <summary>
         /// Copies hitsounds from one map to another.
@@ -91,8 +90,9 @@ namespace Mapping_Tools_Core.Tools.HitsoundCopierStuff {
         /// </remarks>
         /// <param name="sourceBeatmap">The map to copy hitsounds from.</param>
         /// <param name="destBeatmap">The map to copy hitsounds to.</param>
+        /// <param name="processedTimeline">The timeline of the destination beatmap with <see cref="HasCopiedContext"/> on each timeline object that has been copied to.</param>
         /// <returns></returns>
-        public void CopyHitsoundsBasic(IBeatmap sourceBeatmap, IBeatmap destBeatmap) {
+        public void CopyHitsoundsBasic(IBeatmap sourceBeatmap, IBeatmap destBeatmap, out Timeline processedTimeline) {
             // Every defined hitsound and sampleset on hitsound gets copied to their copyTo destination
             // Timelines
             var tlTo = destBeatmap.GetTimeline();
@@ -120,7 +120,7 @@ namespace Mapping_Tools_Core.Tools.HitsoundCopierStuff {
             // Apply the timingpoint changes
             ControlChange.ApplyChanges(destBeatmap.BeatmapTiming, controlChanges, true);
 
-            var processedTimeline = tlTo;
+            processedTimeline = tlTo;
 
             // Return 5% volume to tlo that had it before
             if (volumeMuteTimes != null) {
@@ -220,40 +220,33 @@ namespace Mapping_Tools_Core.Tools.HitsoundCopierStuff {
         /// </summary>
         /// <param name="sourceBeatmap">The map to copy hitsounds from.</param>
         /// <param name="destBeatmap">The map to copy hitsounds to.</param>
+        /// <param name="processedTimeline">The timeline of the destination beatmap with <see cref="HasCopiedContext"/> on each timeline object that has been copied to.</param>
+        /// <param name="sampleSchema">The sample schema to add new samples to when copy to slider ticks or copy to slider slides is enabled.</param>
         /// <returns></returns>
-        public void CopyHitsoundsSmart(IBeatmap sourceBeatmap, IBeatmap destBeatmap) {
-            var doMutedIndex = arg.MutedIndex >= 0;
-
-            var sampleSchema = new SampleSchema();
-
-            var reader = EditorReaderStuff.GetFullEditorReaderOrNot();
-
-            BeatmapEditor editorTo = EditorReaderStuff.GetNewestVersionOrNot(pathTo, reader); ;
-            Beatmap beatmapTo = editorTo.Beatmap;
-            Beatmap beatmapFrom;
+        public void CopyHitsoundsSmart(IBeatmap sourceBeatmap, IBeatmap destBeatmap, out Timeline processedTimeline, SampleSchema sampleSchema = null) {
+            destBeatmap = editorTo.Beatmap;
+            sourceBeatmap;
 
             if (!string.IsNullOrEmpty(arg.PathFrom)) {
                 var editorFrom = EditorReaderStuff.GetNewestVersionOrNot(arg.PathFrom, reader);
-                beatmapFrom = editorFrom.Beatmap;
+                sourceBeatmap = editorFrom.Beatmap;
             } else {
                 // Copy from an empty beatmap similar to the map to copy to
-                beatmapFrom = beatmapTo.DeepCopy();
-                beatmapFrom.HitObjects.Clear();
-                beatmapFrom.BeatmapTiming.Clear();
+                sourceBeatmap = destBeatmap.DeepCopy();
+                sourceBeatmap.HitObjects.Clear();
+                sourceBeatmap.BeatmapTiming.Clear();
             }
-
-            Timeline processedTimeline;
 
             if (arg.CopyMode == 0) {
                 // Every defined hitsound and sampleset on hitsound gets copied to their copyTo destination
                 // Timelines
-                var tlTo = beatmapTo.GetTimeline();
-                var tlFrom = beatmapFrom.GetTimeline();
+                var tlTo = destBeatmap.GetTimeline();
+                var tlFrom = sourceBeatmap.GetTimeline();
 
                 var volumeMuteTimes = arg.CopyVolumes && arg.AlwaysPreserve5Volume ? new List<double>() : null;
 
                 if (arg.CopyHitsounds) {
-                    ResetHitObjectHitsounds(beatmapTo);
+                    ResetHitObjectHitsounds(destBeatmap);
                     CopyHitsounds(arg, tlFrom, tlTo);
                 }
 
@@ -265,19 +258,19 @@ namespace Mapping_Tools_Core.Tools.HitsoundCopierStuff {
                                           select tloTo.Time);
 
                 // Volumes and samplesets and customindices greenlines get copied with timingpointchanges and allafter enabled
-                var timingPointsChanges = beatmapFrom.BeatmapTiming.TimingPoints.Select(tp =>
+                var timingPointsChanges = sourceBeatmap.BeatmapTiming.TimingPoints.Select(tp =>
                     new TimingPointsChange(tp, sampleset: arg.CopySampleSets, index: arg.CopySampleSets,
                         volume: arg.CopyVolumes)).ToList();
 
                 // Apply the timingpoint changes
-                TimingPointsChange.ApplyChanges(beatmapTo.BeatmapTiming, timingPointsChanges, true);
+                TimingPointsChange.ApplyChanges(destBeatmap.BeatmapTiming, timingPointsChanges, true);
 
                 processedTimeline = tlTo;
 
                 // Return 5% volume to tlo that had it before
                 if (volumeMuteTimes != null) {
                     var timingPointsChangesMute = new List<TimingPointsChange>();
-                    processedTimeline.GiveTimingPoints(beatmapTo.BeatmapTiming);
+                    processedTimeline.GiveTimingPoints(destBeatmap.BeatmapTiming);
 
                     // Exclude objects which use their own sample volume property instead
                     foreach (var tloTo in processedTimeline.TimelineObjects.Where(o => Math.Abs(o.SampleVolume) < Precision.DOUBLE_EPSILON)) {
@@ -297,62 +290,62 @@ namespace Mapping_Tools_Core.Tools.HitsoundCopierStuff {
                     }
 
                     // Apply the timingpoint changes
-                    TimingPointsChange.ApplyChanges(beatmapTo.BeatmapTiming, timingPointsChangesMute);
+                    TimingPointsChange.ApplyChanges(destBeatmap.BeatmapTiming, timingPointsChangesMute);
                 }
             } else {
                 // Smarty mode
                 // Copy the defined hitsounds literally (not feno, that will be reserved for cleaner). Only the tlo that have been defined by copyFrom get overwritten.
-                var tlTo = beatmapTo.GetTimeline();
-                var tlFrom = beatmapFrom.GetTimeline();
+                var tlTo = destBeatmap.GetTimeline();
+                var tlFrom = sourceBeatmap.GetTimeline();
 
                 var timingPointsChanges = new List<TimingPointsChange>();
-                var mode = (GameMode)beatmapTo.General["Mode"].IntValue;
+                var mode = (GameMode)destBeatmap.General["Mode"].IntValue;
                 var mapDir = editorTo.GetParentFolder();
                 var firstSamples = HitsoundImporter.AnalyzeSamples(mapDir);
 
                 if (arg.CopyHitsounds) {
-                    CopyHitsounds(arg, beatmapTo, tlFrom, tlTo, timingPointsChanges, mode, mapDir, firstSamples, ref sampleSchema);
+                    CopyHitsounds(arg, destBeatmap, tlFrom, tlTo, timingPointsChanges, mode, mapDir, firstSamples, ref sampleSchema);
                 }
 
                 if (arg.CopyBodyHitsounds) {
                     // Remove timingpoints in beatmapTo that are in a sliderbody/spinnerbody for both beatmapTo and BeatmapFrom
-                    foreach (var tp in from ho in beatmapTo.HitObjects
+                    foreach (var tp in from ho in destBeatmap.HitObjects
                                        from tp in ho.BodyHitsounds
-                                       where beatmapFrom.HitObjects.Any(o => o.Time < tp.Offset && o.EndTime > tp.Offset)
+                                       where sourceBeatmap.HitObjects.Any(o => o.Time < tp.Offset && o.EndTime > tp.Offset)
                                        where !tp.Uninherited
                                        select tp) {
-                        beatmapTo.BeatmapTiming.Remove(tp);
+                        destBeatmap.BeatmapTiming.Remove(tp);
                     }
 
                     // Get timingpointschanges for every timingpoint from beatmapFrom that is in a sliderbody/spinnerbody for both beatmapTo and BeatmapFrom
-                    timingPointsChanges.AddRange(from ho in beatmapFrom.HitObjects
+                    timingPointsChanges.AddRange(from ho in sourceBeatmap.HitObjects
                                                  from tp in ho.BodyHitsounds
-                                                 where beatmapTo.HitObjects.Any(o => o.Time < tp.Offset && o.EndTime > tp.Offset)
+                                                 where destBeatmap.HitObjects.Any(o => o.Time < tp.Offset && o.EndTime > tp.Offset)
                                                  select new TimingPointsChange(tp.Copy(), sampleset: arg.CopySampleSets, index: arg.CopySampleSets,
                                                      volume: arg.CopyVolumes));
                 }
 
                 // Apply the timingpoint changes
-                TimingPointsChange.ApplyChanges(beatmapTo.BeatmapTiming, timingPointsChanges);
+                TimingPointsChange.ApplyChanges(destBeatmap.BeatmapTiming, timingPointsChanges);
 
                 processedTimeline = tlTo;
             }
 
             if (arg.CopyStoryboardedSamples) {
                 if (arg.CopyMode == 0) {
-                    beatmapTo.StoryboardSoundSamples.Clear();
+                    destBeatmap.StoryboardSoundSamples.Clear();
                 }
 
-                beatmapTo.GiveObjectsGreenlines();
-                processedTimeline.GiveTimingPoints(beatmapTo.BeatmapTiming);
+                destBeatmap.GiveObjectsGreenlines();
+                processedTimeline.GiveTimingPoints(destBeatmap.BeatmapTiming);
 
                 var mapDir = editorTo.GetParentFolder();
                 var firstSamples = HitsoundImporter.AnalyzeSamples(mapDir, true);
 
-                var samplesTo = new HashSet<StoryboardSoundSample>(beatmapTo.StoryboardSoundSamples);
-                var mode = (GameMode)beatmapTo.General["Mode"].IntValue;
+                var samplesTo = new HashSet<StoryboardSoundSample>(destBeatmap.StoryboardSoundSamples);
+                var mode = (GameMode)destBeatmap.General["Mode"].IntValue;
 
-                foreach (var sampleFrom in beatmapFrom.StoryboardSoundSamples) {
+                foreach (var sampleFrom in sourceBeatmap.StoryboardSoundSamples) {
                     if (arg.IgnoreHitsoundSatisfiedSamples) {
                         var tloHere = processedTimeline.TimelineObjects.FindAll(o =>
                             Math.Abs(o.Time - sampleFrom.StartTime) <= arg.TemporalLeniency);
@@ -385,21 +378,21 @@ namespace Mapping_Tools_Core.Tools.HitsoundCopierStuff {
 
                     // Add the StoryboardSoundSamples from beatmapFrom to beatmapTo if it doesn't already have the sample
                     if (!samplesTo.Contains(sampleFrom)) {
-                        beatmapTo.StoryboardSoundSamples.Add(sampleFrom);
+                        destBeatmap.StoryboardSoundSamples.Add(sampleFrom);
                     }
                 }
 
                 // Sort the storyboarded samples
-                beatmapTo.StoryboardSoundSamples.Sort();
+                destBeatmap.StoryboardSoundSamples.Sort();
             }
 
             if (arg.MuteSliderends) {
                 var timingPointsChanges = new List<TimingPointsChange>();
-                beatmapTo.GiveObjectsGreenlines();
-                processedTimeline.GiveTimingPoints(beatmapTo.BeatmapTiming);
+                destBeatmap.GiveObjectsGreenlines();
+                processedTimeline.GiveTimingPoints(destBeatmap.BeatmapTiming);
 
                 foreach (var tloTo in processedTimeline.TimelineObjects) {
-                    if (FilterMuteTlo(tloTo, beatmapTo, arg)) {
+                    if (FilterMuteTlo(tloTo, destBeatmap, arg)) {
                         // Set volume to 5%, remove all hitsounds, apply customindex and sampleset
                         tloTo.SampleSet = arg.MutedSampleSet;
                         tloTo.AdditionSet = 0;
@@ -428,7 +421,7 @@ namespace Mapping_Tools_Core.Tools.HitsoundCopierStuff {
                 }
 
                 // Apply the timingpoint changes
-                TimingPointsChange.ApplyChanges(beatmapTo.BeatmapTiming, timingPointsChanges);
+                TimingPointsChange.ApplyChanges(destBeatmap.BeatmapTiming, timingPointsChanges);
             }
         }
 
