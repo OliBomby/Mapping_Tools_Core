@@ -49,8 +49,8 @@ namespace Mapping_Tools_Core.BeatmapHelper.HitObjects {
         public double Volume { get; set; }
 
         public HitSampleInfo() {
-            SampleSet = SampleSet.Auto;
-            AdditionSet = SampleSet.Auto;
+            SampleSet = SampleSet.None;
+            AdditionSet = SampleSet.None;
         }
 
         /// <summary>

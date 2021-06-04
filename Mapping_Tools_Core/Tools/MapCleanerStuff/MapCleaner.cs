@@ -169,7 +169,7 @@ namespace Mapping_Tools_Core.Tools.MapCleanerStuff {
                 // Add body hitsounds
                 if (ho is IHasDuration durationHo) {
                     bool vol = (ho is Slider && args.VolumeSliders) || (ho is Spinner && args.VolumeSpinners);
-                    bool sam = (ho is Slider && args.SampleSetSliders && ho.Hitsounds.SampleSet == SampleSet.Auto);
+                    bool sam = (ho is Slider && args.SampleSetSliders && ho.Hitsounds.SampleSet == SampleSet.None);
                     bool ind = (ho is Slider && args.SampleSetSliders);
 
                     // Whether sampleset of the body hitsounds changed during the hit object
@@ -183,12 +183,12 @@ namespace Mapping_Tools_Core.Tools.MapCleanerStuff {
                         controlChanges.Add(new ControlChange(tp, volume: vol, index: ind, sampleset: sam));
 
                         if (tp.SampleSet != timingContext.HitsoundTimingPoint.SampleSet) {
-                            samplesetActuallyChanged = args.SampleSetSliders && ho.Hitsounds.SampleSet == SampleSet.Auto;
+                            samplesetActuallyChanged = args.SampleSetSliders && ho.Hitsounds.SampleSet == SampleSet.None;
                         }  // True for sampleset change in sliderbody
                     }
 
                     // In this case we can put sampleset on sliderbody without timing points
-                    if (ho is Slider && !samplesetActuallyChanged && ho.Hitsounds.SampleSet == SampleSet.Auto) {
+                    if (ho is Slider && !samplesetActuallyChanged && ho.Hitsounds.SampleSet == SampleSet.None) {
                         ho.Hitsounds.SampleSet = timingContext.HitsoundTimingPoint.SampleSet;
                     }
 
@@ -216,7 +216,7 @@ namespace Mapping_Tools_Core.Tools.MapCleanerStuff {
 
                 // Simplify additions to auto
                 if (tlo.Hitsounds.AdditionSet == tlo.Hitsounds.SampleSet) {
-                    tlo.Hitsounds.AdditionSet = SampleSet.Auto;
+                    tlo.Hitsounds.AdditionSet = SampleSet.None;
                 }
 
                 tlo.HitoundsToOrigin();

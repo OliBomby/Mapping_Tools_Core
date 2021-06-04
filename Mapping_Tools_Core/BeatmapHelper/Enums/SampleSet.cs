@@ -4,9 +4,10 @@
     /// </summary>
     public enum SampleSet {
         /// <summary>
-        /// (Hitobject only) Uses the current inherited timing points' hitsound sampleset and custom list.
+        /// None sampleset. Inherits the actual sample set from something else if possible.
+        /// Displays as "Auto" in the osu! client.
         /// </summary>
-        Auto = 0,
+        None = 0,
         /// <summary>
         /// The sampleset of Normal.
         /// </summary>

@@ -115,7 +115,7 @@ namespace Mapping_Tools_Core.BeatmapHelper.HitObjects.Objects {
 
             // Get sliderslide hitsounds for every timingpoint in the slider
             if (includeDefaults || timing.TimingPoint.SampleIndex != 0) {
-                var firstSampleSet = Hitsounds.SampleSet == SampleSet.Auto ? timing.TimingPoint.SampleSet : Hitsounds.SampleSet;
+                var firstSampleSet = Hitsounds.SampleSet == SampleSet.None ? timing.TimingPoint.SampleSet : Hitsounds.SampleSet;
                 yield return GetSliderFilename(firstSampleSet, "slide", timing.TimingPoint.SampleIndex);
                 if (Hitsounds.Whistle)
                     yield return GetSliderFilename(firstSampleSet, "whistle", timing.TimingPoint.SampleIndex);
@@ -123,7 +123,7 @@ namespace Mapping_Tools_Core.BeatmapHelper.HitObjects.Objects {
 
             foreach (var bodyTp in timing.BodyHitsounds)
                 if (includeDefaults || bodyTp.SampleIndex != 0) {
-                    var sampleSet = Hitsounds.SampleSet == SampleSet.Auto ? bodyTp.SampleSet : Hitsounds.SampleSet;
+                    var sampleSet = Hitsounds.SampleSet == SampleSet.None ? bodyTp.SampleSet : Hitsounds.SampleSet;
                     yield return GetSliderFilename(sampleSet, "slide", bodyTp.SampleIndex);
                     if (Hitsounds.Whistle)
                         yield return GetSliderFilename(sampleSet, "whistle", bodyTp.SampleIndex);
@@ -135,7 +135,7 @@ namespace Mapping_Tools_Core.BeatmapHelper.HitObjects.Objects {
             while (t + 10 < EndTime) {
                 var bodyTp = Timing.GetTimingPointAtTime(t, timing.BodyHitsounds, timing.TimingPoint);
                 if (includeDefaults || bodyTp.SampleIndex != 0) {
-                    var sampleSet = Hitsounds.SampleSet == SampleSet.Auto ? bodyTp.SampleSet : Hitsounds.SampleSet;
+                    var sampleSet = Hitsounds.SampleSet == SampleSet.None ? bodyTp.SampleSet : Hitsounds.SampleSet;
                     yield return GetSliderFilename(sampleSet, "tick", bodyTp.SampleIndex);
                 }
 
