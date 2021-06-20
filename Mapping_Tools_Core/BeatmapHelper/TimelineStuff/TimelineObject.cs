@@ -45,14 +45,14 @@ namespace Mapping_Tools_Core.BeatmapHelper.TimelineStuff {
         /// <summary>
         /// The actual sampleset used by this timeline object. Includes <see cref="TimingContext"/>.
         /// </summary>
-        public SampleSet FenoSampleSet => Hitsounds.SampleSet == SampleSet.Auto
+        public SampleSet FenoSampleSet => Hitsounds.SampleSet == SampleSet.None
             ? GetContext<TimingContext>().HitsoundTimingPoint.SampleSet
             : Hitsounds.SampleSet;
 
         /// <summary>
         /// The actual additions sampleset used by this timeline object. Includes <see cref="TimingContext"/>.
         /// </summary>
-        public SampleSet FenoAdditionSet => Hitsounds.AdditionSet == SampleSet.Auto ? FenoSampleSet : Hitsounds.AdditionSet;
+        public SampleSet FenoAdditionSet => Hitsounds.AdditionSet == SampleSet.None ? FenoSampleSet : Hitsounds.AdditionSet;
 
         /// <summary>
         /// The actual custom index used by this timeline object. Includes <see cref="TimingContext"/>.

@@ -1,5 +1,8 @@
-﻿using Mapping_Tools_Core.BeatmapHelper;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Mapping_Tools_Core.BeatmapHelper;
 using Mapping_Tools_Core.BeatmapHelper.BeatDivisors;
+using Mapping_Tools_Core.BeatmapHelper.Contexts;
 using Mapping_Tools_Core.BeatmapHelper.Enums;
 using Mapping_Tools_Core.BeatmapHelper.TimelineStuff;
 using Mapping_Tools_Core.BeatmapHelper.TimelineStuff.TimelineObjects;
@@ -50,9 +53,9 @@ namespace Mapping_Tools_Core.Tools.HitsoundCopierStuff {
         /// The sample set to assign to sliderends that get muted.
         /// </summary>
         /// <remarks>
-        /// If this value is not Auto, sliderends that do not match this sample set will not get muted.
+        /// If this value is not None, sliderends that do not match this sample set will not get muted.
         /// </remarks>
-        public SampleSet MutedSampleSet = SampleSet.Auto;
+        public SampleSet MutedSampleSet = SampleSet.None;
 
         /// <summary>
         /// Mutes slider-ends and spinner-ends in a beatmap.
@@ -117,7 +120,7 @@ namespace Mapping_Tools_Core.Tools.HitsoundCopierStuff {
 
             // Check if this tlo has hitsounds
             if (tloTo.Hitsounds.Whistle || tloTo.Hitsounds.Finish || tloTo.Hitsounds.Clap ||
-                (MutedSampleSet != SampleSet.Auto && tloTo.FenoSampleSet != MutedSampleSet)) {
+                (MutedSampleSet != SampleSet.None && tloTo.FenoSampleSet != MutedSampleSet)) {
                 return false;
             }
 

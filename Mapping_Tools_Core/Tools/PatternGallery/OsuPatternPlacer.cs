@@ -735,7 +735,7 @@ namespace Mapping_Tools_Core.Tools.PatternGallery {
                 if (includeTimingPointHitsounds) {
                     // Body hitsounds
                     bool vol = ho is Slider || ho is Spinner;
-                    bool sam = ho is Slider && ho.Hitsounds.SampleSet == SampleSet.Auto;
+                    bool sam = ho is Slider && ho.Hitsounds.SampleSet == SampleSet.None;
                     bool ind = ho is Slider;
                     controlChanges.AddRange(tc.BodyHitsounds.Select(tp =>
                         new ControlChange(tp, volume: vol, index: ind, sampleset: sam)));

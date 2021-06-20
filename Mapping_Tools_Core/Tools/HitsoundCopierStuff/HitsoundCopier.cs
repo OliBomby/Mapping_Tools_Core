@@ -496,7 +496,7 @@ namespace Mapping_Tools_Core.Tools.HitsoundCopierStuff {
                         }
 
                         // Make sure the slider with the slider ticks uses auto sampleset so the customized greenlines control the hitsounds
-                        tickSlider.SampleSet = SampleSet.Auto;
+                        tickSlider.SampleSet = SampleSet.None;
 
                         // Add timingpointschange
                         var tp = tloFrom.HitsoundTimingPoint.Copy();
@@ -552,7 +552,7 @@ namespace Mapping_Tools_Core.Tools.HitsoundCopierStuff {
                         index: arg.CopySampleSets, volume: arg.CopyVolumes));
 
                     // Make sure the slider with the slider ticks uses auto sampleset so the customized greenlines control the hitsounds
-                    slideSlider.SampleSet = SampleSet.Auto;
+                    slideSlider.SampleSet = SampleSet.None;
                 }
             }
 
@@ -560,7 +560,7 @@ namespace Mapping_Tools_Core.Tools.HitsoundCopierStuff {
             foreach (var tloTo in tlTo.TimelineObjects) {
                 if (!tloTo.CanCopy) continue;
                 var tp = tloTo.HitsoundTimingPoint.Copy();
-                var holdSampleset = arg.CopySampleSets && tloTo.SampleSet == SampleSet.Auto;
+                var holdSampleset = arg.CopySampleSets && tloTo.SampleSet == SampleSet.None;
                 var holdIndex = arg.CopySampleSets && !(tloTo.CanCustoms && tloTo.CustomIndex != 0);
 
                 // Dont hold indexes or sampleset if the sample it plays currently is the same as the sample it would play without conserving
@@ -682,8 +682,8 @@ namespace Mapping_Tools_Core.Tools.HitsoundCopierStuff {
                 if (!ho.IsSlider) continue;
                 // Remove edge hitsounds
                 ho.EdgeHitsounds = ho.EdgeHitsounds.Select(o => 0).ToList();
-                ho.EdgeSampleSets = ho.EdgeSampleSets.Select(o => SampleSet.Auto).ToList();
-                ho.EdgeAdditionSets = ho.EdgeAdditionSets.Select(o => SampleSet.Auto).ToList();
+                ho.EdgeSampleSets = ho.EdgeSampleSets.Select(o => SampleSet.None).ToList();
+                ho.EdgeAdditionSets = ho.EdgeAdditionSets.Select(o => SampleSet.None).ToList();
             }
         }
     }

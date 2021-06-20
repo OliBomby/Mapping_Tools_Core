@@ -618,7 +618,7 @@ namespace Mapping_Tools_Core.BeatmapHelper.TimingStuff {
                 return new TimingPoint(0, 1000, firstTp.Meter, firstTp.SampleSet, firstTp.SampleIndex, firstTp.Volume,
                     firstTp.Uninherited, false, false);
 
-            return new TimingPoint(0, 0, 0, SampleSet.Auto, 0, 0, true, false, false);
+            return new TimingPoint(0, 0, 0, SampleSet.None, 0, 0, true, false, false);
         }
     }
 }
