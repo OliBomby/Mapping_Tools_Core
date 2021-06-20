@@ -8,6 +8,6 @@ namespace Mapping_Tools_Core.BeatmapHelper.TimelineStuff.TimelineObjects {
 
         public SpinnerHead(double time, [NotNull] HitSampleInfo hitsounds) : base(time, hitsounds) { }
 
-        public override void HitoundsToOrigin() { }
+        public override void HitsoundsToOrigin() { }
     }
 }

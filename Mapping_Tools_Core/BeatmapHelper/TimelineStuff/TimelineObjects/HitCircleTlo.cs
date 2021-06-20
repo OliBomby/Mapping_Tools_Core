@@ -10,7 +10,7 @@ namespace Mapping_Tools_Core.BeatmapHelper.TimelineStuff.TimelineObjects {
 
         public HitCircleTlo(double time, [NotNull] HitSampleInfo hitsounds) : base(time, hitsounds) { }
 
-        public override void HitoundsToOrigin() {
+        public override void HitsoundsToOrigin() {
             if (!(Origin is HitCircle))
                 throw new InvalidOperationException(
                     $"Invalid origin. Can not assign hitcircle hitsounds to a {Origin?.GetType()}: {Origin}.");

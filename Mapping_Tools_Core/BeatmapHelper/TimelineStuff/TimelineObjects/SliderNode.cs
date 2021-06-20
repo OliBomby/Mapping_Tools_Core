@@ -21,7 +21,7 @@ namespace Mapping_Tools_Core.BeatmapHelper.TimelineStuff.TimelineObjects {
             NodeIndex = nodeIndex;
         }
 
-        public override void HitoundsToOrigin() {
+        public override void HitsoundsToOrigin() {
             if (!(Origin is Slider slider))
                 throw new InvalidOperationException(
                     $"Invalid origin. Can not assign slider node hitsounds to a {Origin?.GetType()}: {Origin}.");
