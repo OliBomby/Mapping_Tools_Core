@@ -55,7 +55,7 @@ namespace Mapping_Tools_Core.Tools.HitsoundCopierStuff {
         /// <summary>
         /// Whether to copy storyboarded samples.
         /// </summary>
-        public bool CopyStoryboardedSamples = false;
+        public bool DoCopyStoryboardedSamples = false;
 
         /// <summary>
         /// Whether to prevent copying storyboarded samples that are already played in the hitsounds.
@@ -149,7 +149,7 @@ namespace Mapping_Tools_Core.Tools.HitsoundCopierStuff {
                 ControlChange.ApplyChanges(destBeatmap.BeatmapTiming, timingPointsChangesMute);
             }
             
-            if (CopyStoryboardedSamples) {
+            if (DoCopyStoryboardedSamples) {
                 CopyStoryboardedSamples(sourceBeatmap, destBeatmap, processedTimeline, true);
             }
         }

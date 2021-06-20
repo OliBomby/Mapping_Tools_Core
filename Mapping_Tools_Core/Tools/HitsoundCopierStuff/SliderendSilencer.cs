@@ -67,24 +67,24 @@ namespace Mapping_Tools_Core.Tools.HitsoundCopierStuff {
             var doMutedIndex = MutedIndex >= 0;
 
             beatmap.GiveObjectsTimingContext();
-            processedTimeline = processedTimeline ?? beatmap.GetTimeline();
+            processedTimeline ??= beatmap.GetTimeline();
             processedTimeline.GiveTimingContext(beatmap.BeatmapTiming);
             
             var controlChanges = new List<ControlChange>();
             foreach (var tloTo in processedTimeline.TimelineObjects) {
                 if (FilterMuteTlo(tloTo, beatmap)) {
                     // Set volume to 5%, remove all hitsounds, apply customindex and sampleset
-                    tloTo.SampleSet = MutedSampleSet;
-                    tloTo.AdditionSet = 0;
-                    tloTo.Normal = false;
-                    tloTo.Whistle = false;
-                    tloTo.Finish = false;
-                    tloTo.Clap = false;
-
+                    tloTo.Hitsounds.SampleSet = MutedSampleSet;
+                    tloTo.Hitsounds.AdditionSet = 0;
+                    tloTo.Hitsounds.Normal = false;
+                    tloTo.Hitsounds.Whistle = false;
+                    tloTo.Hitsounds.Finish = false;
+                    tloTo.Hitsounds.Clap = false;
+                    
                     tloTo.HitsoundsToOrigin();
 
                     // Add timingpointschange to copy timingpoint hitsounds
-                    var tp = tloTo.HitsoundTimingPoint.Copy();
+                    var tp = tloTo.GetContext<TimingContext>().HitsoundTimingPoint.Copy();
                     tp.Offset = tloTo.Time;
                     tp.SampleSet = MutedSampleSet;
                     tp.SampleIndex = MutedIndex;
@@ -93,7 +93,7 @@ namespace Mapping_Tools_Core.Tools.HitsoundCopierStuff {
                         volume: true));
                 } else {
                     // Add timingpointschange to preserve index and volume and sampleset
-                    var tp = tloTo.HitsoundTimingPoint.Copy();
+                    var tp = tloTo.GetContext<TimingContext>().HitsoundTimingPoint.Copy();
                     tp.Offset = tloTo.Time;
                     controlChanges.Add(new ControlChange(tp, sampleset: true, index: doMutedIndex,
                         volume: true));
@@ -110,7 +110,7 @@ namespace Mapping_Tools_Core.Tools.HitsoundCopierStuff {
                 return false;
 
             // Check type
-            if (!(tloTo is SliderTail || tloTo is SpinnerTail))
+            if (tloTo is not (SliderTail or SpinnerTail))
                 return false;
 
             // Make sure the slider is not a repeating slider
@@ -141,8 +141,8 @@ namespace Mapping_Tools_Core.Tools.HitsoundCopierStuff {
                 return false;
             }
 
-            // Check filter temporal length
-            return Precision.AlmostBigger(tloTo.Origin.Duration, MinLength * timingPoint.MpB);
+            // Check filter minimum duration
+            return tloTo.Origin == null || Precision.AlmostBigger(tloTo.Origin.Duration, MinLength * timingPoint.MpB);
         }
     }
 }
