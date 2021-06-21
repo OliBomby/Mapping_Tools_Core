@@ -57,16 +57,19 @@ namespace Mapping_Tools_Core.BeatmapHelper.HitObjects {
         /// Copies all properties of this to the other.
         /// </summary>
         /// <param name="other">The object to copy to.</param>
-        public void CopyTo(HitSampleInfo other) {
+        /// <param name="copyCustoms">Whether to copy the <see cref="CustomIndex"/>, <see cref="Filename"/>, and <see cref="Volume"/> properties.</param>
+        public void CopyTo(HitSampleInfo other, bool copyCustoms = true) {
             other.SampleSet = SampleSet;
             other.AdditionSet = AdditionSet;
             other.Normal = Normal;
             other.Whistle = Whistle;
             other.Finish = Finish;
             other.Clap = Clap;
-            other.CustomIndex = CustomIndex;
-            other.Filename = Filename;
-            other.Volume = Volume;
+            if (copyCustoms) {
+                other.CustomIndex = CustomIndex;
+                other.Filename = Filename;
+                other.Volume = Volume;
+            }
         }
 
         public HitSampleInfo Clone() => (HitSampleInfo)MemberwiseClone();
