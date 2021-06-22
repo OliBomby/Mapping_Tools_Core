@@ -309,9 +309,11 @@ namespace Mapping_Tools_Core.Tools.HitsoundCopierStuff {
 
                     // Add a new custom sample to this slider tick to represent the hitsounds
                     IEnumerable<string> sampleFilenames = tloFrom.GetFirstPlayingFilenames(mode, containingFolderPath, comparer, false);
-                    List<ISampleGenerator> samples = sampleFilenames
-                        .Select(o => (ISampleGenerator) new RawAudioSampleGenerator(Helpers.OpenSample(o, comparer.GetOriginalSample(o).GetData())))
-                        .ToList();
+                    var samples = new HashSet<ISampleGenerator>(
+                        sampleFilenames
+                            // ReSharper disable once PossibleNullReferenceException
+                            .Select(o => (ISampleGenerator) new RawAudioSampleGenerator(Helpers.OpenSample(o, comparer.GetOriginalSample(o).GetData())))
+                        );
 
                     if (samples.Count > 0) {
                         var hstp = tloFrom.GetContext<TimingContext>().HitsoundTimingPoint;
@@ -319,40 +321,41 @@ namespace Mapping_Tools_Core.Tools.HitsoundCopierStuff {
                         if (sampleSchema.AddHitsound(samples, "slidertick", tloFrom.FenoSampleSet,
                             out int index, out var sampleSet, StartIndex)) {
                             // Add a copy of the slider slide sound to this index if necessary
+                            // Because we want to retain the same slider slide sound at the time of the slider tick
                             var oldIndex = hstp.SampleIndex;
                             var oldSampleSet = hstp.SampleSet;
-                            var oldSlideFilename =
-                                $"{oldSampleSet.ToString().ToLower()}-sliderslide{(oldIndex == 1 ? string.Empty : oldIndex.ToInvariant())}";
+                            var oldSlideFilename = Helpers.CreateHitsoundFilename(oldSampleSet, "sliderslide", oldIndex);
                             var oldSlidePath = Path.Combine(containingFolderPath, oldSlideFilename);
 
-                            if (comparer.ContainsKey(oldSlidePath)) {
-                                oldSlidePath = comparer[oldSlidePath];
-                                var slideGeneratingArgs = new SampleGeneratingArgs(oldSlidePath);
-                                var newSlideFilename =
-                                    $"{sampleSet.ToString().ToLower()}-sliderslide{index.ToInvariant()}";
+                            // Check if there exists a custom sample for slider slide here
+                            var oldSlideSample = comparer.GetOriginalSample(oldSlidePath);
+                            if (oldSlideSample != null) {
+                                // Add a copy to the sample schema at the index of the slider tick
+                                var slideGeneratingArgs = new RawAudioSampleGenerator(Helpers.OpenSample(oldSlideSample.Filename, oldSlideSample.GetData()));
+                                var newSlideFilename = Helpers.CreateHitsoundFilename(sampleSet, "sliderslide", index);
 
                                 sampleSchema.Add(newSlideFilename,
-                                    new List<SampleGeneratingArgs> { slideGeneratingArgs });
+                                    new HashSet<ISampleGenerator> { slideGeneratingArgs });
                             }
                         }
 
                         // Make sure the slider with the slider ticks uses auto sampleset so the customized greenlines control the hitsounds
-                        tickSlider.SampleSet = SampleSet.None;
+                        tickSlider.Hitsounds.SampleSet = SampleSet.None;
 
                         // Add timingpointschange
-                        var tp = tloFrom.HitsoundTimingPoint.Copy();
+                        var tp = hstp.Copy();
                         tp.Offset = sliderTickTime;
                         tp.SampleIndex = index;
                         tp.SampleSet = sampleSet;
                         tp.Volume = tloFrom.FenoSampleVolume;
-                        controlChanges.Add(new TimingPointsChange(tp, sampleset: arg.CopySampleSets,
-                            index: arg.CopySampleSets, volume: arg.CopyVolumes));
+                        controlChanges.Add(new ControlChange(tp, sampleset: DoCopySampleSets,
+                            index: DoCopySampleSets, volume: DoCopyVolumes));
 
                         // Add timingpointschange 5ms later to revert the stuff back to whatever it should be
-                        var tp2 = tloFrom.HitsoundTimingPoint.Copy();
+                        var tp2 = hstp.Copy();
                         tp2.Offset = sliderTickTime + 5;
-                        controlChanges.Add(new TimingPointsChange(tp2, sampleset: arg.CopySampleSets,
-                            index: arg.CopySampleSets, volume: arg.CopyVolumes));
+                        controlChanges.Add(new ControlChange(tp2, sampleset: DoCopySampleSets,
+                            index: DoCopySampleSets, volume: DoCopyVolumes));
 
                         CustomSampledTimes.Add((int)sliderTickTime);
                     }
@@ -373,62 +376,66 @@ namespace Mapping_Tools_Core.Tools.HitsoundCopierStuff {
                     continue;
 
                 // Add a new custom sample to this slider slide to represent the hitsounds
-                List<string> sampleFilenames = tlo.GetFirstPlayingFilenames(mode, containingFolderPath, comparer, false);
-                List<SampleGeneratingArgs> samples = sampleFilenames
-                    .Select(o => new SampleGeneratingArgs(Path.Combine(containingFolderPath, o)))
-                    .Where(o => SampleImporter.ValidateSampleArgs(o))
-                    .ToList();
+                IEnumerable<string> sampleFilenames = tlo.GetFirstPlayingFilenames(mode, containingFolderPath, comparer, false);
+                var samples = new HashSet<ISampleGenerator>(
+                    sampleFilenames
+                        // ReSharper disable once PossibleNullReferenceException
+                        .Select(o => (ISampleGenerator)new RawAudioSampleGenerator(Helpers.OpenSample(o, comparer.GetOriginalSample(o).GetData())))
+                    );
 
                 if (samples.Count > 0) {
                     sampleSchema.AddHitsound(samples, "sliderslide", tlo.FenoSampleSet,
-                        out int index, out var sampleSet, arg.StartIndex);
+                        out int index, out var sampleSet, StartIndex);
 
                     // Add timingpointschange
-                    var tp = tlo.HitsoundTimingPoint.Copy();
+                    var tp = tlo.GetContext<TimingContext>().HitsoundTimingPoint.Copy();
                     tp.Offset = tlo.Time;
                     tp.SampleIndex = index;
                     tp.SampleSet = sampleSet;
                     tp.Volume = tlo.FenoSampleVolume;
-                    controlChanges.Add(new TimingPointsChange(tp, sampleset: arg.CopySampleSets,
-                        index: arg.CopySampleSets, volume: arg.CopyVolumes));
+                    controlChanges.Add(new ControlChange(tp, sampleset: DoCopySampleSets,
+                        index: DoCopySampleSets, volume: DoCopyVolumes));
 
                     // Make sure the slider with the slider ticks uses auto sampleset so the customized greenlines control the hitsounds
-                    slideSlider.SampleSet = SampleSet.None;
+                    slideSlider.Hitsounds.SampleSet = SampleSet.None;
                 }
             }
 
             // Timingpointchange all the undefined tlo from copyFrom
             // But this is super complicated because we also try to prevent unnecessary hitsounds
             foreach (var tloTo in tlTo.TimelineObjects) {
-                if (!tloTo.CanCopy) continue;
-                var tp = tloTo.HitsoundTimingPoint.Copy();
-                var holdSampleset = arg.CopySampleSets && tloTo.SampleSet == SampleSet.None;
-                var holdIndex = arg.CopySampleSets && !(tloTo.CanCustoms && tloTo.CustomIndex != 0);
+                if (tloTo.HasContext<HasCopiedContext>()) continue;
+                
+                var hstp = tloTo.GetContext<TimingContext>().HitsoundTimingPoint;
+                var hstpCopy = hstp.Copy();
+                var holdSampleset = DoCopySampleSets && tloTo.Hitsounds.SampleSet == SampleSet.None;
+                var holdIndex = DoCopySampleSets && !(tloTo.CanCustoms && tloTo.Hitsounds.CustomIndex != 0);
 
                 // Dont hold indexes or sampleset if the sample it plays currently is the same as the sample it would play without conserving
                 if (holdSampleset || holdIndex) {
-                    var nativeSamples = tloTo.GetFirstPlayingFilenames(mode, containingFolderPath, comparer);
+                    var nativeSamples = tloTo.GetFirstPlayingFilenames(mode, containingFolderPath, comparer).ToArray();
 
                     if (holdSampleset) {
-                        var oldSampleSet = tloTo.FenoSampleSet;
-                        var newSampleSet = tloTo.FenoSampleSet;
+                        var oldSampleSet = hstp.SampleSet;
+                        var newSampleSet = hstp.SampleSet;
                         var latest = double.NegativeInfinity;
-                        foreach (TimingPointsChange tpc in controlChanges) {
+                        foreach (var tpc in controlChanges) {
                             if (!tpc.Sampleset || !(tpc.MyTP.Offset <= tloTo.Time) || !(tpc.MyTP.Offset >= latest))
                                 continue;
                             newSampleSet = tpc.MyTP.SampleSet;
                             latest = tpc.MyTP.Offset;
                         }
 
-                        tp.SampleSet = newSampleSet;
-                        tloTo.GiveHitsoundTimingPoint(tp);
+                        hstp.SampleSet = newSampleSet;
                         var newSamples = tloTo.GetFirstPlayingFilenames(mode, containingFolderPath, comparer);
-                        tp.SampleSet = nativeSamples.SequenceEqual(newSamples) ? newSampleSet : oldSampleSet;
+                        hstp.SampleSet = oldSampleSet;
+
+                        hstpCopy.SampleSet = nativeSamples.SequenceEqual(newSamples) ? newSampleSet : oldSampleSet;
                     }
 
                     if (holdIndex) {
-                        var oldIndex = tloTo.FenoCustomIndex;
-                        var newIndex = tloTo.FenoCustomIndex;
+                        var oldIndex = hstp.SampleIndex;
+                        var newIndex = hstp.SampleIndex;
                         var latest = double.NegativeInfinity;
                         foreach (var tpc in controlChanges) {
                             if (!tpc.Index || !(tpc.MyTP.Offset <= tloTo.Time) || !(tpc.MyTP.Offset >= latest))
@@ -437,18 +444,17 @@ namespace Mapping_Tools_Core.Tools.HitsoundCopierStuff {
                             latest = tpc.MyTP.Offset;
                         }
 
-                        tp.SampleIndex = newIndex;
-                        tloTo.GiveHitsoundTimingPoint(tp);
+                        hstp.SampleIndex = newIndex;
                         var newSamples = tloTo.GetFirstPlayingFilenames(mode, containingFolderPath, comparer);
-                        tp.SampleIndex = nativeSamples.SequenceEqual(newSamples) ? newIndex : oldIndex;
-                    }
+                        hstp.SampleIndex = oldIndex;
 
-                    tloTo.GiveHitsoundTimingPoint(tp);
+                        hstpCopy.SampleIndex = nativeSamples.SequenceEqual(newSamples) ? newIndex : oldIndex;
+                    }
                 }
 
-                tp.Offset = tloTo.Time;
-                controlChanges.Add(new TimingPointsChange(tp, sampleset: holdSampleset, index: holdIndex,
-                    volume: arg.CopyVolumes));
+                hstpCopy.Offset = tloTo.Time;
+                controlChanges.Add(new ControlChange(hstp, sampleset: holdSampleset, index: holdIndex,
+                    volume: DoCopyVolumes));
             }
         }
 
