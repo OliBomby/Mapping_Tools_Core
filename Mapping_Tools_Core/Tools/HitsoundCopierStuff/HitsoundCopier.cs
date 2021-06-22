@@ -324,7 +324,7 @@ namespace Mapping_Tools_Core.Tools.HitsoundCopierStuff {
                             // Because we want to retain the same slider slide sound at the time of the slider tick
                             var oldIndex = hstp.SampleIndex;
                             var oldSampleSet = hstp.SampleSet;
-                            var oldSlideFilename = Helpers.CreateHitsoundFilename(oldSampleSet, "sliderslide", oldIndex);
+                            var oldSlideFilename = Helpers.GetHitsoundFilename(oldSampleSet, "sliderslide", oldIndex);
                             var oldSlidePath = Path.Combine(containingFolderPath, oldSlideFilename);
 
                             // Check if there exists a custom sample for slider slide here
@@ -332,7 +332,7 @@ namespace Mapping_Tools_Core.Tools.HitsoundCopierStuff {
                             if (oldSlideSample != null) {
                                 // Add a copy to the sample schema at the index of the slider tick
                                 var slideGeneratingArgs = new RawAudioSampleGenerator(Helpers.OpenSample(oldSlideSample.Filename, oldSlideSample.GetData()));
-                                var newSlideFilename = Helpers.CreateHitsoundFilename(sampleSet, "sliderslide", index);
+                                var newSlideFilename = Helpers.GetHitsoundFilename(sampleSet, "sliderslide", index);
 
                                 sampleSchema.Add(newSlideFilename,
                                     new HashSet<ISampleGenerator> { slideGeneratingArgs });

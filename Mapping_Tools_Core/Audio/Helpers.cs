@@ -5,6 +5,7 @@ using NAudio.Wave.SampleProviders;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Mapping_Tools_Core.BeatmapHelper.Enums;
 
 namespace Mapping_Tools_Core.Audio {
     public static class Helpers {
@@ -130,6 +131,29 @@ namespace Mapping_Tools_Core.Audio {
                     Console.WriteLine(e);
                 }
             }
+        }
+
+        /// <summary>
+        /// Gets the hitsound file name without extension. For example: "soft-sliderslide"
+        /// </summary>
+        /// <param name="sampleSet">The sample set of the hitsound.</param>
+        /// <param name="name">The name of the hitsound.</param>
+        /// <param name="index">The sample index of the hitsound.</param>
+        /// <returns>The filename without extension.</returns>
+        public static string GetHitsoundFilename(SampleSet sampleSet, string name, int index = 1) {
+            return $"{sampleSet.ToString().ToLower()}-{name}{(index == 1 ? string.Empty : index.ToInvariant())}";
+        }
+
+
+        /// <summary>
+        /// Gets the hitsound file name without extension. For example: "normal-hitclap3"
+        /// </summary>
+        /// <param name="sampleSet">The sample set of the hitsound.</param>
+        /// <param name="hitsound">The type of hitsound.</param>
+        /// <param name="index">The sample index of the hitsound.</param>
+        /// <returns>The filename without extension.</returns>
+        public static string GetHitsoundFilename(SampleSet sampleSet, Hitsound hitsound, int index = 1) {
+            return $"{sampleSet.ToString().ToLower()}-hit{hitsound.ToString().ToLower()}{(index == 1 ? string.Empty : index.ToInvariant())}";
         }
     }
 }
