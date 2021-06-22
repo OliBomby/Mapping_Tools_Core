@@ -314,11 +314,13 @@ namespace Mapping_Tools_Core.Tools.HitsoundCopierStuff {
                         .ToList();
 
                     if (samples.Count > 0) {
+                        var hstp = tloFrom.GetContext<TimingContext>().HitsoundTimingPoint;
+
                         if (sampleSchema.AddHitsound(samples, "slidertick", tloFrom.FenoSampleSet,
-                            out int index, out var sampleSet, arg.StartIndex)) {
+                            out int index, out var sampleSet, StartIndex)) {
                             // Add a copy of the slider slide sound to this index if necessary
-                            var oldIndex = tloFrom.HitsoundTimingPoint.SampleIndex;
-                            var oldSampleSet = tloFrom.HitsoundTimingPoint.SampleSet;
+                            var oldIndex = hstp.SampleIndex;
+                            var oldSampleSet = hstp.SampleSet;
                             var oldSlideFilename =
                                 $"{oldSampleSet.ToString().ToLower()}-sliderslide{(oldIndex == 1 ? string.Empty : oldIndex.ToInvariant())}";
                             var oldSlidePath = Path.Combine(containingFolderPath, oldSlideFilename);
@@ -357,11 +359,11 @@ namespace Mapping_Tools_Core.Tools.HitsoundCopierStuff {
                 }
                 // If the there is no slidertick to be found, then try copying it to the slider slide
                 else
-                if (arg.CopyToSliderSlides) {
+                if (DoCopyToSliderSlides) {
                     tloToSliderSlide.Add(tloFrom);
                 }
 
-                tloFrom.CanCopy = false;
+                tloFrom.SetContext(new HasCopiedContext());
             }
 
             // Do the sliderslide hitsounds after because the ticks need to add sliderslides with strict indices.
