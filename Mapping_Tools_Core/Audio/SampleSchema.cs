@@ -16,13 +16,13 @@ namespace Mapping_Tools_Core.Audio {
         [UsedImplicitly]
         public SampleSchema() { }
 
-        public SampleSchema(IEnumerable<CustomIndex> customIndices) {
+/*        public SampleSchema(IEnumerable<CustomIndex> customIndices) {
             foreach (var customIndex in customIndices) {
                 foreach (var customIndexSample in customIndex.Samples) {
                     Add(customIndexSample.Key + customIndex.GetNumberExtension(), customIndexSample.Value);
                 }
             }
-        }
+        }*/
 
         public SampleSchema(IDictionary<ISampleGenerator, string> sampleNames) {
             foreach (var sample in sampleNames) {
@@ -101,7 +101,7 @@ namespace Mapping_Tools_Core.Audio {
             return sampleNames;
         }
 
-        public IList<ICustomIndex> GetCustomIndices() {
+/*        public IList<ICustomIndex> GetCustomIndices() {
             var customIndices = new Dictionary<int, ICustomIndex>();
 
             foreach (var kvp in this) {
@@ -131,7 +131,7 @@ namespace Mapping_Tools_Core.Audio {
             }
 
             return customIndices.Values.ToList();
-        }
+        }*/
 
         public void MergeWith(ISampleSchema other) {
             foreach (var kvp in other) {
