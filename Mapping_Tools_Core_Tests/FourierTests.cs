@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Mapping_Tools_Core.Audio;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NAudio.Wave;
 using System;
 using System.Collections.Generic;
@@ -8,10 +9,10 @@ using System.Threading.Tasks;
 namespace Mapping_Tools_Core_Tests {
     [TestClass]
     public class FourierTests {
-        //[TestMethod]
+        [TestMethod]
         public void FourierTest() {
             const int expectedBPM = 165;
-            var reader = new MediaFoundationReader(Path.Join("Resources", "04 Compute It With Some Devilish Alcoholic Steampunk Engines.mp3"));
+            var reader = new Mp3FileReader(Path.Join("Resources", "04 Compute It With Some Devilish Alcoholic Steampunk Engines.mp3"));
             var sampleProvider = reader.ToSampleProvider().ToMono();
             var sampleRate = sampleProvider.WaveFormat.SampleRate;
 

@@ -10,6 +10,10 @@ using System.Text.RegularExpressions;
 
 namespace Mapping_Tools_Core.Audio {
     public static class Helpers {
+        public static WaveStream OpenSample(string filename) {
+            return OpenSample(filename, File.OpenRead(filename));
+        }
+
         public static WaveStream OpenSample(string filename, Stream stream) {
             return Path.GetExtension(filename) switch {
                 ".wav" => new WaveFileReader(stream),

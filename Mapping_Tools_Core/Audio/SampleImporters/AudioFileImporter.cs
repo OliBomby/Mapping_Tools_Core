@@ -9,7 +9,7 @@ namespace Mapping_Tools_Core.Audio.SampleImporters {
         }
 
         public WaveStream Import() {
-            return new AudioFileReader(path);
+            return Helpers.OpenSample(path);
         }
     }
 }
