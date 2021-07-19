@@ -14,8 +14,10 @@ Core functionality behind Mapping Tools.
 [![CodeFactor](https://www.codefactor.io/repository/github/olibomby/mapping_tools_core/badge)](https://www.codefactor.io/repository/github/olibomby/mapping_tools_core)
 
 ## Used libraries
-- [NAudio](https://github.com/naudio/NAudio)
-- [NAudio Vorbis](https://github.com/naudio/Vorbis)
-- [.NET Ogg Vorbis Encoder](https://github.com/SteveLillis/.NET-Ogg-Vorbis-Encoder)
 - [JetBrains.Annotations](https://www.jetbrains.com/help/resharper/2021.1/Code_Analysis__Code_Annotations.html)
+- [NAudio.Core](https://github.com/naudio/NAudio)
+- [NAudio.Midi](https://github.com/naudio/NAudio)
+- [NAudio.Vorbis](https://github.com/naudio/Vorbis)
+- [Nlayer.NAudioSupport](https://github.com/naudio/NLayer)
+- [OggVorbisEncoder](https://github.com/SteveLillis/.NET-Ogg-Vorbis-Encoder)
 
