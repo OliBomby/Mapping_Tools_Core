@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace Mapping_Tools_Core_Tests {
     [TestClass]
     public class FourierTests {
-        [TestMethod]
+        //[TestMethod]
         public void FourierTest() {
             const int expectedBPM = 165;
             var reader = new Mp3FileReader(Path.Join("Resources", "04 Compute It With Some Devilish Alcoholic Steampunk Engines.mp3"));
