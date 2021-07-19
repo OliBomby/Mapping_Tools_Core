@@ -5,6 +5,8 @@ using NAudio.Wave.SampleProviders;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Mapping_Tools_Core.BeatmapHelper.Enums;
+using System.Text.RegularExpressions;
 
 namespace Mapping_Tools_Core.Audio {
     public static class Helpers {
@@ -130,6 +132,94 @@ namespace Mapping_Tools_Core.Audio {
                     Console.WriteLine(e);
                 }
             }
+        }
+
+        /// <summary>
+        /// Gets the hitsound file name without extension. For example: "soft-sliderslide"
+        /// </summary>
+        /// <param name="sampleSet">The sample set of the hitsound.</param>
+        /// <param name="name">The name of the hitsound.</param>
+        /// <param name="index">The sample index of the hitsound.</param>
+        /// <returns>The filename without extension.</returns>
+        public static string GetHitsoundFilename(SampleSet sampleSet, string name, int index = 1) {
+            return $"{sampleSet.ToString().ToLower()}-{name}{(index == 1 ? string.Empty : index.ToInvariant())}";
+        }
+
+
+        /// <summary>
+        /// Gets the hitsound file name without extension. For example: "normal-hitclap3"
+        /// </summary>
+        /// <param name="sampleSet">The sample set of the hitsound.</param>
+        /// <param name="hitsound">The type of hitsound.</param>
+        /// <param name="index">The sample index of the hitsound.</param>
+        /// <returns>The filename without extension.</returns>
+        public static string GetHitsoundFilename(SampleSet sampleSet, Hitsound hitsound, int index = 1) {
+            return $"{sampleSet.ToString().ToLower()}-hit{hitsound.ToString().ToLower()}{(index == 1 ? string.Empty : index.ToInvariant())}";
+        }
+
+        /// <summary>
+        /// Gets the sample set from a standard osu! hitsound filename notation.
+        /// Returns <see cref="SampleSet.None"/> for invalid input.
+        /// </summary>
+        /// <param name="filename">The filename to get the sample set from.</param>
+        /// <returns>The sample set in the filename.</returns>
+        public static SampleSet GetSamplesetFromFilename(string filename) {
+            string[] split = filename.Split('-');
+            if (split.Length == 0)
+                return SampleSet.None;
+            string sampleset = split[0];
+            switch (sampleset) {
+                case "none":
+                    return SampleSet.None;
+                case "normal":
+                    return SampleSet.Normal;
+                case "soft":
+                    return SampleSet.Soft;
+                case "drum":
+                    return SampleSet.Drum;
+                default:
+                    return SampleSet.None;
+            }
+        }
+
+        /// <summary>
+        /// Gets the hitsound type from a standard osu! hitsound filename notation.
+        /// Returns <see cref="Hitsound.Normal"/> for invalid input.
+        /// </summary>
+        /// <param name="filename">The filename to get the hitsound from.</param>
+        /// <returns>The hitsound type in the filename.</returns>
+        public static Hitsound GetHitsoundFromFilename(string filename) {
+            string[] split = filename.Split('-');
+            if (split.Length < 2)
+                return Hitsound.Normal;
+            string hitsound = split[1];
+            if (hitsound.Contains("hitnormal"))
+                return Hitsound.Normal;
+            if (hitsound.Contains("hitwhistle"))
+                return Hitsound.Whistle;
+            if (hitsound.Contains("hitfinish"))
+                return Hitsound.Finish;
+            if (hitsound.Contains("hitclap"))
+                return Hitsound.Clap;
+            return Hitsound.Normal;
+        }
+
+        /// <summary>
+        /// Gets the custom sample index from a standard osu! hitsound filename notation.
+        /// Returns 0 for invalid input.
+        /// </summary>
+        /// <param name="filename">The filename to get custom sample index from.</param>
+        /// <returns>The custom sample index in the filename.</returns>
+        public static int GetIndexFromFilename(string filename) {
+            var match = Regex.Match(filename, "^(normal|soft|drum)-(hit(normal|whistle|finish|clap)|slidertick|sliderslide)");
+
+            var remainder = filename.Substring(match.Index + match.Length);
+            int index = 0;
+            if (!string.IsNullOrEmpty(remainder)) {
+                InputParsers.TryParseInt(remainder, out index);
+            }
+
+            return index;
         }
     }
 }

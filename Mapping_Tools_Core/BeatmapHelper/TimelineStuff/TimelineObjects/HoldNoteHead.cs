@@ -10,7 +10,7 @@ namespace Mapping_Tools_Core.BeatmapHelper.TimelineStuff.TimelineObjects {
 
         public HoldNoteHead(double time, [NotNull] HitSampleInfo hitsounds) : base(time, hitsounds) { }
 
-        public override void HitoundsToOrigin() {
+        public override void HitsoundsToOrigin() {
             if (!(Origin is HoldNote))
                 throw new InvalidOperationException(
                     $"Invalid origin. Can not assign hold note head hitsounds to a {Origin?.GetType()}: {Origin}.");

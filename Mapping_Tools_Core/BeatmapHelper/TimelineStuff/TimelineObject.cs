@@ -195,7 +195,7 @@ namespace Mapping_Tools_Core.BeatmapHelper.TimelineStuff {
         /// <summary>
         /// Assigns the hitsounds of this timeline object to the <see cref="Origin"/>.
         /// </summary>
-        public abstract void HitoundsToOrigin();
+        public abstract void HitsoundsToOrigin();
 
         /// <summary>
         /// Grabs the playing file name of the object.

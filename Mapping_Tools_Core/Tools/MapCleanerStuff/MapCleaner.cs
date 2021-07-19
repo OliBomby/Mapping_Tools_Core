@@ -219,7 +219,7 @@ namespace Mapping_Tools_Core.Tools.MapCleanerStuff {
                     tlo.Hitsounds.AdditionSet = SampleSet.None;
                 }
 
-                tlo.HitoundsToOrigin();
+                tlo.HitsoundsToOrigin();
 
                 // Add greenlines for custom indexes and volumes
                 if (tlo.HasHitsound) {

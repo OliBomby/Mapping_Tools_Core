@@ -270,5 +270,17 @@ namespace Mapping_Tools_Core.BeatmapHelper.HitObjects.Objects {
             }
             SetContext(context);
         }
+
+        private TimelineObject createTimelineObject(double time, HitSampleInfo hitsounds, int nodeIndex) {
+            if (nodeIndex == 0) {
+                return new SliderHead(time, GetNodeSamples(nodeIndex).Clone(), nodeIndex) {Origin = this};
+            }
+
+            if (nodeIndex == SpanCount) {
+                return new SliderTail(time, GetNodeSamples(nodeIndex).Clone(), nodeIndex) {Origin = this};
+            }
+            
+            return new SliderNode(time, GetNodeSamples(nodeIndex).Clone(), nodeIndex) {Origin = this};
+        }
     }
 }

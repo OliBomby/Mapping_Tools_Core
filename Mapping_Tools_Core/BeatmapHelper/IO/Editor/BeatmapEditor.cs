@@ -9,7 +9,7 @@ namespace Mapping_Tools_Core.BeatmapHelper.IO.Editor {
         public BeatmapEditor(string path) : base(new OsuBeatmapEncoder(), new OsuBeatmapDecoder(), path) {}
 
         /// <summary>
-        /// Saves the beatmap using <see cref=".SaveFile()"/> but also updates the filename according to the metadata of the <see cref="IBeatmap"/>
+        /// Saves the beatmap using <see cref="!:PathEditor.WriteFile"/> but also updates the filename according to the metadata of the <see cref="IBeatmap"/>
         /// </summary>
         /// <remarks>This method also updates the Path property</remarks>
         public void WriteFileWithNameUpdate(IBeatmap beatmap, bool deleteOriginal = true) {
