@@ -7,13 +7,28 @@ using System.Collections.Generic;
 using System.IO;
 using Mapping_Tools_Core.BeatmapHelper.Enums;
 using System.Text.RegularExpressions;
+using Mapping_Tools_Core.Audio.Samples;
 
 namespace Mapping_Tools_Core.Audio {
+    /// <summary>
+    /// Miscellaneous helper functions related to audio.
+    /// </summary>
     public static class Helpers {
+        /// <summary>
+        /// Decodes any audio file and returns the wave audio stream.
+        /// </summary>
+        /// <param name="filename">The path to the file to open with extension.</param>
+        /// <returns>The wave audio stream.</returns>
         public static WaveStream OpenSample(string filename) {
             return OpenSample(filename, File.OpenRead(filename));
         }
 
+        /// <summary>
+        /// Decodes any audio file and returns the wave audio stream.
+        /// </summary>
+        /// <param name="filename">The filename with extension of the file to decode.</param>
+        /// <param name="stream">The file stream to decode.</param>
+        /// <returns>The wave audio stream.</returns>
         public static WaveStream OpenSample(string filename, Stream stream) {
             return Path.GetExtension(filename) switch {
                 ".wav" => new WaveFileReader(stream),
@@ -23,6 +38,15 @@ namespace Mapping_Tools_Core.Audio {
                 ".ogg" => new VorbisWaveReader(stream),
                 _ => throw new ArgumentException("Unrecognized file extension.", nameof(filename))
             };
+        }
+
+        /// <summary>
+        /// Computes a hash based on the wave data.
+        /// </summary>
+        /// <param name="sample">The audio sample to compute the hash of.</param>
+        /// <returns>The hash of the audio of the sample.</returns>
+        public static int ComputeAudioHash(IAudioSampleGenerator sample) {
+            throw new NotImplementedException();
         }
 
         public static ISampleProvider SetChannels(ISampleProvider sampleProvider, int channels) {

@@ -1,13 +1,15 @@
 ﻿using System.Collections.Generic;
-using Mapping_Tools_Core.Audio.SampleGeneration;
+using Mapping_Tools_Core.Audio.DuplicateDetection;
+using Mapping_Tools_Core.Audio.Samples.Types;
 using Mapping_Tools_Core.BeatmapHelper.Enums;
 
 namespace Mapping_Tools_Core.Audio {
     /// <summary>
-    /// A mapping between samples and their filenames (filename without ext., set of samples which are satisfied by that file)
+    /// A mapping between audio samples and their filenames.
     /// Represents a schema on how to exports sample packages.
+    /// Can be used to find out which files already satisfy the sound you want.
     /// </summary>
-    public interface ISampleSchema : IDictionary<string, ISet<ISampleGenerator>> {
+    public interface ISampleSchema : IAudioSampleContentComparer<IAudioFile> {
         /// <summary>
         /// Makes sure a certain hitsound with a certain sound is in the <see cref="ISampleSchema"/>.
         /// If it already exists, then it simply returns the index and sampleset of that filename.
@@ -19,7 +21,7 @@ namespace Mapping_Tools_Core.Audio {
         /// <param name="newSampleSet">The sample set of the added sample.</param>
         /// <param name="startIndex">The index of the added sample.</param>
         /// <returns>True if it added a new entry.</returns>
-        bool AddHitsound(ISet<ISampleGenerator> samples, string hitsoundName, SampleSet sampleSet,
+        bool AddHitsound(int soundHash, string hitsoundName, SampleSet sampleSet,
             out int newIndex, out SampleSet newSampleSet, int startIndex = 1);
         
         /// <summary>
@@ -28,7 +30,7 @@ namespace Mapping_Tools_Core.Audio {
         /// </summary>
         /// <param name="samples">The set of samples to search for.</param>
         /// <returns>The filename associated with the set of samples.</returns>
-        string FindFilename(ISet<ISampleGenerator> samples);
+        string FindFilename(int soundHash);
 
         /// <summary>
         /// Finds the filename associated with the set of samples and matches the regex pattern.
@@ -37,14 +39,14 @@ namespace Mapping_Tools_Core.Audio {
         /// <param name="samples">The set of samples to search for.</param>
         /// <param name="regexPattern">The regex pattern to match the filename with.</param>
         /// <returns>The filename associated with the set of samples.</returns>
-        string FindFilename(ISet<ISampleGenerator> samples, string regexPattern);
+        string FindFilename(int soundHash, string regexPattern);
 
         /// <summary>
         /// Generates a dictionary which maps <see cref="ISampleGenerator"/> to their corresponding filename which makes that sample sound.
         /// Only maps the <see cref="ISampleGenerator"/> which are non-mixed.
         /// </summary>
         /// <returns></returns>
-        IDictionary<ISampleGenerator, string> GetSampleNames();
+        IDictionary<int, string> GetSampleNames();
 
         /// <summary>
         /// Merges the other sample schema into this sample schema.
