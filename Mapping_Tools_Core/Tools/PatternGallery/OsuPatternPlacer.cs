@@ -207,22 +207,28 @@ namespace Mapping_Tools_Core.Tools.PatternGallery {
             int startIndex = 0;
             for (int i = 1; i < beatmap.HitObjects.Count; i++) {
                 var gap = beatMode ?
-                    beatmap.HitObjects[i].StartTime - beatmap.HitObjects[i-1].EndTime :
-                    beatmap.BeatmapTiming.GetBeatLength(beatmap.HitObjects[i-1].EndTime, beatmap.HitObjects[i].StartTime);
+                    beatmap.HitObjects[i].GetContext<TransformTimeContext>().StartTime - beatmap.HitObjects[i-1].GetContext<TransformTimeContext>().EndTime :
+                    beatmap.BeatmapTiming.GetBeatLength(beatmap.HitObjects[i-1].GetContext<TransformTimeContext>().EndTime, beatmap.HitObjects[i].GetContext<TransformTimeContext>().StartTime);
 
                 if (Precision.AlmostBigger(gap, PartingDistance)) {
-                    parts.Add(new Part(beatmap.HitObjects[startIndex].StartTime,
-                        beatmap.HitObjects[i-1].EndTime, 
+                    parts.Add(new Part(beatmap.HitObjects[startIndex].GetContext<TransformTimeContext>().StartTime,
+                        GetEndTimeNoZeroLength(beatmap.HitObjects[i-1], beatMode), 
                         beatmap.HitObjects.GetRange(startIndex, i - startIndex)));
 
                     startIndex = i;
                 }
             }
-            parts.Add(new Part(beatmap.HitObjects[startIndex].StartTime,
-                beatmap.HitObjects[^1].EndTime, 
+            parts.Add(new Part(beatmap.HitObjects[startIndex].GetContext<TransformTimeContext>().StartTime,
+                GetEndTimeNoZeroLength(beatmap.HitObjects[^1], beatMode), 
                 beatmap.HitObjects.GetRange(startIndex, beatmap.HitObjects.Count - startIndex)));
 
             return parts;
+        }
+
+        private static double GetEndTimeNoZeroLength(HitObject ho, bool beatMode) {
+            var endTime = ho.GetContext<TransformTimeContext>().EndTime;
+            // We want sliders to have at least 1 ms of length so the start time can always get a redline and have the part end after the slider start
+            return Precision.AlmostEquals(endTime, ho.StartTime, 1) && ho is Slider && !beatMode ? endTime + 1 : endTime;
         }
 
         private class Part {
@@ -407,8 +413,8 @@ namespace Mapping_Tools_Core.Tools.PatternGallery {
                 parts = PartitionBeatmap(patternBeatmap, scaleToNewTiming);
             } else {
                 parts = new List<Part> {
-                    new Part(patternBeatmap.HitObjects[0].GetContext<TransformTimeContext>().StartTime, 
-                        patternBeatmap.HitObjects[^1].GetContext<TransformTimeContext>().StartTime, 
+                    new(patternBeatmap.HitObjects.Min(o => o.GetContext<TransformTimeContext>().StartTime), 
+                        patternBeatmap.HitObjects.Max(o => o.GetContext<TransformTimeContext>().EndTime), 
                         patternBeatmap.HitObjects)
                 };
             }
@@ -421,7 +427,7 @@ namespace Mapping_Tools_Core.Tools.PatternGallery {
             var lastEndTime = double.NegativeInfinity;
             foreach (var part in parts) {
                 var startTime = part.StartTime;
-                var endTime = part.EndTime;  // Subtract one to omit BPM changes right on the end of the part.
+                var endTime = part.EndTime;
 
                 // Add the redlines in between patterns
                 newTiming.AddRange(transformOriginalTiming.GetRedlinesInRange(lastEndTime, startTime, false));
@@ -448,7 +454,7 @@ namespace Mapping_Tools_Core.Tools.PatternGallery {
                         inPartRedlines = tempInPartRedlines.Select(tp => {
                             if (Precision.AlmostEquals(tp.MpB, patternDefaultMpb)) {
                                 var tp2 = transformOriginalTiming.GetRedlineAtTime(tp.Offset).Copy();
-                                tp2.Offset = tp2.Offset;
+                                tp2.Offset = tp.Offset;
                                 return tp2;
                             }
 
