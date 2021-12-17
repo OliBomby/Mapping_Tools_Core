@@ -206,9 +206,11 @@ namespace Mapping_Tools_Core.Tools.PatternGallery {
 
             int startIndex = 0;
             for (int i = 1; i < beatmap.HitObjects.Count; i++) {
+                var timeGap = beatmap.HitObjects[i].GetContext<TransformTimeContext>().StartTime - beatmap.HitObjects[i - 1].GetContext<TransformTimeContext>().EndTime;
+                var beatGap = beatmap.BeatmapTiming.GetBeatLength(beatmap.HitObjects[i - 1].GetContext<TransformTimeContext>().EndTime, beatmap.HitObjects[i].GetContext<TransformTimeContext>().StartTime);
                 var gap = beatMode ?
-                    beatmap.HitObjects[i].GetContext<TransformTimeContext>().StartTime - beatmap.HitObjects[i-1].GetContext<TransformTimeContext>().EndTime :
-                    beatmap.BeatmapTiming.GetBeatLength(beatmap.HitObjects[i-1].GetContext<TransformTimeContext>().EndTime, beatmap.HitObjects[i].GetContext<TransformTimeContext>().StartTime);
+                    timeGap :
+                    Math.Min(beatGap, timeGap);
 
                 if (Precision.AlmostBigger(gap, PartingDistance)) {
                     parts.Add(new Part(beatmap.HitObjects[startIndex].GetContext<TransformTimeContext>().StartTime,

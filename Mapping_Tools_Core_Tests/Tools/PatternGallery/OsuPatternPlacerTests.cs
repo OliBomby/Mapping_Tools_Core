@@ -17,10 +17,7 @@ using System.IO;
 namespace Mapping_Tools_Core_Tests.Tools.PatternGallery {
     [TestClass]
     public class OsuPatternPlacerTests {
-        private IBeatmap patternBeatmap;
-
-        [TestInitialize]
-        public void Init() {
+        private static IBeatmap GetPattern1() {
             var maker = new OsuPatternMaker();
 
             var decoder = new HitObjectDecoder();
@@ -39,7 +36,8 @@ namespace Mapping_Tools_Core_Tests.Tools.PatternGallery {
                 tpDecoder.Decode("1950,-25,4,1,100,97,0,0")
             };
 
-            maker.FromObjects(hitObjects, timingPoints, out patternBeatmap, "test", globalSv: 1);
+            maker.FromObjects(hitObjects, timingPoints, out IBeatmap patternBeatmap, "test", globalSv: 1);
+            return patternBeatmap;
         }
 
         [TestMethod]
@@ -61,16 +59,11 @@ namespace Mapping_Tools_Core_Tests.Tools.PatternGallery {
                 SnapToNewTiming = true
             };
 
-            placer.PlaceOsuPatternAtTime(patternBeatmap, beatmap, 101120);
+            placer.PlaceOsuPatternAtTime(GetPattern1(), beatmap, 101120);
 
             var patternHitObjects = beatmap.GetHitObjectsWithRangeInRange(101120, 101120 + 3600);
 
-            foreach (var patternHitObject in patternHitObjects) {
-                Console.WriteLine("Start time: " + patternHitObject.StartTime);
-                Console.WriteLine("End time: " + patternHitObject.EndTime);
-                Console.WriteLine(patternHitObject);
-                Console.WriteLine(patternHitObject.GetContext<TimingContext>());
-            }
+            PrintHitObjects(patternHitObjects);
 
             Assert.AreEqual(patternHitObjects.Count, 4);
 
@@ -107,16 +100,11 @@ namespace Mapping_Tools_Core_Tests.Tools.PatternGallery {
                 SnapToNewTiming = true
             };
 
-            placer.PlaceOsuPatternAtTime(patternBeatmap, beatmap, 101120);
+            placer.PlaceOsuPatternAtTime(GetPattern1(), beatmap, 101120);
 
             var patternHitObjects = beatmap.GetHitObjectsWithRangeInRange(101120, 101120 + 3600/1.9);
 
-            foreach (var patternHitObject in patternHitObjects) {
-                Console.WriteLine("Start time: " + patternHitObject.StartTime);
-                Console.WriteLine("End time: " + patternHitObject.EndTime);
-                Console.WriteLine(patternHitObject);
-                Console.WriteLine(patternHitObject.GetContext<TimingContext>());
-            }
+            PrintHitObjects(patternHitObjects);
 
             Assert.AreEqual(patternHitObjects.Count, 4);
 
@@ -138,6 +126,88 @@ namespace Mapping_Tools_Core_Tests.Tools.PatternGallery {
             Assert.AreEqual(0.5, beatmap.BeatmapTiming.GetBeatLength(patternHitObjects[1].EndTime, patternHitObjects[2].StartTime), msBeatDelta);
             Assert.AreEqual(0.5, beatmap.BeatmapTiming.GetBeatLength(patternHitObjects[2].EndTime, patternHitObjects[3].StartTime), msBeatDelta);
             Assert.AreEqual(3, beatmap.BeatmapTiming.GetBeatLength(patternHitObjects[3].StartTime, patternHitObjects[3].EndTime), msBeatDelta);
+        }
+
+        [TestMethod]
+        public void PartitionedOverwriteZeroLengthSliderBpmTest() {
+            var maker = new OsuPatternMaker();
+
+            var decoder = new HitObjectDecoder();
+            var hitObjects = new List<HitObject> {
+                decoder.Decode("100,142,100,1,0,0:0:0:0:"),
+                decoder.Decode("199,44,199,6,0,B|249:111|215:269|370:-5|-72:203|658:203|216:-5|371:269|337:111|341:44,1,20000"),
+                decoder.Decode("200,142,200,1,0,0:0:0:0:"),
+                decoder.Decode("400,142,400,1,0,0:0:0:0:"),
+            };
+
+            var tpDecoder = new TimingPointDecoder();
+            var timingPoints = new List<TimingPoint> {
+                tpDecoder.Decode("100,200,4,2,100,97,1,0"),
+                tpDecoder.Decode("199,1E-2900,4,2,100,97,1,0"),
+                tpDecoder.Decode("199,NaN,4,2,100,97,0,0"),
+                tpDecoder.Decode("200,200,4,2,100,97,1,0"),
+            };
+
+            maker.FromObjects(hitObjects, timingPoints, out IBeatmap patternBeatmap2, "test", globalSv: 1);
+            patternBeatmap2.GiveObjectsTimingContext();
+
+            Assert.AreEqual(199, patternBeatmap2.HitObjects[1].GetEndTime(true), Precision.DOUBLE_EPSILON);
+
+            var path = Path.Join("Resources", "EmptyTestMap.osu");
+            var beatmap = new BeatmapEditor(path).ReadFile();
+
+            var placer = new OsuPatternPlacer {
+                BeatDivisors = new IBeatDivisor[] { new RationalBeatDivisor(4) },
+                FixBpmSv = false,
+                FixColourHax = true,
+                FixGlobalSv = true,
+                IncludeHitsounds = true,
+                IncludeKiai = true,
+                PatternOverwriteMode = PatternOverwriteMode.PartitionedOverwrite,
+                TimingOverwriteMode = TimingOverwriteMode.PatternTimingOnly,
+                ScaleToNewCircleSize = false,
+                ScaleToNewTiming = false,
+                SnapToNewTiming = false
+            };
+
+            placer.PlaceOsuPattern(patternBeatmap2, beatmap);
+
+            var patternHitObjects = beatmap.HitObjects;
+
+            PrintHitObjects(patternHitObjects);
+            PrintTimingPoints(beatmap.BeatmapTiming.TimingPoints);
+
+            Assert.AreEqual(patternHitObjects.Count, 4);
+
+            Assert.IsInstanceOfType(patternHitObjects[0], typeof(HitCircle));
+            Assert.IsInstanceOfType(patternHitObjects[1], typeof(Slider));
+            Assert.IsInstanceOfType(patternHitObjects[2], typeof(HitCircle));
+            Assert.IsInstanceOfType(patternHitObjects[3], typeof(HitCircle));
+
+            Assert.AreEqual(199, patternHitObjects[1].GetEndTime(true), Precision.DOUBLE_EPSILON);
+            Assert.AreEqual(20000, ((Slider)patternHitObjects[1]).PixelLength, Precision.DOUBLE_EPSILON);
+
+            var testTp = beatmap.BeatmapTiming.GetGreenlineAtTime(199);
+
+            Assert.IsTrue(double.IsNaN(testTp.GetSliderVelocity()));
+
+            Assert.AreEqual(double.PositiveInfinity, beatmap.BeatmapTiming.GetBpmAtTime(199));
+            Assert.AreEqual(60000 / 200d, beatmap.BeatmapTiming.GetBpmAtTime(200), Precision.DOUBLE_EPSILON);
+        }
+
+        private static void PrintHitObjects(IEnumerable<HitObject> hitobjects) {
+            foreach (var patternHitObject in hitobjects) {
+                Console.WriteLine("Start time: " + patternHitObject.StartTime);
+                Console.WriteLine("End time: " + patternHitObject.EndTime);
+                Console.WriteLine(patternHitObject);
+                Console.WriteLine(patternHitObject.GetContext<TimingContext>());
+            }
+        }
+
+        private static void PrintTimingPoints(IEnumerable<TimingPoint> timingPoints) {
+            foreach (var tp in timingPoints) {
+                Console.WriteLine(tp);
+            }
         }
     }
 }
