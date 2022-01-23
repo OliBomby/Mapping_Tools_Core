@@ -55,7 +55,8 @@ namespace Mapping_Tools_Core.BeatmapHelper.IO.Encoding {
                 yield return @"CountdownOffset: " + beatmap.General.CountdownOffset.ToInvariant();
             if (beatmap.General.Mode == GameMode.Mania)
                 yield return @"SpecialStyle: " + (beatmap.General.SpecialStyle ? @"1" : @"0");
-            yield return @"WidescreenStoryboard: " + (beatmap.General.WidescreenStoryboard ? @"1" : @"0");
+            if (beatmap.BeatmapVersion > 10 || beatmap.General.WidescreenStoryboard)
+                yield return @"WidescreenStoryboard: " + (beatmap.General.WidescreenStoryboard ? @"1" : @"0");
             if (beatmap.General.SamplesMatchPlaybackRate)
                 yield return @"SamplesMatchPlaybackRate: 1";
             yield return @"";
@@ -71,20 +72,25 @@ namespace Mapping_Tools_Core.BeatmapHelper.IO.Encoding {
             yield return @"DistanceSpacing: " + beatmap.Editor.DistanceSpacing.ToInvariant();
             yield return @"BeatDivisor: " + beatmap.Editor.BeatDivisor.ToInvariant();
             yield return @"GridSize: " + beatmap.Editor.GridSize.ToInvariant();
-            yield return @"TimelineZoom: " + beatmap.Editor.TimelineZoom.ToInvariant();
+            if (beatmap.BeatmapVersion > 10 || beatmap.Editor.TimelineZoom != 1f)
+                yield return @"TimelineZoom: " + beatmap.Editor.TimelineZoom.ToInvariant();
             yield return @"";
 
             yield return "[Metadata]";
             yield return @"Title:" + beatmap.Metadata.Title;
-            yield return @"TitleUnicode:" + beatmap.Metadata.TitleUnicode;
+            if (beatmap.BeatmapVersion > 9 || beatmap.Metadata.TitleUnicode != beatmap.Metadata.Title)
+                yield return @"TitleUnicode:" + beatmap.Metadata.TitleUnicode;
             yield return @"Artist:" + beatmap.Metadata.Artist;
-            yield return @"ArtistUnicode:" + beatmap.Metadata.ArtistUnicode;
+            if (beatmap.BeatmapVersion > 9 || beatmap.Metadata.ArtistUnicode != beatmap.Metadata.Artist)
+                yield return @"ArtistUnicode:" + beatmap.Metadata.ArtistUnicode;
             yield return @"Creator:" + beatmap.Metadata.Creator;
             yield return @"Version:" + beatmap.Metadata.Version;
             yield return @"Source:" + beatmap.Metadata.Source;
             yield return @"Tags:" + beatmap.Metadata.Tags;
-            yield return @"BeatmapID:" + beatmap.Metadata.BeatmapId.ToInvariant();
-            yield return @"BeatmapSetID:" + beatmap.Metadata.BeatmapSetId.ToInvariant();
+            if (beatmap.BeatmapVersion > 9 || beatmap.Metadata.BeatmapId != 0)
+                yield return @"BeatmapID:" + beatmap.Metadata.BeatmapId.ToInvariant();
+            if (beatmap.BeatmapVersion > 9 || beatmap.Metadata.BeatmapSetId != -1)
+                yield return @"BeatmapSetID:" + beatmap.Metadata.BeatmapSetId.ToInvariant();
             yield return @"";
 
             yield return "[Difficulty]";

@@ -216,12 +216,14 @@ namespace Mapping_Tools_Core.BeatmapHelper.IO.Decoding {
             switch (left) {
                 case "Artist":
                     b.Metadata.Artist = right;
+                    b.Metadata.ArtistUnicode = right;
                     break;
                 case "ArtistUnicode":
                     b.Metadata.ArtistUnicode = right;
                     break;
                 case "Title":
                     b.Metadata.Title = right;
+                    b.Metadata.TitleUnicode = right;
                     break;
                 case "TitleUnicode":
                     b.Metadata.TitleUnicode = right;

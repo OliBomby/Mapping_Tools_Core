@@ -67,6 +67,9 @@ namespace Mapping_Tools_Core.BeatmapHelper.IO.Decoding.HitObjects {
                 hitObject.Hitsounds.CustomIndex = ci;
             else throw new BeatmapParsingException("Failed to parse custom index of hit object.", extras);
 
+            if (i >= split.Length)
+                return;
+
             if (FileFormatHelper.TryParseDouble(split[i++], out var vol))
                 hitObject.Hitsounds.Volume = vol;
             else throw new BeatmapParsingException("Failed to parse volume of hit object.", extras);

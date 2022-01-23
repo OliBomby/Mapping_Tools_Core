@@ -126,7 +126,7 @@ namespace Mapping_Tools_Core.BeatmapHelper.Events {
         }
 
         public static int ParseIndents(string line) {
-            return line.TakeWhile(char.IsWhiteSpace).Count();
+            return line.TakeWhile(c => char.IsWhiteSpace(c) || c == '_').Count();
         }
 
         public static string RemoveIndents(string line) {

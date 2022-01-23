@@ -55,5 +55,23 @@ namespace Mapping_Tools_Core_Tests.BeatmapHelper {
 
             TestUnchanging(lines, decoder, encoder);
         }
+
+        [TestMethod]
+        public void V9ParseTest() {
+            var path = Path.Join("Resources", "V9TestMap.osu");
+            var lines = File.ReadAllText(path);
+            var decoder = new OsuBeatmapDecoder();
+
+            decoder.Decode(lines);
+        }
+
+        [TestMethod]
+        public void V10ParseTest() {
+            var path = Path.Join("Resources", "V10TaikoTestMap.osu");
+            var lines = File.ReadAllText(path);
+            var decoder = new OsuBeatmapDecoder();
+
+            decoder.Decode(lines);
+        }
     }
 }

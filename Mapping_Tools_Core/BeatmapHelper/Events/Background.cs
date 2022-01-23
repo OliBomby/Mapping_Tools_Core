@@ -16,7 +16,7 @@ namespace Mapping_Tools_Core.BeatmapHelper.Events {
         }
 
         public override string GetLine() {
-            // Writing the offset is optional if its 0,0 but we add it anyways because that is what osu! does.
+            // Writing the offset is optional if its 0,0 but we add it anyways because that is what osu! does on later file format versions.
             return $"{EventType},{StartTime.ToRoundInvariant()},\"{Filename}\",{XOffset.ToInvariant()},{YOffset.ToInvariant()}";
         }
 
