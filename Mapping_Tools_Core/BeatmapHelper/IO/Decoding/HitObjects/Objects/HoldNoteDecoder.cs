@@ -7,8 +7,8 @@ namespace Mapping_Tools_Core.BeatmapHelper.IO.Decoding.HitObjects.Objects {
         public void Decode(HoldNote obj, string code) {
             var values = HitObjectDecodingHelper.SplitLine(code);
 
-            if (HitObjectDecodingHelper.GetHitObjectType(values) != HitObjectType.Circle)
-                throw new BeatmapParsingException("This code is not a hit circle.", code);
+            if (HitObjectDecodingHelper.GetHitObjectType(values) != HitObjectType.HoldNote)
+                throw new BeatmapParsingException("This code is not a hold note.", code);
 
             HitObjectDecodingHelper.DecodeSharedProperties(obj, values);
 
