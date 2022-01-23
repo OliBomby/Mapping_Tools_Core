@@ -118,7 +118,7 @@ namespace Mapping_Tools_Core.BeatmapHelper {
         /// Sorts all hitobjects in map by order of time.
         /// </summary>
         public static void SortHitObjects(this IBeatmap beatmap) {
-            beatmap.HitObjects.Sort();
+            beatmap.HitObjects = beatmap.HitObjects.OrderBy(d => d, Comparer<HitObject>.Default).ToList();
         }
 
         /// <summary>
