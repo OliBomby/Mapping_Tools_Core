@@ -52,13 +52,19 @@ namespace Mapping_Tools_Core.BeatmapHelper {
         /// </summary>
         [NotNull]
         List<StoryboardSoundSample> StoryboardSoundSamples { get; set; }
+
+        /// <summary>
+        /// A list of all background colour transformation events under the [Events] -> (Background Colour Transformations) section.
+        /// </summary>
+        [NotNull]
+        List<BackgroundColourTransformation> BackgroundColourTransformations { get; set; }
     }
 
     public static class IStoryboardExtensions {
         public static IEnumerable<Event> EnumerateAllEvents(this IStoryboard sb) {
             return sb.BackgroundAndVideoEvents.Concat(sb.BreakPeriods).Concat(sb.StoryboardSoundSamples)
                 .Concat(sb.StoryboardLayerFail).Concat(sb.StoryboardLayerPass).Concat(sb.StoryboardLayerBackground)
-                .Concat(sb.StoryboardLayerForeground).Concat(sb.StoryboardLayerOverlay);
+                .Concat(sb.StoryboardLayerForeground).Concat(sb.StoryboardLayerOverlay).Concat(sb.BackgroundColourTransformations);
         }
     }
 }

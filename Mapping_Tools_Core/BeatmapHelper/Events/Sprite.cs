@@ -1,10 +1,11 @@
 ﻿using System;
 using Mapping_Tools_Core.BeatmapHelper.IO;
+using Mapping_Tools_Core.BeatmapHelper.Types;
 using Mapping_Tools_Core.Exceptions;
 using Mapping_Tools_Core.MathUtil;
 
 namespace Mapping_Tools_Core.BeatmapHelper.Events {
-    public class Sprite : Event {
+    public class Sprite : Event, IHasStoryboardLayer {
         public StoryboardLayer Layer { get; set; }
         public Origin Origin { get; set; }
 
@@ -30,7 +31,7 @@ namespace Mapping_Tools_Core.BeatmapHelper.Events {
         public override void SetLine(string line) {
             string[] values = line.Split(',');
 
-            if (values[0] != "Sprite") {
+            if (values[0] != "Sprite" && values[0] != "4") {
                 throw new BeatmapParsingException("This line is not a sprite.", line);
             }
 

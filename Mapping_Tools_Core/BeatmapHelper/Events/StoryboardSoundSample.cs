@@ -10,7 +10,7 @@ namespace Mapping_Tools_Core.BeatmapHelper.Events {
     /// <example>
     /// Sample,56056,0,"soft-hitnormal.wav",30
     /// </example>
-    public class StoryboardSoundSample : Event, IEquatable<StoryboardSoundSample>, IHasStartTime, IComparable<StoryboardSoundSample> {
+    public class StoryboardSoundSample : Event, IEquatable<StoryboardSoundSample>, IHasStartTime, IHasStoryboardLayer, IComparable<StoryboardSoundSample> {
         /// <summary>
         /// The time when this sound event occurs.
         /// </summary>

@@ -2,9 +2,10 @@
 using System;
 using Mapping_Tools_Core.BeatmapHelper.IO;
 using Mapping_Tools_Core.Exceptions;
+using Mapping_Tools_Core.BeatmapHelper.Types;
 
 namespace Mapping_Tools_Core.BeatmapHelper.Events {
-    public class Animation : Event {
+    public class Animation : Event, IHasStoryboardLayer {
         public StoryboardLayer Layer { get; set; }
         public Origin Origin { get; set; }
 
@@ -34,7 +35,7 @@ namespace Mapping_Tools_Core.BeatmapHelper.Events {
         public override void SetLine(string line) {
             string[] values = line.Split(',');
 
-            if (values[0] != "Animation") {
+            if (values[0] != "Animation" && values[0] != "6") {
                 throw new BeatmapParsingException("This line is not an animation.", line);
             }
 

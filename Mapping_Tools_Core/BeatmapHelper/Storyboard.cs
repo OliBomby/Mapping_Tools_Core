@@ -24,6 +24,8 @@ namespace Mapping_Tools_Core.BeatmapHelper {
 
         public List<StoryboardSoundSample> StoryboardSoundSamples { get; set; }
 
+        public List<BackgroundColourTransformation> BackgroundColourTransformations { get; set; }
+
         /// <summary>
         /// Initializes an empty storyboard.
         /// </summary>
@@ -36,6 +38,7 @@ namespace Mapping_Tools_Core.BeatmapHelper {
             StoryboardLayerForeground = new List<Event>();
             StoryboardLayerOverlay = new List<Event>();
             StoryboardSoundSamples = new List<StoryboardSoundSample>();
+            BackgroundColourTransformations = new List<BackgroundColourTransformation>();
         }
 
         /// <summary>

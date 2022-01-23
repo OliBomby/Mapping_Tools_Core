@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Mapping_Tools_Core.BeatmapHelper.Events;
+using Mapping_Tools_Core.BeatmapHelper.Types;
 using static Mapping_Tools_Core.BeatmapHelper.IO.FileFormatHelper;
 
 namespace Mapping_Tools_Core.BeatmapHelper.IO.Decoding {
@@ -9,32 +10,83 @@ namespace Mapping_Tools_Core.BeatmapHelper.IO.Decoding {
         public void Decode(Storyboard obj, string code) {
             var lines = code.Split('\n').Select(l => l.Trim('\r')).ToList();
 
-            // Load up all the stuff
-            IEnumerable<string> backgroundAndVideoEventsLines = GetCategoryLines(lines, "//Background and Video events", new[] { "[", "//" });
-            IEnumerable<string> breakPeriodsLines = GetCategoryLines(lines, "//Break Periods", new[] { "[", "//" });
-            IEnumerable<string> storyboardLayerBackgroundLines = GetCategoryLines(lines, "//Storyboard Layer 0 (Background)", new[] { "[", "//" });
-            IEnumerable<string> storyboardLayerFailLines = GetCategoryLines(lines, "//Storyboard Layer 1 (Fail)", new[] { "[", "//" });
-            IEnumerable<string> storyboardLayerPassLines = GetCategoryLines(lines, "//Storyboard Layer 2 (Pass)", new[] { "[", "//" });
-            IEnumerable<string> storyboardLayerForegroundLines = GetCategoryLines(lines, "//Storyboard Layer 3 (Foreground)", new[] { "[", "//" });
-            IEnumerable<string> storyboardLayerOverlayLines = GetCategoryLines(lines, "//Storyboard Layer 4 (Overlay)", new[] { "[", "//" });
-            IEnumerable<string> storyboardSoundSamplesLines = GetCategoryLines(lines, "//Storyboard Sound Samples", new[] { "[", "//" });
+            IEnumerable<string> eventsLines = GetCategoryLines(lines, "[Events]");
 
-            foreach (string line in backgroundAndVideoEventsLines) {
-                obj.BackgroundAndVideoEvents.Add(Event.MakeEvent(line));
+            foreach (var section in EnumerateSections(eventsLines)) {
+                var events = Event.ParseEventTree(section);
+                foreach (var ev in events) {
+                    switch (ev) {
+                        case Background:
+                        case Video:
+                            obj.BackgroundAndVideoEvents.Add(ev);
+                            break;
+                        case Break b:
+                            obj.BreakPeriods.Add(b);
+                            break;
+                        case StoryboardSoundSample sbss:
+                            obj.StoryboardSoundSamples.Add(sbss);
+                            break;
+                        case BackgroundColourTransformation bct:
+                            obj.BackgroundColourTransformations.Add(bct);
+                            break;
+                        case IHasStoryboardLayer l:
+                            switch (l.Layer) {
+                                case StoryboardLayer.Background:
+                                    obj.StoryboardLayerBackground.Add(ev);
+                                    break;
+                                case StoryboardLayer.Fail:
+                                    obj.StoryboardLayerFail.Add(ev);
+                                    break;
+                                case StoryboardLayer.Pass:
+                                    obj.StoryboardLayerPass.Add(ev);
+                                    break;
+                                case StoryboardLayer.Foreground:
+                                    obj.StoryboardLayerForeground.Add(ev);
+                                    break;
+                                case StoryboardLayer.Overlay:
+                                    obj.StoryboardLayerOverlay.Add(ev);
+                                    break;
+                                default:
+                                    // Unexpected layer. Event gets placed nowhere
+                                    break;
+                            }
+                            break;
+                        default:
+                            // Unexpected command. Can be warned but its no big deal.
+                            break;
+                    }
+                }
             }
+        }
 
-            foreach (string line in breakPeriodsLines) {
-                obj.BreakPeriods.Add(new Break(line));
+        private IEnumerable<IEnumerable<string>> EnumerateSections(IEnumerable<string> lines) {
+            var em = lines.GetEnumerator();
+            while (em.MoveNext()) {
+                yield return EnumerateSection(em);
+                if (em.Current.StartsWith('['))
+                    yield break;
             }
+        }
 
-            obj.StoryboardLayerBackground.AddRange(Event.ParseEventTree(storyboardLayerBackgroundLines));
-            obj.StoryboardLayerFail.AddRange(Event.ParseEventTree(storyboardLayerFailLines));
-            obj.StoryboardLayerPass.AddRange(Event.ParseEventTree(storyboardLayerPassLines));
-            obj.StoryboardLayerForeground.AddRange(Event.ParseEventTree(storyboardLayerForegroundLines));
-            obj.StoryboardLayerOverlay.AddRange(Event.ParseEventTree(storyboardLayerOverlayLines));
-
-            foreach (string line in storyboardSoundSamplesLines) {
-                obj.StoryboardSoundSamples.Add(new StoryboardSoundSample(line));
+        /// <summary>
+        /// Enumerates the enumerator until it reaches a // or [.
+        /// </summary>
+        private IEnumerable<string> EnumerateSection(IEnumerator<string> em) {
+            var line = em.Current;
+            if (!string.IsNullOrWhiteSpace(line)) {
+                if (line.StartsWith("//") || line.StartsWith('[')) {
+                    yield break;
+                }
+                yield return line;
+            }
+            while (em.MoveNext()) {
+                line = em.Current;
+                if (!string.IsNullOrWhiteSpace(line)) {
+                    if (line.StartsWith("//") || line.StartsWith('[')) {
+                        yield break;
+                    }
+                    yield return line;
+                }
             }
         }
 

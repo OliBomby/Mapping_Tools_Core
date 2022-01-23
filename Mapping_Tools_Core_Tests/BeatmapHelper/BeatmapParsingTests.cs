@@ -1,4 +1,5 @@
 ﻿using Mapping_Tools_Core.BeatmapHelper;
+using Mapping_Tools_Core.BeatmapHelper.Events;
 using Mapping_Tools_Core.BeatmapHelper.IO.Decoding;
 using Mapping_Tools_Core.BeatmapHelper.IO.Encoding;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -33,8 +34,8 @@ namespace Mapping_Tools_Core_Tests.BeatmapHelper {
             var map = decoder.Decode(lines);
             var lines2 = encoder.Encode(map);
 
-            //Debug.Print(lines);
-            //Debug.Print(lines2);
+            Debug.Print(lines);
+            Debug.Print(lines2);
 
             // Split equal asserting to lines so we know where the difference is
             var linesSplit = lines.Split(Environment.NewLine);
@@ -77,6 +78,26 @@ namespace Mapping_Tools_Core_Tests.BeatmapHelper {
         [TestMethod]
         public void V14ExtraWhiteSpaceParseTest() {
             var path = Path.Join("Resources", "MYTH & ROID - L.L.L. (jonathanlfj) [Raose's Hard].osu");
+            var lines = File.ReadAllText(path);
+            var decoder = new OsuBeatmapDecoder();
+
+            decoder.Decode(lines);
+        }
+
+        [TestMethod]
+        public void V9SbInSoundSamplesParseTest() {
+            var path = Path.Join("Resources", "Jun.A - The Refrain of the Lovely Great War (KanbeKotori) [Alace's Taiko].osu");
+            var lines = File.ReadAllText(path);
+            var decoder = new OsuBeatmapDecoder();
+
+            var map = decoder.Decode(lines);
+
+            Assert.AreEqual(typeof(Sprite), map.Storyboard.StoryboardLayerForeground[0].GetType());
+        }
+
+        [TestMethod]
+        public void V5ParseTest() {
+            var path = Path.Join("Resources", "V5TestMap.osu");
             var lines = File.ReadAllText(path);
             var decoder = new OsuBeatmapDecoder();
 

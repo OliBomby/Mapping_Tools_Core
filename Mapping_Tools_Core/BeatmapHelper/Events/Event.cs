@@ -34,9 +34,14 @@ namespace Mapping_Tools_Core.BeatmapHelper.Events {
                 case "Break":
                     myEvent = new Break();
                     break;
+                case "3":
+                    myEvent = new BackgroundColourTransformation();
+                    break;
+                case "4":
                 case "Sprite":
                     myEvent = new Sprite();
                     break;
+                case "6":
                 case "Animation":
                     myEvent = new Animation();
                     break;
@@ -73,8 +78,8 @@ namespace Mapping_Tools_Core.BeatmapHelper.Events {
             Event lastEvent = null;
             int lastIndents = -1;  // -1 is below the lowest possible indents, so this will always trigger adding null in the parent events
             foreach (var line in lines) {
-                var ev = MakeEvent(line);
                 int indents = ParseIndents(line);
+                var ev = MakeEvent(line.Substring(indents));
 
                 // Add the indent count to any command type events
                 if (ev is Command c) c.Indents = indents;

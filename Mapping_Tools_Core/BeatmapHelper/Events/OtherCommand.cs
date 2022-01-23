@@ -3,6 +3,7 @@ using System.Text;
 using Mapping_Tools_Core.BeatmapHelper.IO;
 using Mapping_Tools_Core.BeatmapHelper.Types;
 using Mapping_Tools_Core.Exceptions;
+using Mapping_Tools_Core.MathUtil;
 
 namespace Mapping_Tools_Core.BeatmapHelper.Events {
     /// <summary>
@@ -28,7 +29,8 @@ namespace Mapping_Tools_Core.BeatmapHelper.Events {
             builder.Append(',');
             builder.Append(StartTime.ToRoundInvariant());
             builder.Append(',');
-            builder.Append(EndTime.ToRoundInvariant());
+            if (!Precision.AlmostEquals(EndTime, StartTime))
+                builder.Append(EndTime.ToRoundInvariant());
 
             foreach (var param in Params) {
                 builder.Append(',');

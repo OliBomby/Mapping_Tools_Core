@@ -23,6 +23,10 @@ namespace Mapping_Tools_Core.BeatmapHelper.IO.Encoding {
             foreach (string s in Event.SerializeEventTree(obj.StoryboardLayerOverlay)) yield return s;
             yield return "//Storyboard Sound Samples";
             foreach (string s in obj.StoryboardSoundSamples.Select(sbss => sbss.GetLine())) yield return s;
+            if (obj.BackgroundColourTransformations.Count > 0) {
+                yield return "//Background Colour Transformations";
+                foreach (string s in obj.BackgroundColourTransformations.Select(sbss => sbss.GetLine())) yield return s;
+            }
             yield return "";
         }
 
