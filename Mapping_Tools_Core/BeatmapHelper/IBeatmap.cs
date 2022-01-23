@@ -497,6 +497,11 @@ namespace Mapping_Tools_Core.BeatmapHelper {
 
             // Enumerate through the hit objects from the first object at the time
             int objectIndex = beatmap.HitObjects.FindIndex(h => h.StartTime >= time);
+
+            if (objectIndex < 0) {
+                yield break;
+            }
+
             foreach (var comboNumber in comboNumbers) {
                 while (comboNumber != -1 && objectIndex < beatmap.HitObjects.Count &&
                        beatmap.HitObjects[objectIndex].GetContext<ComboContext>().ComboIndex != comboNumber) {
