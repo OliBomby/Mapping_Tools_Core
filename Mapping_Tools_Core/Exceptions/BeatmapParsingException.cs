@@ -5,18 +5,17 @@ namespace Mapping_Tools_Core.Exceptions
     [Serializable]
     public class BeatmapParsingException : Exception
     {
-        public BeatmapParsingException() {
-
-        }
+        public BeatmapParsingException() : base("Unexpected value encountered while parsing beatmap.") { }
 
         public BeatmapParsingException(string line)
-            : base($"Unexpected value encountered while parsing beatmap.\n{line}") {
-
-        }
+            : this(line, innerException: null) { }
+        public BeatmapParsingException(string line, Exception innerException)
+            : this($"Unexpected value encountered while parsing beatmap.", line, innerException) { }
 
         public BeatmapParsingException(string message, string line)
-            : base($"{message}\n{line}") {
+            : base($"{message}\n{line}", null) { }
 
-        }
+        public BeatmapParsingException(string message, string line, Exception innerException)
+            : base($"{message}\n{line}", innerException) { }
     }
 }

@@ -73,5 +73,14 @@ namespace Mapping_Tools_Core_Tests.BeatmapHelper {
 
             decoder.Decode(lines);
         }
+
+        [TestMethod]
+        public void V14ExtraWhiteSpaceParseTest() {
+            var path = Path.Join("Resources", "MYTH & ROID - L.L.L. (jonathanlfj) [Raose's Hard].osu");
+            var lines = File.ReadAllText(path);
+            var decoder = new OsuBeatmapDecoder();
+
+            decoder.Decode(lines);
+        }
     }
 }

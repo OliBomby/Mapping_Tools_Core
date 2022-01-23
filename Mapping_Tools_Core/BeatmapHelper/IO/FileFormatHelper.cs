@@ -33,7 +33,7 @@ namespace Mapping_Tools_Core.BeatmapHelper.IO {
             bool atCategory = false;
 
             foreach (string line in lines) {
-                if (atCategory && line != "") {
+                if (atCategory && !string.IsNullOrWhiteSpace(line)) {
                     if (categoryIdentifiers.Any(o => line.StartsWith(o))) // Reached another category
                     {
                         yield break;

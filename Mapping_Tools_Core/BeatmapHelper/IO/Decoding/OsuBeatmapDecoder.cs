@@ -99,8 +99,7 @@ namespace Mapping_Tools_Core.BeatmapHelper.IO.Decoding {
                     sectionDecoder.Invoke(b, left, right);
                 }
                 catch (Exception e) {
-                    Console.WriteLine(e);
-                    throw new BeatmapParsingException(line);
+                    throw new BeatmapParsingException(line, e);
                 }
             }
         }
