@@ -41,12 +41,13 @@ namespace Mapping_Tools_Core.BeatmapHelper.Events {
                 case "Sprite":
                     myEvent = new Sprite();
                     break;
+                case "5":
+                case "Sample":
+                    myEvent = new StoryboardSoundSample();
+                    break;
                 case "6":
                 case "Animation":
                     myEvent = new Animation();
-                    break;
-                case "Sample":
-                    myEvent = new StoryboardSoundSample();
                     break;
                 case "P":
                     myEvent = new ParameterCommand();

@@ -95,8 +95,10 @@ namespace Mapping_Tools_Core.BeatmapHelper.IO.Decoding {
         private static void DecodeSection(Beatmap b, IEnumerable<string> generalLines, SectionDecoderDelegate sectionDecoder) {
             foreach (var line in generalLines) {
                 try {
-                    var (left, right) = SplitKeyValue(line);
-                    sectionDecoder.Invoke(b, left, right);
+                    var result = SplitKeyValue(line);
+                    if (result is null)
+                        continue;
+                    sectionDecoder.Invoke(b, result.Item1, result.Item2);
                 }
                 catch (Exception e) {
                     throw new BeatmapParsingException(line, e);

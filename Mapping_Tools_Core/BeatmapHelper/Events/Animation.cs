@@ -18,7 +18,7 @@ namespace Mapping_Tools_Core.BeatmapHelper.Events {
 
         public int FrameCount { get; set; }
         public double FrameDelay { get; set; }
-        public LoopType LoopType { get; set; }
+        public LoopType LoopType { get; set; } = LoopType.LoopForever;
 
         /// <summary>
         /// Serializes this object to .osu code.
@@ -65,9 +65,11 @@ namespace Mapping_Tools_Core.BeatmapHelper.Events {
                 FrameDelay = frameDelay;
             else throw new BeatmapParsingException("Failed to parse frame delay of animation.", line);
 
-            if (Enum.TryParse(values[8], out LoopType loopType))
-                LoopType = loopType;
-            else throw new BeatmapParsingException("Failed to parse loop type of animation.", line);
+            if (values.Length > 8) {
+                if (Enum.TryParse(values[8], out LoopType loopType))
+                    LoopType = loopType;
+                else throw new BeatmapParsingException("Failed to parse loop type of animation.", line);
+            }
         }
     }
 }

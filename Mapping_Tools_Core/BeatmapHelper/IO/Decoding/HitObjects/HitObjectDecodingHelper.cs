@@ -63,6 +63,9 @@ namespace Mapping_Tools_Core.BeatmapHelper.IO.Decoding.HitObjects {
                 hitObject.Hitsounds.AdditionSet = (SampleSet)ass;
             else throw new BeatmapParsingException("Failed to parse additional sample set of hit object.", extras);
 
+            if (i >= split.Length)
+                return;
+
             if (FileFormatHelper.TryParseInt(split[i++], out var ci))
                 hitObject.Hitsounds.CustomIndex = ci;
             else throw new BeatmapParsingException("Failed to parse custom index of hit object.", extras);

@@ -32,9 +32,13 @@ namespace Mapping_Tools_Core.BeatmapHelper.Events {
             if (!Precision.AlmostEquals(EndTime, StartTime))
                 builder.Append(EndTime.ToRoundInvariant());
 
-            foreach (var param in Params) {
+            if (Params.Length == 0) {
                 builder.Append(',');
-                builder.Append(param.ToInvariant());
+            } else {
+                foreach (var param in Params) {
+                    builder.Append(',');
+                    builder.Append(param.ToInvariant());
+                }
             }
 
             return builder.ToString();
@@ -66,14 +70,18 @@ namespace Mapping_Tools_Core.BeatmapHelper.Events {
                 else throw new BeatmapParsingException("Failed to parse end time of command.", line);
             }
 
-            Params = new double[values.Length - 4];
-            for (int i = 4; i < values.Length; i++) {
-                var stringValue = values[i];
-                int index = i - 4;
+            if (values.Length <= 4 || string.IsNullOrWhiteSpace(values[4])) {
+                Params = Array.Empty<double>();
+            } else {
+                Params = new double[values.Length - 4];
+                for (int i = 4; i < values.Length; i++) {
+                    var stringValue = values[i];
+                    int index = i - 4;
 
-                if (FileFormatHelper.TryParseDouble(stringValue, out double value))
-                    Params[index] = value;
-                else throw new BeatmapParsingException($"Failed to parse value at position {i} of command.", line);
+                    if (FileFormatHelper.TryParseDouble(stringValue, out double value))
+                        Params[index] = value;
+                    else throw new BeatmapParsingException($"Failed to parse value at position {i} of command.", line);
+                }
             }
         }
     }

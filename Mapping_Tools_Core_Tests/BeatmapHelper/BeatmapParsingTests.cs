@@ -67,7 +67,7 @@ namespace Mapping_Tools_Core_Tests.BeatmapHelper {
         }
 
         [TestMethod]
-        public void V10ParseTest() {
+        public void V10TaikoParseTest() {
             var path = Path.Join("Resources", "V10TaikoTestMap.osu");
             var lines = File.ReadAllText(path);
             var decoder = new OsuBeatmapDecoder();
@@ -98,6 +98,24 @@ namespace Mapping_Tools_Core_Tests.BeatmapHelper {
         [TestMethod]
         public void V5ParseTest() {
             var path = Path.Join("Resources", "V5TestMap.osu");
+            var lines = File.ReadAllText(path);
+            var decoder = new OsuBeatmapDecoder();
+
+            decoder.Decode(lines);
+        }
+
+        [TestMethod]
+        public void V10ParseTest() {
+            var path = Path.Join("Resources", "V10TestMap.osu");
+            var lines = File.ReadAllText(path);
+            var decoder = new OsuBeatmapDecoder();
+
+            decoder.Decode(lines);
+        }
+
+        [TestMethod]
+        public void MessedUpParseTest() {
+            var path = Path.Join("Resources", "MessedUpTestMap.osu");
             var lines = File.ReadAllText(path);
             var decoder = new OsuBeatmapDecoder();
 

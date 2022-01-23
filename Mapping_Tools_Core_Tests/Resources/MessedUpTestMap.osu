@@ -35,6 +35,7 @@ Creator:OliBomby
 Version:complicated
 Source:
 Tags:ilya bryzgalov simple visualisation
+where's that girl from
 BeatmapID:0
 BeatmapSetID:727066
 
@@ -62,6 +63,7 @@ Sprite,Foreground,Centre,"Taiko BG.png",320,240
 //Storyboard Layer 4 (Overlay)
 //Storyboard Sound Samples
 Sample,0,0,"normal-hitnormal3.wav",0
+5,88980,1,"BreakFail.mp3"
 //Background Colour Transformations
 3,100,163,162,255
 
