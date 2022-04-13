@@ -326,6 +326,55 @@ namespace Mapping_Tools_Core.BeatmapHelper {
         }
 
         /// <summary>
+        /// Fixes illegal break periods and automatically adds new break periods in gaps >= 5000 ms.
+        /// Assumes end times are set for all hit objects.
+        /// </summary>
+        public static void FixBreakPeriods(this IBeatmap beatmap) {
+            const double maxMargin = 5000;
+            const double minLeftMargin = 200;
+            const double minBreakTime = 650;
+            const double autoBreakGapSize = 5000;
+
+            var approachTime = beatmap.Difficulty.ApproachTime;
+            var newBreakPeriods = new List<Events.Break>(beatmap.Storyboard.BreakPeriods.Count);
+
+            // Add new break periods
+            for (int i = 0; i < beatmap.HitObjects.Count - 1; i++) {
+                var prev = beatmap.HitObjects[i];
+                var next = beatmap.HitObjects[i + 1];
+
+                var existingBreak = beatmap.Storyboard.BreakPeriods.FirstOrDefault(b => {
+                    var middle = (b.StartTime + b.EndTime) / 2;
+                    return middle >= prev.EndTime && middle <= next.StartTime;
+                });
+                
+                if (existingBreak is not null) {
+                    // Fix existing break periods
+                    var middle = (existingBreak.StartTime + existingBreak.EndTime) / 2;
+                    // Get the distance to the end of the hit object to the left
+                    var leftMargin = middle - prev.EndTime;
+                    // Get the distance to the start of the hit object to the right
+                    var rightMargin = next.StartTime - middle;
+
+                    // Clamp the start and end time into legal bounds
+                    existingBreak.StartTime = MathHelper.Clamp(existingBreak.StartTime, middle - leftMargin + minLeftMargin, middle - leftMargin + maxMargin);
+                    existingBreak.EndTime = MathHelper.Clamp(existingBreak.EndTime, middle + rightMargin - maxMargin, middle + rightMargin - approachTime);
+
+                    // Remove the break period if too small
+                    if (!Precision.DefinitelySmaller(existingBreak.Duration, minBreakTime)) {
+                        newBreakPeriods.Add(existingBreak);
+                    }
+                } else if (!Precision.DefinitelySmaller(next.StartTime - prev.EndTime, autoBreakGapSize)) {
+                    // Add new break
+                    newBreakPeriods.Add(new Events.Break(prev.EndTime + minLeftMargin, next.StartTime - approachTime));
+                }
+            }
+
+            newBreakPeriods.Sort();
+            beatmap.Storyboard.BreakPeriods = newBreakPeriods;
+        }
+
+        /// <summary>
         /// Adjusts combo skip for all the hitobjects so colour index is correct.
         /// Assumes a <see cref="ComboContext"/> is present for all hit objects.
         /// </summary>

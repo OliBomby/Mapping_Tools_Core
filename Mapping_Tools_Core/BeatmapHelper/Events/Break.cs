@@ -2,9 +2,10 @@
 using Mapping_Tools_Core.BeatmapHelper.IO;
 using Mapping_Tools_Core.BeatmapHelper.Types;
 using Mapping_Tools_Core.Exceptions;
+using System;
 
 namespace Mapping_Tools_Core.BeatmapHelper.Events {
-    public class Break : Event, IHasStartTime, IHasDuration {
+    public class Break : Event, IHasStartTime, IHasDuration, IComparable<Break> {
         public string EventType { get; set; }
         public double StartTime { get; set; }
         public double Duration => EndTime - StartTime;
@@ -14,6 +15,12 @@ namespace Mapping_Tools_Core.BeatmapHelper.Events {
 
         public Break(string line) {
             SetLine(line);
+        }
+
+        public Break(double startTime, double endTime) {
+            EventType = "2";
+            StartTime = startTime;
+            EndTime = endTime;
         }
 
         public override string GetLine() {
@@ -37,6 +44,11 @@ namespace Mapping_Tools_Core.BeatmapHelper.Events {
             if (FileFormatHelper.TryParseDouble(values[2], out double endTime))
                 EndTime = endTime;
             else throw new BeatmapParsingException("Failed to parse end time of break.", line);
+        }
+
+        /// <inheritdoc/>
+        public int CompareTo(Break other) {
+            return StartTime.CompareTo(other.StartTime);
         }
     }
 }
