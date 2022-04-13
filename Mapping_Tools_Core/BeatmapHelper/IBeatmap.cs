@@ -146,9 +146,9 @@ namespace Mapping_Tools_Core.BeatmapHelper {
                 endIndex = beatmap.HitObjects.Count - 1;
 
             // Getting some variables for use later
-            double stackOffset = SectionDifficulty.GetStackOffset(beatmap.Difficulty.CircleSize);
+            double stackOffset = beatmap.Difficulty.StackOffset;
             double stackLeniency = beatmap.General.StackLeniency;
-            double preEmpt = SectionDifficulty.GetApproachTime(beatmap.Difficulty.ApproachRate);
+            double preEmpt = beatmap.Difficulty.ApproachTime;
 
             // Round the stack offset so objects only get offset by integer values
             if (rounded) {
@@ -435,7 +435,7 @@ namespace Mapping_Tools_Core.BeatmapHelper {
             if (eventsWithStartTime.Length > 0)
                 leadInTime = Math.Max(-eventsWithStartTime.Min(o => o.StartTime), leadInTime);
             if (beatmap.HitObjects.Count > 0) {
-                var approachTime = SectionDifficulty.GetApproachTime(beatmap.Difficulty.ApproachRate);
+                var approachTime = beatmap.Difficulty.ApproachTime;
                 leadInTime = Math.Max(approachTime - beatmap.HitObjects[0].StartTime, leadInTime);
             }
             return leadInTime + window50 + 1000;
