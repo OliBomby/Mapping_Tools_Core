@@ -1,7 +1,10 @@
 ﻿
+using System;
+using System.Text;
 using Mapping_Tools_Core.BeatmapHelper.IO;
 using Mapping_Tools_Core.BeatmapHelper.Types;
 using Mapping_Tools_Core.Exceptions;
+using Mapping_Tools_Core.MathUtil;
 
 namespace Mapping_Tools_Core.BeatmapHelper.Events {
     /// <summary>
@@ -15,22 +18,47 @@ namespace Mapping_Tools_Core.BeatmapHelper.Events {
         public string Parameter { get; set; }
 
         public override string GetLine() {
-            return $"{EventType},{((int)Easing).ToInvariant()},{StartTime.ToRoundInvariant()},{EndTime.ToRoundInvariant()},{Parameter}";
+            var builder = new StringBuilder(9);
+
+            builder.Append(EventType.ToString());
+            builder.Append(',');
+            builder.Append(((int) Easing).ToInvariant());
+            builder.Append(',');
+            builder.Append(StartTime.ToInvariant());
+            builder.Append(',');
+            if (!Precision.AlmostEquals(StartTime, EndTime)) {
+                builder.Append(EndTime.ToInvariant());
+            }
+
+            builder.Append(',');
+            builder.Append(Parameter);
+
+            return builder.ToString();
         }
 
         public override void SetLine(string line) {
             var subLine = RemoveIndents(line);
             var values = subLine.Split(',');
 
-            if (FileFormatHelper.TryParseDouble(values[1], out double startTime))
+            if (Enum.TryParse(values[1], out EasingType easingType))
+                Easing = easingType;
+            else throw new BeatmapParsingException("Failed to parse easing of command.", line);
+
+            if (FileFormatHelper.TryParseInt(values[2], out int startTime))
                 StartTime = startTime;
             else throw new BeatmapParsingException("Failed to parse start time of param command.", line);
 
-            if (FileFormatHelper.TryParseDouble(values[2], out double endTime))
-                EndTime = endTime;
-            else throw new BeatmapParsingException("Failed to parse end time of param command.", line);
+            // Set end time to start time if empty. This accounts for the shorthand
+            if (string.IsNullOrEmpty(values[3])) {
+                EndTime = StartTime;
+            }
+            else {
+                if (FileFormatHelper.TryParseInt(values[3], out int endTime))
+                    EndTime = endTime;
+                else throw new BeatmapParsingException("Failed to parse end time of param command.", line);
+            }
 
-            Parameter = values[3];
+            Parameter = values[4];
         }
     }
 }
