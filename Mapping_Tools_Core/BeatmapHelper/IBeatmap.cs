@@ -127,7 +127,15 @@ namespace Mapping_Tools_Core.BeatmapHelper {
         /// WARNING: Slow!
         /// </summary>
         public static void CalculateEndPositions(this IBeatmap beatmap) {
-            foreach (var ho in beatmap.HitObjects) {
+            CalculateEndPositions(beatmap.HitObjects);
+        }
+
+        /// <summary>
+        /// Calculates the end position for all hit objects.
+        /// WARNING: Slow!
+        /// </summary>
+        public static void CalculateEndPositions(this IEnumerable<HitObject> hitObjects) {
+            foreach (var ho in hitObjects) {
                 if (ho is Slider slider) {
                     slider.RecalculateEndPosition();
                 }
@@ -436,16 +444,24 @@ namespace Mapping_Tools_Core.BeatmapHelper {
         /// Basically making all hit objects independent of <see cref="IBeatmap.BeatmapTiming"/>.
         /// </summary>
         public static void GiveObjectsTimingContext(this IBeatmap beatmap) {
-            foreach (var ho in beatmap.HitObjects) {
-                ho.SetContext(new TimingContext(beatmap.BeatmapTiming.GlobalSliderMultiplier,
-                    beatmap.BeatmapTiming.GetSvAtTime(ho.StartTime),
-                    beatmap.BeatmapTiming.GetTimingPointAtTime(ho.StartTime),
-                    beatmap.BeatmapTiming.GetTimingPointAtTime(ho.StartTime + 5),
-                    beatmap.BeatmapTiming.GetRedlineAtTime(ho.StartTime)));
+            GiveObjectsTimingContext(beatmap.HitObjects, beatmap.BeatmapTiming);
+        }
+
+        /// <summary>
+        /// For each hit object it stores the timingpoints from <see cref="IBeatmap.BeatmapTiming"/> which are affecting that hit object.
+        /// Basically making all hit objects independent of <see cref="IBeatmap.BeatmapTiming"/>.
+        /// </summary>
+        public static void GiveObjectsTimingContext(this IEnumerable<HitObject> hitObjects, Timing timing) {
+            foreach (var ho in hitObjects) {
+                ho.SetContext(new TimingContext(timing.GlobalSliderMultiplier,
+                    timing.GetSvAtTime(ho.StartTime),
+                    timing.GetTimingPointAtTime(ho.StartTime),
+                    timing.GetTimingPointAtTime(ho.StartTime + 5),
+                    timing.GetRedlineAtTime(ho.StartTime)));
 
                 // This has to be set afterwards because the EndTime is inaccessible before the hitobject has a timing context
                 ho.GetContext<TimingContext>().BodyHitsounds =
-                    beatmap.BeatmapTiming.GetTimingPointsInRange(ho.StartTime, ho.EndTime, false);
+                    timing.GetTimingPointsInRange(ho.StartTime, ho.EndTime, false);
             }
         }
 
