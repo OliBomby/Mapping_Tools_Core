@@ -14,6 +14,7 @@ using System.IO;
 using System.Linq;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
+using Mapping_Tools_Core.BeatmapHelper.Events;
 
 namespace Mapping_Tools_Core.BeatmapHelper {
     public interface IBeatmap : IHasComboColours {
@@ -142,31 +143,42 @@ namespace Mapping_Tools_Core.BeatmapHelper {
         /// <param name="endIndex"></param>
         /// <param name="rounded">Whether to use a rounded stackOffset</param>
         public static void UpdateStacking(this IBeatmap beatmap, int startIndex = 0, int endIndex = -1, bool rounded = false) {
-            if (endIndex == -1)
-                endIndex = beatmap.HitObjects.Count - 1;
+            UpdateStacking(beatmap.HitObjects, beatmap.Difficulty.StackOffset, beatmap.General.StackLeniency,
+                beatmap.Difficulty.ApproachTime, startIndex, endIndex, rounded);
+        }
 
-            // Getting some variables for use later
-            double stackOffset = beatmap.Difficulty.StackOffset;
-            double stackLeniency = beatmap.General.StackLeniency;
-            double preEmpt = beatmap.Difficulty.ApproachTime;
+        /// <summary>
+        /// Actual osu! stable code for calculating stacked positions of all hit objects.
+        /// Make sure slider end positions are calculated before using this procedure.
+        /// </summary>
+        /// <param name="preEmpt">The approach time.</param>
+        /// <param name="startIndex"></param>
+        /// <param name="endIndex"></param>
+        /// <param name="rounded">Whether to use a rounded stackOffset.</param>
+        /// <param name="hitObjects">The hit objects to update stacking context on.</param>
+        /// <param name="stackOffset">The offset in X and Y osu! pixels between objects in a stack.</param>
+        /// <param name="stackLeniency">The stacking leniency.</param>
+        public static void UpdateStacking(this IList<HitObject> hitObjects, double stackOffset, double stackLeniency, double preEmpt, int startIndex = 0, int endIndex = -1, bool rounded = false) {
+            if (endIndex == -1)
+                endIndex = hitObjects.Count - 1;
 
             // Round the stack offset so objects only get offset by integer values
             if (rounded) {
                 stackOffset = Math.Round(stackOffset);
             }
 
-            const int STACK_LENIENCE = 3;
+            const int stackLenience = 3;
 
             Vector2 stackVector = new Vector2(stackOffset, stackOffset);
             float stackThresold = (float)(preEmpt * stackLeniency);
 
             // Reset stacking inside the update range
             // Make sure stacking context exists for all objects
-            for (int i = 0; i < beatmap.HitObjects.Count; i++) {
-                if (i >= startIndex && i <= endIndex || !beatmap.HitObjects[i].HasContext<StackingContext>()) {
-                    beatmap.HitObjects[i].SetContext(new StackingContext(stackVector));
+            for (int i = 0; i < hitObjects.Count; i++) {
+                if (i >= startIndex && i <= endIndex || !hitObjects[i].HasContext<StackingContext>()) {
+                    hitObjects[i].SetContext(new StackingContext(stackVector));
                 } else {
-                    beatmap.HitObjects[i].GetContext<StackingContext>().StackVector = stackVector;
+                    hitObjects[i].GetContext<StackingContext>().StackVector = stackVector;
                 }
             }
 
@@ -174,19 +186,19 @@ namespace Mapping_Tools_Core.BeatmapHelper {
             int extendedEndIndex = endIndex;
             for (int i = endIndex; i >= startIndex; i--) {
                 int stackBaseIndex = i;
-                for (int n = stackBaseIndex + 1; n < beatmap.HitObjects.Count; n++) {
-                    HitObject stackBaseObject = beatmap.HitObjects[stackBaseIndex];
+                for (int n = stackBaseIndex + 1; n < hitObjects.Count; n++) {
+                    HitObject stackBaseObject = hitObjects[stackBaseIndex];
                     if (stackBaseObject is Spinner) break;
 
-                    HitObject objectN = beatmap.HitObjects[n];
+                    HitObject objectN = hitObjects[n];
                     if (objectN is Spinner) continue;
 
                     if (objectN.StartTime - stackBaseObject.EndTime > stackThresold)
                         //We are no longer within stacking range of the next object.
                         break;
 
-                    if (Vector2.Distance(stackBaseObject.Pos, objectN.Pos) < STACK_LENIENCE ||
-                        (stackBaseObject is Slider && Vector2.Distance(stackBaseObject.EndPos, objectN.Pos) < STACK_LENIENCE)) {
+                    if (Vector2.Distance(stackBaseObject.Pos, objectN.Pos) < stackLenience ||
+                        (stackBaseObject is Slider && Vector2.Distance(stackBaseObject.EndPos, objectN.Pos) < stackLenience)) {
                         stackBaseIndex = n;
 
                         // HitObjects after the specified update range haven't been reset yet
@@ -196,7 +208,7 @@ namespace Mapping_Tools_Core.BeatmapHelper {
 
                 if (stackBaseIndex > extendedEndIndex) {
                     extendedEndIndex = stackBaseIndex;
-                    if (extendedEndIndex == beatmap.HitObjects.Count - 1)
+                    if (extendedEndIndex == hitObjects.Count - 1)
                         break;
                 }
             }
@@ -216,7 +228,7 @@ namespace Mapping_Tools_Core.BeatmapHelper {
                     * 2 and 1 will be ignored in the i loop because they already have a stack value.
                     */
 
-                HitObject objectI = beatmap.HitObjects[i];
+                HitObject objectI = hitObjects[i];
                 StackingContext stackingI = objectI.GetContext<StackingContext>();
 
                 if (stackingI.StackCount != 0 || objectI is Spinner) continue;
@@ -227,7 +239,7 @@ namespace Mapping_Tools_Core.BeatmapHelper {
                     */
                 if (objectI is HitCircle) {
                     while (--n >= 0) {
-                        HitObject objectN = beatmap.HitObjects[n];
+                        HitObject objectN = hitObjects[n];
                         StackingContext stackingN = objectN.GetContext<StackingContext>();
 
                         if (objectN is Spinner) continue;
@@ -247,12 +259,12 @@ namespace Mapping_Tools_Core.BeatmapHelper {
                             *        o <- hitCircle has stack of -1
                             *         o <- hitCircle has stack of -2
                             */
-                        if (objectN is Slider && Vector2.Distance(objectN.EndPos, objectI.Pos) < STACK_LENIENCE) {
+                        if (objectN is Slider && Vector2.Distance(objectN.EndPos, objectI.Pos) < stackLenience) {
                             int offset = stackingI.StackCount - stackingN.StackCount + 1;
                             for (int j = n + 1; j <= i; j++) {
                                 //For each object which was declared under this slider, we will offset it to appear *below* the slider end (rather than above).
-                                if (Vector2.Distance(objectN.EndPos, beatmap.HitObjects[j].Pos) < STACK_LENIENCE)
-                                    beatmap.HitObjects[j].GetContext<StackingContext>().StackCount -= offset;
+                                if (Vector2.Distance(objectN.EndPos, hitObjects[j].Pos) < stackLenience)
+                                    hitObjects[j].GetContext<StackingContext>().StackCount -= offset;
                             }
 
                             //We have hit a slider.  We should restart calculation using this as the new base.
@@ -260,7 +272,7 @@ namespace Mapping_Tools_Core.BeatmapHelper {
                             break;
                         }
 
-                        if (Vector2.Distance(objectN.Pos, objectI.Pos) < STACK_LENIENCE) {
+                        if (Vector2.Distance(objectN.Pos, objectI.Pos) < stackLenience) {
                             //Keep processing as if there are no sliders.  If we come across a slider, this gets cancelled out.
                             //NOTE: Sliders with start positions stacking are a special case that is also handled here.
 
@@ -273,7 +285,7 @@ namespace Mapping_Tools_Core.BeatmapHelper {
                         * From this point on, we ALWAYS stack positive regardless.
                         */
                     while (--n >= startIndex) {
-                        HitObject objectN = beatmap.HitObjects[n];
+                        HitObject objectN = hitObjects[n];
                         StackingContext stackingN = objectN.GetContext<StackingContext>();
 
                         if (objectN is Spinner) continue;
@@ -282,7 +294,7 @@ namespace Mapping_Tools_Core.BeatmapHelper {
                             //We are no longer within stacking range of the previous object.
                             break;
 
-                        if (Vector2.Distance(objectN.EndPos, objectI.Pos) < STACK_LENIENCE) {
+                        if (Vector2.Distance(objectN.EndPos, objectI.Pos) < stackLenience) {
                             stackingN.StackCount = stackingI.StackCount + 1;
                             objectI = objectN;
                         }
@@ -297,17 +309,26 @@ namespace Mapping_Tools_Core.BeatmapHelper {
         /// This includes cases where the previous hit object is a spinner or doesnt exist.
         /// </summary>
         public static void CalculateHitObjectComboStuff(this IBeatmap beatmap) {
+            CalculateHitObjectComboStuff(beatmap.HitObjects, beatmap.ComboColoursList.Count == 0 ? null : beatmap.ComboColoursList.ToArray(), beatmap.Storyboard.BreakPeriods);
+        }
+
+        /// <summary>
+        /// Calculates the which hit objects actually have a new combo.
+        /// Calculates the combo index and combo colours for each hit object.
+        /// This includes cases where the previous hit object is a spinner or doesnt exist.
+        /// </summary>
+        public static void CalculateHitObjectComboStuff(this IEnumerable<HitObject> hitObjects, [CanBeNull] IComboColour[] comboColours = null, [CanBeNull] ICollection<Break> breakPeriods = null) {
             HitObject previousHitObject = null;
             int colourIndex = 0;
             int comboIndex = 0;
 
             // If there are no combo colours use the default combo colours so the hitobjects still have something
-            var actingComboColours = beatmap.ComboColoursList.Count == 0
+            var actingComboColours = comboColours is null || comboColours.Length == 0
                 ? ComboColour.GetDefaultComboColours()
-                : beatmap.ComboColoursList.ToArray();
+                : comboColours;
 
-            foreach (var hitObject in beatmap.HitObjects) {
-                var actualNewCombo = hitObject.IsActualNewCombo(previousHitObject, beatmap.Storyboard.BreakPeriods);
+            foreach (var hitObject in hitObjects) {
+                var actualNewCombo = hitObject.IsActualNewCombo(previousHitObject, breakPeriods);
 
                 if (actualNewCombo) {
                     var colourIncrement = hitObject.ComboIncrement + hitObject.ComboSkip;

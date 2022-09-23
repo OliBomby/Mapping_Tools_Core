@@ -118,12 +118,13 @@ namespace Mapping_Tools_Core.BeatmapHelper.HitObjects {
         /// <param name="previousHitObject">The hit object that comes directly before this hit object.</param>
         /// <param name="breaks">All the break periods in the beatmap.</param>
         /// <returns>Whether this hit object actually has a new combo.</returns>
-        public bool IsActualNewCombo([CanBeNull] HitObject previousHitObject, IEnumerable<Break> breaks) {
+        public bool IsActualNewCombo([CanBeNull] HitObject previousHitObject, [CanBeNull] IEnumerable<Break> breaks) {
             return NewCombo ||
                    this is Spinner ||
                    previousHitObject == null ||
                    previousHitObject is Spinner ||
-                   breaks.Any(b => previousHitObject.StartTime <= b.EndTime && Precision.DefinitelySmaller(b.EndTime, StartTime));
+                   (breaks is not null && breaks.Any(b =>
+                       previousHitObject.StartTime <= b.EndTime && Precision.DefinitelySmaller(b.EndTime, StartTime)));
         }
 
         /// <summary>
