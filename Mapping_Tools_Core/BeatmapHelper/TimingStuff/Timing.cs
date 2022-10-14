@@ -300,9 +300,9 @@ namespace Mapping_Tools_Core.BeatmapHelper.TimingStuff {
             if (milliseconds >= 0) {
                 TimingPoint firstRedline = GetRedlineAtTime(startBeatTime);
                 TimingPoint lastRedline = firstRedline;
-                int index = GetTimingPointIndexAfterTime(startBeatTime, _redlines);
-                for (int i = index; i < _redlines.Count && i != -1; i++) {
-                    var redline = _redlines[index];
+                int startIndex = GetTimingPointIndexAfterTime(startBeatTime, _redlines);
+                for (int i = startIndex; i < _redlines.Count && i != -1; i++) {
+                    var redline = _redlines[i];
                     var beatDiff = lastRedline == firstRedline ? 
                         redline.Offset - startBeatTime:
                         redline.Offset - lastRedline.Offset;
@@ -318,11 +318,11 @@ namespace Mapping_Tools_Core.BeatmapHelper.TimingStuff {
                 }
                 beatTime += milliseconds / lastRedline.MpB;
             } else {
-                int index = GetTimingPointIndexAtTime(startBeatTime, _redlines);
+                int startIndex = GetTimingPointIndexAtTime(startBeatTime, _redlines);
                 double lastBeatTime = startBeatTime;
-                TimingPoint redline = index == -1 ? GetFirstTimingPointExtended() : _redlines[index];
-                for (int i = index; i >= 0; i--) {
-                    redline = _redlines[index];
+                TimingPoint redline = startIndex == -1 ? GetFirstTimingPointExtended() : _redlines[startIndex];
+                for (int i = startIndex; i >= 0; i--) {
+                    redline = _redlines[i];
                     double beatDiff = redline.Offset - lastBeatTime;
 
                     if (beatDiff * redline.MpB < milliseconds - Precision.DOUBLE_EPSILON) {
@@ -355,9 +355,9 @@ namespace Mapping_Tools_Core.BeatmapHelper.TimingStuff {
             if (beatTime >= 0) {
                 TimingPoint firstRedline = GetRedlineAtTime(originTime);
                 TimingPoint lastRedline = firstRedline;
-                int index = GetTimingPointIndexAfterTime(originTime, _redlines);
-                for (int i = index; i < _redlines.Count && i != -1; i++) {
-                    var redline = _redlines[index];
+                int startIndex = GetTimingPointIndexAfterTime(originTime, _redlines);
+                for (int i = startIndex; i < _redlines.Count && i != -1; i++) {
+                    var redline = _redlines[i];
                     var msDiff = lastRedline == firstRedline ?
                         redline.Offset - originTime :
                         redline.Offset - lastRedline.Offset;
@@ -374,11 +374,11 @@ namespace Mapping_Tools_Core.BeatmapHelper.TimingStuff {
                 }
                 ms += beatTime * lastRedline.MpB;
             } else {
-                int index = GetTimingPointIndexAtTime(originTime, _redlines);
+                int startIndex = GetTimingPointIndexAtTime(originTime, _redlines);
                 double lastBeatTime = originTime;
-                TimingPoint redline = index == -1 ? GetFirstTimingPointExtended() : _redlines[index];
-                for (int i = index; i >= 0; i--) {
-                    redline = _redlines[index];
+                TimingPoint redline = startIndex == -1 ? GetFirstTimingPointExtended() : _redlines[startIndex];
+                for (int i = startIndex; i >= 0; i--) {
+                    redline = _redlines[i];
                     double msDiff = redline.Offset - lastBeatTime;
                     var beatDiff = round ? MultiSnapRound(msDiff / redline.MpB, divisors) : msDiff / redline.MpB;
 
