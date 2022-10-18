@@ -200,11 +200,7 @@ namespace Mapping_Tools_Core.BeatmapHelper.TimingStuff {
         /// </summary>
         /// <returns></returns>
         public double GetSliderVelocity() {
-            if (!Uninherited) {
-                return MpB < 0 ? -100 / MpB : 1;
-            }
-
-            return 1;
+            return !Uninherited && Mpb < 0 ? -100 / Mpb : 1;
         }
 
         /// <summary>
