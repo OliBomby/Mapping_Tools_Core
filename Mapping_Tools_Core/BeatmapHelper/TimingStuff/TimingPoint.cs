@@ -196,15 +196,11 @@ namespace Mapping_Tools_Core.BeatmapHelper.TimingStuff {
         /// <summary>
         /// Grabs the current slider velocity multiplier from the <see cref="TimingPoint"/>
         /// assuming this is an inherited timing point.
-        /// Returns 1x slider velocity if this is an uninherited timing point.
+        /// Returns 1x slider velocity if this is an uninherited timing point or if MpB is positive.
         /// </summary>
         /// <returns></returns>
         public double GetSliderVelocity() {
-            if (!Uninherited) {
-                return -100 / MpB;
-            }
-
-            return 1;
+            return Uninherited || MpB >= 0 ? 1 : -100 / MpB;
         }
 
         /// <summary>
