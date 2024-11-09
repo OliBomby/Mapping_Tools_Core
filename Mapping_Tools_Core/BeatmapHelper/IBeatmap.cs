@@ -116,6 +116,22 @@ namespace Mapping_Tools_Core.BeatmapHelper {
 
     public static class IBeatmapExtensions {
         /// <summary>
+        /// An offset which needs to be applied to old beatmaps (v4 and lower) to correct timing changes that were applied at a game client level.
+        /// </summary>
+        public static readonly int EarlyVersionTimingOffset = 24;
+
+        /// <summary>
+        /// Upgrades the beatmap to the latest stable beatmap file format version (V14).
+        /// </summary>
+        public static void UpgradeBeatmapVersion(this IBeatmap beatmap) {
+            if (beatmap.BeatmapVersion < 5) {
+                beatmap.OffsetTime(EarlyVersionTimingOffset);
+            }
+
+            beatmap.BeatmapVersion = 14;
+        }
+
+        /// <summary>
         /// Sorts all hitobjects in map by order of time.
         /// </summary>
         public static void SortHitObjects(this IBeatmap beatmap) {
@@ -509,6 +525,13 @@ namespace Mapping_Tools_Core.BeatmapHelper {
         }
 
         public static void OffsetTime(this IBeatmap beatmap, double offset) {
+            beatmap.General.PreviewTime = beatmap.General.PreviewTime == -1 ? -1 : beatmap.General.PreviewTime + EarlyVersionTimingOffset;
+
+            foreach(var breakPeriod in beatmap.Storyboard.BreakPeriods) {
+                breakPeriod.StartTime += EarlyVersionTimingOffset;
+                breakPeriod.EndTime += EarlyVersionTimingOffset;
+            }
+
             beatmap.BeatmapTiming.Offset(offset);
             beatmap.HitObjects.ForEach(h => h.MoveTime(offset));
         }
