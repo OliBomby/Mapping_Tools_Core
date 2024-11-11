@@ -60,6 +60,13 @@ Sprite,Foreground,Centre,"Taiko BG.png",320,240
  M,0,0,,320,240
  S,0,0,,0.8054399
  F,0,0,122303,1
+Sprite,Foreground,Centre,"LargeWhiteImage.png",320,240
+_T,Passing,20000,40000
+__F,0,0,500,1
+__F,0,500,501,0
+_T,HitSoundWhistle
+__F,0,0,500,1
+__F,0,500,501,0
 //Storyboard Layer 4 (Overlay)
 //Storyboard Sound Samples
 Sample,0,0,"normal-hitnormal3.wav",0
