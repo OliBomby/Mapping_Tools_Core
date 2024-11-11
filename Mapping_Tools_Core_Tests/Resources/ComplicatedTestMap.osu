@@ -55,7 +55,6 @@ SliderTickRate:0.5
 //Storyboard Layer 2 (Pass)
 //Storyboard Layer 3 (Foreground)
 Sprite,Foreground,Centre,"Taiko BG.png",320,240
- N,0,0,1000,
  M,0,0,,320,240
  S,0,0,,0.8054399
  F,0,0,122303,1

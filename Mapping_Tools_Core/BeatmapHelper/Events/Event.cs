@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 
 namespace Mapping_Tools_Core.BeatmapHelper.Events {
     /// <summary>
@@ -17,6 +18,7 @@ namespace Mapping_Tools_Core.BeatmapHelper.Events {
         /// </summary>
         /// <param name="line"></param>
         /// <returns></returns>
+        [CanBeNull]
         public static Event MakeEvent(string line) {
             string[] values = line.Split(',');
             string eventType = values[0].Trim();
@@ -24,6 +26,7 @@ namespace Mapping_Tools_Core.BeatmapHelper.Events {
             Event myEvent;
             switch (eventType) {
                 case "0":
+                case "Background":
                     myEvent = new Background();
                     break;
                 case "1":
@@ -35,6 +38,7 @@ namespace Mapping_Tools_Core.BeatmapHelper.Events {
                     myEvent = new Break();
                     break;
                 case "3":
+                case "Colour":
                     myEvent = new BackgroundColourTransformation();
                     break;
                 case "4":
@@ -58,9 +62,18 @@ namespace Mapping_Tools_Core.BeatmapHelper.Events {
                 case "T":
                     myEvent = new TriggerLoop();
                     break;
-                default:
+                case "F":
+                case "M":
+                case "MX":
+                case "MY":
+                case "S":
+                case "V":
+                case "R":
+                case "C":
                     myEvent = new OtherCommand();
                     break;
+                default:
+                    return null;
             }
 
             myEvent.SetLine(line);
@@ -80,7 +93,11 @@ namespace Mapping_Tools_Core.BeatmapHelper.Events {
             int lastIndents = -1;  // -1 is below the lowest possible indents, so this will always trigger adding null in the parent events
             foreach (var line in lines) {
                 int indents = ParseIndents(line);
-                var ev = MakeEvent(line.Substring(indents));
+                var ev = MakeEvent(line[indents..]);
+
+                // Transforms with an illegal type are ignored
+                if (ev == null)
+                    continue;
 
                 // Add the indent count to any command type events
                 if (ev is Command c) c.Indents = indents;

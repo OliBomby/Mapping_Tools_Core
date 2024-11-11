@@ -27,7 +27,7 @@ namespace Mapping_Tools_Core.BeatmapHelper.Events {
         public sealed override void SetLine(string line) {
             string[] values = line.Split(',');
 
-            if (values[0] != "3") {
+            if (values[0] != "3" && values[0] != "Colour") {
                 throw new BeatmapParsingException("This line is not a background colour transformation.", line);
             }
 

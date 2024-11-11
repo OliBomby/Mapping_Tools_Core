@@ -67,6 +67,13 @@ __F,0,500,501,0
 _T,HitSoundWhistle
 __F,0,0,500,1
 __F,0,500,501,0
+Sprite,Foreground,Centre,"SB.jpg",320,240
+ F,0,72241,78241,0,0.5
+ C,1,72241,78241,255,255,255,0,0,0
+ F,0,73241,78241,0.5,0
+ Ñ,1,78245,90245,0,0,0,255,255,255
+ F,0,78245,90245,0.5,0
+ ,1,1,1
 //Storyboard Layer 4 (Overlay)
 //Storyboard Sound Samples
 Sample,0,0,"normal-hitnormal3.wav",0

@@ -23,7 +23,7 @@ namespace Mapping_Tools_Core.BeatmapHelper.Events {
         public override void SetLine(string line) {
             string[] values = line.Split(',');
 
-            if (values[0] != "0") {
+            if (values[0] != "0" && values[0] != "Background") {
                 throw new BeatmapParsingException("This line is not a background.", line);
             }
 
