@@ -65,7 +65,7 @@ namespace Mapping_Tools_Core_Tests.Tools.PatternGallery {
 
             PrintHitObjects(patternHitObjects);
 
-            Assert.AreEqual(patternHitObjects.Count, 4);
+            Assert.AreEqual(4, patternHitObjects.Count);
 
             Assert.IsInstanceOfType(patternHitObjects[0], typeof(Slider));
             Assert.IsInstanceOfType(patternHitObjects[1], typeof(HitCircle));
@@ -106,7 +106,7 @@ namespace Mapping_Tools_Core_Tests.Tools.PatternGallery {
 
             PrintHitObjects(patternHitObjects);
 
-            Assert.AreEqual(patternHitObjects.Count, 4);
+            Assert.AreEqual(4, patternHitObjects.Count);
 
             Assert.IsInstanceOfType(patternHitObjects[0], typeof(Slider));
             Assert.IsInstanceOfType(patternHitObjects[1], typeof(HitCircle));
@@ -126,6 +126,53 @@ namespace Mapping_Tools_Core_Tests.Tools.PatternGallery {
             Assert.AreEqual(0.5, beatmap.BeatmapTiming.GetBeatLength(patternHitObjects[1].EndTime, patternHitObjects[2].StartTime), msBeatDelta);
             Assert.AreEqual(0.5, beatmap.BeatmapTiming.GetBeatLength(patternHitObjects[2].EndTime, patternHitObjects[3].StartTime), msBeatDelta);
             Assert.AreEqual(3, beatmap.BeatmapTiming.GetBeatLength(patternHitObjects[3].StartTime, patternHitObjects[3].EndTime), msBeatDelta);
+        }
+
+
+        [TestMethod]
+        public void ExportCustomOverwriteWindowTest() {
+            var path = Path.Join("Resources", "SAMString - Forget The Promise (DeviousPanda) [Elysium].osu");
+            var beatmap = new BeatmapEditor(path).ReadFile();
+
+            var placer = new OsuPatternPlacer {
+                BeatDivisors = new IBeatDivisor[] { new RationalBeatDivisor(4) },
+                FixBpmSv = false,
+                FixColourHax = true,
+                FixGlobalSv = true,
+                IncludeHitsounds = true,
+                IncludeKiai = true,
+                PatternOverwriteMode = PatternOverwriteMode.PartitionedOverwrite,
+                TimingOverwriteMode = TimingOverwriteMode.PatternTimingOnly,
+                ScaleToNewCircleSize = false,
+                ScaleToNewTiming = true,
+                SnapToNewTiming = true,
+                Padding = 0,
+            };
+
+            placer.PlaceOsuPatternAtTime(
+                GetPattern1(),
+                beatmap,
+                101120,
+                overwriteStartTime: 99857,
+                overwriteEndTime: 121331
+                );
+
+            var patternHitObjects = beatmap.GetHitObjectsWithRangeInRange(99857, 121331);
+
+            PrintHitObjects(patternHitObjects);
+
+            Assert.AreEqual(4, patternHitObjects.Count);
+
+            Assert.IsInstanceOfType(patternHitObjects[0], typeof(Slider));
+            Assert.IsInstanceOfType(patternHitObjects[1], typeof(HitCircle));
+            Assert.IsInstanceOfType(patternHitObjects[2], typeof(Spinner));
+            Assert.IsInstanceOfType(patternHitObjects[3], typeof(Slider));
+
+            Assert.AreEqual(600, beatmap.BeatmapTiming.GetMpBAtTime(99857), Precision.DOUBLE_EPSILON);
+            Assert.AreEqual(190, beatmap.BeatmapTiming.GetBpmAtTime(99856), Precision.DOUBLE_EPSILON);
+
+            Assert.AreEqual(600, beatmap.BeatmapTiming.GetMpBAtTime(121330), Precision.DOUBLE_EPSILON);
+            Assert.AreEqual(190, beatmap.BeatmapTiming.GetBpmAtTime(121331), Precision.DOUBLE_EPSILON);
         }
 
         [TestMethod]
@@ -177,7 +224,7 @@ namespace Mapping_Tools_Core_Tests.Tools.PatternGallery {
             PrintHitObjects(patternHitObjects);
             PrintTimingPoints(beatmap.BeatmapTiming.TimingPoints);
 
-            Assert.AreEqual(patternHitObjects.Count, 4);
+            Assert.AreEqual(4, patternHitObjects.Count);
 
             Assert.IsInstanceOfType(patternHitObjects[0], typeof(HitCircle));
             Assert.IsInstanceOfType(patternHitObjects[1], typeof(Slider));

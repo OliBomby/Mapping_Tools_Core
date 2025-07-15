@@ -114,14 +114,23 @@ namespace Mapping_Tools_Core.Tools.PatternGallery {
         /// <param name="targetBeatmap">The beatmap to place the pattern in.</param>
         /// <param name="time">The time at which to place the first hit object of the pattern beatmap.</param>
         /// <param name="protectPatternBeatmap">If true, copies the pattern beatmap to prevent the pattern beatmap from being modified by this method.</param>
+        /// <param name="overwriteStartTime">Set the start time of the overwrite window in the target beatmap. Will ignore partitioned overwrite mode.</param>
+        /// <param name="overwriteEndTime">Set the end time of the overwrite window in the target beatmap. Will ignore partitioned overwrite mode.</param>
         /// <exception cref="ArgumentException">If pattern beatmap contains no hit objects.</exception>
-        public void PlaceOsuPatternAtTime(IBeatmap patternBeatmap, IBeatmap targetBeatmap, double time, bool protectPatternBeatmap = true) {
+        public void PlaceOsuPatternAtTime(
+            IBeatmap patternBeatmap,
+            IBeatmap targetBeatmap,
+            double time,
+            bool protectPatternBeatmap = true,
+            double? overwriteStartTime = null,
+            double? overwriteEndTime = null
+            ) {
             if (patternBeatmap.HitObjects.Count == 0) {
                 throw new ArgumentException("Pattern Beatmap should contain at least one hit object.", nameof(patternBeatmap));
             }
 
             double offset = double.IsNaN(time) ? 0 : time - patternBeatmap.GetHitObjectStartTime();
-            PlaceOsuPattern(patternBeatmap, targetBeatmap, offset, protectPatternBeatmap);
+            PlaceOsuPattern(patternBeatmap, targetBeatmap, offset, protectPatternBeatmap, overwriteStartTime, overwriteEndTime);
         }
 
         /// <summary>
@@ -132,8 +141,17 @@ namespace Mapping_Tools_Core.Tools.PatternGallery {
         /// <param name="targetBeatmap">The beatmap to place the pattern in.</param>
         /// <param name="offset">An offset in milliseconds to move the pattern beatmap in time.</param>
         /// <param name="protectPatternBeatmap">If true, copies the pattern beatmap to prevent the pattern beatmap from being modified by this method.</param>
+        /// <param name="overwriteStartTime">Set the start time of the overwrite window in the target beatmap. Will ignore partitioned overwrite mode.</param>
+        /// <param name="overwriteEndTime">Set the end time of the overwrite window in the target beatmap. Will ignore partitioned overwrite mode.</param>
         /// <exception cref="ArgumentException">If pattern beatmap contains no hit objects.</exception>
-        public void PlaceOsuPattern(IBeatmap patternBeatmap, IBeatmap targetBeatmap, double offset = 0, bool protectPatternBeatmap = true) {
+        public void PlaceOsuPattern(
+            IBeatmap patternBeatmap,
+            IBeatmap targetBeatmap,
+            double offset = 0,
+            bool protectPatternBeatmap = true,
+            double? overwriteStartTime = null,
+            double? overwriteEndTime = null
+            ) {
             if (patternBeatmap.HitObjects.Count == 0) {
                 throw new ArgumentException("Pattern Beatmap should contain at least one hit object.", nameof(patternBeatmap));
             }
@@ -155,7 +173,14 @@ namespace Mapping_Tools_Core.Tools.PatternGallery {
             // We adjust the pattern first so it alligns with the beatmap.
             // The right timing is applied and optional pre-processing is applied.
             // Sliderends and object timingpoints get recalculated.
-            PreparePattern(patternBeatmap, targetBeatmap, out var parts, out var controlChanges);
+            PreparePattern(
+                patternBeatmap,
+                targetBeatmap,
+                out var parts,
+                out var controlChanges,
+                overwriteStartTime,
+                overwriteEndTime
+                );
 
             // Keep just the timing point changes which are inside the parts.
             // These timing point changes have everything that is necessary for inside the parts of the pattern. (even timing)
@@ -273,8 +298,15 @@ namespace Mapping_Tools_Core.Tools.PatternGallery {
         /// Applies move refactoring to the pattern beatmap.
         /// It does so according to the options selected in this.
         /// </summary>
-        private void PreparePattern(IBeatmap patternBeatmap, IBeatmap targetBeatmap, out List<Part> parts, out List<ControlChange> controlChanges) {
-            double patternStartTime = patternBeatmap.GetHitObjectStartTime();
+        private void PreparePattern(
+            IBeatmap patternBeatmap,
+            IBeatmap targetBeatmap,
+            out List<Part> parts,
+            out List<ControlChange> controlChanges,
+            double? overwriteStartTime = null,
+            double? overwriteEndTime = null
+            ) {
+            double patternStartTime = overwriteStartTime ?? patternBeatmap.GetHitObjectStartTime();
 
             Timing originalTiming = targetBeatmap.BeatmapTiming;
             Timing patternTiming = patternBeatmap.BeatmapTiming;
@@ -327,17 +359,17 @@ namespace Mapping_Tools_Core.Tools.PatternGallery {
 
             // Collect SliderVelocity changes for mania/taiko
             List<TimingPoint> svChanges = new List<TimingPoint>();
-            double lastSV = 1;
+            double lastSv = 1;
             // If not including the SV of the pattern, add the SV of the original map.
             // This has to be done because this part of the original map might get deleted.
             foreach (TimingPoint tp in includePatternSliderVelocity ? patternTiming.TimingPoints : originalTiming.TimingPoints) {
                 if (tp.Uninherited) {
-                    lastSV = 1;
+                    lastSv = 1;
                 } else {
                     var sv = tp.GetSliderVelocity();
-                    if (Math.Abs(sv - lastSV) > Precision.DOUBLE_EPSILON) {
+                    if (Math.Abs(sv - lastSv) > Precision.DOUBLE_EPSILON) {
                         svChanges.Add(tp.Copy());
-                        lastSV = sv;
+                        lastSv = sv;
                     }
                 }
             }
@@ -364,8 +396,8 @@ namespace Mapping_Tools_Core.Tools.PatternGallery {
             // Make sure that moving the objects in the pattern moves the timeline objects aswell
             // This method is NOT safe to use in beat time
             Timeline patternTimeline = patternBeatmap.GetTimeline();
-            Timing transformOriginalTiming = originalTiming;
-            Timing transformPatternTiming = patternTiming;
+            Timing transformOriginalTiming = originalTiming.Copy();
+            Timing transformPatternTiming = patternTiming.Copy();
             if (scaleToNewTiming) {
                 // Transform everything to beat time relative to pattern start time
                 foreach (var ho in patternBeatmap.HitObjects) {
@@ -390,16 +422,20 @@ namespace Mapping_Tools_Core.Tools.PatternGallery {
                     tp.Offset = patternTiming.GetBeatLength(patternStartTime, tp.Offset);
                 }
 
+                // Transform the override pattern start and end time to beat time
+                if (overwriteStartTime.HasValue)
+                    overwriteStartTime = patternTiming.GetBeatLength(patternStartTime, overwriteStartTime.Value);
+                if (overwriteEndTime.HasValue)
+                    overwriteEndTime = patternTiming.GetBeatLength(patternStartTime, overwriteEndTime.Value);
+
                 // Transform the pattern redlines to beat time
                 // This will not change the order of redlines (unless negative BPM exists)
-                transformPatternTiming = patternTiming.Copy();
                 foreach (var tp in transformPatternTiming.Redlines) {
                     tp.Offset = patternTiming.GetBeatLength(patternStartTime, tp.Offset);
                 }
 
                 // Transform the original timingpoints to beat time
                 // This will not change the order of timingpoints (unless negative BPM exists)
-                transformOriginalTiming = originalTiming.Copy();
                 foreach (var tp in transformOriginalTiming.TimingPoints) {
                     tp.Offset = originalTiming.GetBeatLength(patternStartTime, tp.Offset);
                 }
@@ -411,14 +447,15 @@ namespace Mapping_Tools_Core.Tools.PatternGallery {
             }
 
             // Partition the pattern based on the timing in the pattern
-            if (PatternOverwriteMode == PatternOverwriteMode.PartitionedOverwrite) {
+            if (PatternOverwriteMode == PatternOverwriteMode.PartitionedOverwrite && !overwriteStartTime.HasValue && !overwriteEndTime.HasValue) {
                 parts = PartitionBeatmap(patternBeatmap, scaleToNewTiming);
             } else {
-                parts = new List<Part> {
-                    new(patternBeatmap.HitObjects.Min(o => o.GetContext<TransformTimeContext>().StartTime), 
-                        patternBeatmap.HitObjects.Max(o => o.GetContext<TransformTimeContext>().EndTime), 
-                        patternBeatmap.HitObjects)
-                };
+                double partStartTime = overwriteStartTime ?? patternBeatmap.HitObjects.Min(o => o.GetContext<TransformTimeContext>().StartTime);
+                double partEndTime = overwriteEndTime ?? patternBeatmap.HitObjects.Max(o => o.GetContext<TransformTimeContext>().EndTime);
+                parts = [
+                    new Part(partStartTime, partEndTime,
+                        patternBeatmap.HitObjects.FindAll(o => o.GetContext<TransformTimeContext>().StartTime >= partStartTime && o.GetContext<TransformTimeContext>().EndTime <= partEndTime)),
+                ];
             }
 
             // Construct a new timing which is a mix of the beatmap and the pattern.
@@ -552,8 +589,11 @@ namespace Mapping_Tools_Core.Tools.PatternGallery {
                 }
 
                 // Update the end time because the lengths of sliders changed
-                endTime = part.HitObjects.Max(o => o.GetContext<TransformTimeContext>().EndTime);
-                part.EndTime = endTime;
+                // Except if the end time is overwritten, because then the end time is not calculated from the hit objects.
+                if (!overwriteEndTime.HasValue) {
+                    endTime = part.HitObjects.Max(o => o.GetContext<TransformTimeContext>().EndTime);
+                    part.EndTime = endTime;
+                }
 
                 // Add a redline at the end of the pattern to make sure the BPM goes back to normal after the pattern.
                 var endOriginalRedline = transformOriginalTiming.GetRedlineAtTime(endTime);
