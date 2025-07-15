@@ -494,6 +494,18 @@ namespace Mapping_Tools_Core.BeatmapHelper {
         }
 
         /// <summary>
+        /// Finds all hit objects from this beatmap which are within a specified range.
+        /// The entire hit object has to be inside the time range in order to be included.
+        /// </summary>
+        /// <param name="beatmap">The beatmap to get hit objects from.</param>
+        /// <param name="start">The start of the time range.</param>
+        /// <param name="end">The end of the time range.</param>
+        /// <returns>All <see cref="HitObject"/> that are found within specified range.</returns>
+        public static List<HitObject> GetHitObjectsInRange(this IBeatmap beatmap, double start, double end) {
+            return beatmap.HitObjects.FindAll(o => o.StartTime >= start && o.EndTime <= end);
+        }
+
+        /// <summary>
         /// Creates a new <see cref="Timeline"/> for this Beatmap.
         /// Upon creation the timeline is updated with all the current timing and hitsounds of this beatmap,
         /// but later changes wont be automatically synchronized.
