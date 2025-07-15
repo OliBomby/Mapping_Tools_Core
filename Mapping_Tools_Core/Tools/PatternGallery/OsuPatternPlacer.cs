@@ -114,8 +114,8 @@ namespace Mapping_Tools_Core.Tools.PatternGallery {
         /// <param name="targetBeatmap">The beatmap to place the pattern in.</param>
         /// <param name="time">The time at which to place the first hit object of the pattern beatmap.</param>
         /// <param name="protectPatternBeatmap">If true, copies the pattern beatmap to prevent the pattern beatmap from being modified by this method.</param>
-        /// <param name="overwriteStartTime">Set the start time of the overwrite window in the target beatmap. Will ignore partitioned overwrite mode.</param>
-        /// <param name="overwriteEndTime">Set the end time of the overwrite window in the target beatmap. Will ignore partitioned overwrite mode.</param>
+        /// <param name="overwriteStartTime">Set the start time of the overwrite window in the pattern beatmap. Will ignore partitioned overwrite mode.</param>
+        /// <param name="overwriteEndTime">Set the end time of the overwrite window in the pattern beatmap. Will ignore partitioned overwrite mode.</param>
         /// <exception cref="ArgumentException">If pattern beatmap contains no hit objects.</exception>
         public void PlaceOsuPatternAtTime(
             IBeatmap patternBeatmap,
@@ -141,8 +141,8 @@ namespace Mapping_Tools_Core.Tools.PatternGallery {
         /// <param name="targetBeatmap">The beatmap to place the pattern in.</param>
         /// <param name="offset">An offset in milliseconds to move the pattern beatmap in time.</param>
         /// <param name="protectPatternBeatmap">If true, copies the pattern beatmap to prevent the pattern beatmap from being modified by this method.</param>
-        /// <param name="overwriteStartTime">Set the start time of the overwrite window in the target beatmap. Will ignore partitioned overwrite mode.</param>
-        /// <param name="overwriteEndTime">Set the end time of the overwrite window in the target beatmap. Will ignore partitioned overwrite mode.</param>
+        /// <param name="overwriteStartTime">Set the start time of the overwrite window in the pattern beatmap. Will ignore partitioned overwrite mode.</param>
+        /// <param name="overwriteEndTime">Set the end time of the overwrite window in the pattern beatmap. Will ignore partitioned overwrite mode.</param>
         /// <exception cref="ArgumentException">If pattern beatmap contains no hit objects.</exception>
         public void PlaceOsuPattern(
             IBeatmap patternBeatmap,
@@ -168,6 +168,8 @@ namespace Mapping_Tools_Core.Tools.PatternGallery {
             // Do the offset
             if (Math.Abs(offset) > Precision.DOUBLE_EPSILON) {
                 patternBeatmap.OffsetTime(offset);
+                overwriteStartTime += offset;
+                overwriteEndTime += offset;
             }
 
             // We adjust the pattern first so it alligns with the beatmap.
@@ -437,7 +439,7 @@ namespace Mapping_Tools_Core.Tools.PatternGallery {
                 // Transform the original timingpoints to beat time
                 // This will not change the order of timingpoints (unless negative BPM exists)
                 foreach (var tp in transformOriginalTiming.TimingPoints) {
-                    tp.Offset = originalTiming.GetBeatLength(patternStartTime, tp.Offset);
+                    tp.Offset = patternTiming.GetBeatLength(patternStartTime, tp.Offset);
                 }
             } else {
                 // Make sure every hit object has a transform time context
@@ -469,7 +471,7 @@ namespace Mapping_Tools_Core.Tools.PatternGallery {
                 var endTime = part.EndTime;
 
                 // Add the redlines in between patterns
-                newTiming.AddRange(transformOriginalTiming.GetRedlinesInRange(lastEndTime, startTime, false));
+                newTiming.AddRange(transformOriginalTiming.GetRedlinesInRange(lastEndTime, startTime - 2 * Precision.DOUBLE_EPSILON));
 
                 var startOriginalRedline = transformOriginalTiming.GetRedlineAtTime(startTime);
 
@@ -609,6 +611,9 @@ namespace Mapping_Tools_Core.Tools.PatternGallery {
 
                 lastEndTime = endTime;
             }
+
+            // Add the redlines after all the parts
+            newTiming.AddRange(transformOriginalTiming.GetRedlinesInRange(lastEndTime, double.PositiveInfinity));
 
             // Transform the beat time back to millisecond time
             Timing transformNewTiming = newTiming;

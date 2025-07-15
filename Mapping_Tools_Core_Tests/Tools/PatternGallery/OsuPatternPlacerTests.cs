@@ -13,6 +13,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Mapping_Tools_Core.BeatmapHelper.Enums;
 
 namespace Mapping_Tools_Core_Tests.Tools.PatternGallery {
     [TestClass]
@@ -149,12 +150,16 @@ namespace Mapping_Tools_Core_Tests.Tools.PatternGallery {
                 Padding = 0,
             };
 
-            placer.PlaceOsuPatternAtTime(
-                GetPattern1(),
+            var pattern = GetPattern1();
+            pattern.BeatmapTiming.Add(new TimingPoint(3600, 60000d / 190, 4, SampleSet.Soft, 1, 40, true, false, false));
+            beatmap.BeatmapTiming.Add(new TimingPoint(121331, 60000d / 190, 4, SampleSet.Soft, 1, 40, true, false, false));
+
+            placer.PlaceOsuPattern(
+                pattern,
                 beatmap,
                 101120,
-                overwriteStartTime: 99857,
-                overwriteEndTime: 121331
+                overwriteStartTime: 99857 - 101120,
+                overwriteEndTime: 121331 - 101120  // 121331 is the estimated end time in the target beatmap if the time scaling ends up being 1:1 which is the case with PatternTimingOnly
                 );
 
             var patternHitObjects = beatmap.GetHitObjectsWithRangeInRange(99857, 121331);
@@ -168,11 +173,20 @@ namespace Mapping_Tools_Core_Tests.Tools.PatternGallery {
             Assert.IsInstanceOfType(patternHitObjects[2], typeof(Spinner));
             Assert.IsInstanceOfType(patternHitObjects[3], typeof(Slider));
 
-            Assert.AreEqual(600, beatmap.BeatmapTiming.GetMpBAtTime(99857), Precision.DOUBLE_EPSILON);
             Assert.AreEqual(190, beatmap.BeatmapTiming.GetBpmAtTime(99856), Precision.DOUBLE_EPSILON);
+            Assert.AreEqual(600, beatmap.BeatmapTiming.GetMpBAtTime(99857), Precision.DOUBLE_EPSILON);
 
-            Assert.AreEqual(600, beatmap.BeatmapTiming.GetMpBAtTime(121330), Precision.DOUBLE_EPSILON);
+            Assert.AreEqual(600, beatmap.BeatmapTiming.GetMpBAtTime(104719), Precision.DOUBLE_EPSILON);
+            Assert.AreEqual(190, beatmap.BeatmapTiming.GetBpmAtTime(104720), Precision.DOUBLE_EPSILON);
+
+            Assert.AreEqual(190, beatmap.BeatmapTiming.GetBpmAtTime(121330), Precision.DOUBLE_EPSILON);
             Assert.AreEqual(190, beatmap.BeatmapTiming.GetBpmAtTime(121331), Precision.DOUBLE_EPSILON);
+
+            var redline = beatmap.BeatmapTiming.GetRedlineAtTime(121331);
+
+            Assert.IsNotNull(redline);
+            Assert.AreEqual(60000d / 190, redline.MpB, Precision.DOUBLE_EPSILON);
+            Assert.AreEqual(121331, redline.Offset, Precision.DOUBLE_EPSILON);
         }
 
         [TestMethod]
