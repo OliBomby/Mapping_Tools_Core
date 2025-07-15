@@ -477,7 +477,7 @@ namespace Mapping_Tools_Core.BeatmapHelper {
 
                 // This has to be set afterwards because the EndTime is inaccessible before the hitobject has a timing context
                 ho.GetContext<TimingContext>().BodyHitsounds =
-                    timing.GetTimingPointsInRange(ho.StartTime, ho.EndTime, false);
+                    timing.GetTimingPointsInRange(ho.StartTime, ho.EndTime, false).Select(o => o.Copy()).ToList();
             }
         }
 
